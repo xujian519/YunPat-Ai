@@ -1,0 +1,3 @@
+module YunPatNetworking {
+    header "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatNetworking.build/include/YunPatNetworking-Swift.h"
+}

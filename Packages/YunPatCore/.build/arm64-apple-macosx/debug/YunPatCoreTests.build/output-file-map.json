@@ -1,0 +1,61 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/AgentLoopEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/AgentLoopEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/AgentLoopEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/AgentLoopEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/AgentLoopEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/AgentLoopEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/CapabilityRegistryTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/CapabilityRegistryTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/CapabilityRegistryTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/CapabilityRegistryTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/CapabilityRegistryTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/CapabilityRegistryTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/ChecklistEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ChecklistEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ChecklistEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ChecklistEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ChecklistEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ChecklistEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/ContextEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/FactBlackboardTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/FactBlackboardTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/FactBlackboardTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/FactBlackboardTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/FactBlackboardTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/FactBlackboardTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/LegalStateMachineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/LegalStateMachineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/LegalStateMachineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/LegalStateMachineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/LegalStateMachineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/LegalStateMachineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/MemoryEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/PatentLoopEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.dia"
+  }
+}
