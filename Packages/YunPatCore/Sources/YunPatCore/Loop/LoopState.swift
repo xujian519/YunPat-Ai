@@ -63,3 +63,28 @@ public enum IssueSeverity: Sendable {
     case warning
     case error
 }
+
+public struct ExecutionPlan: Sendable {
+    public let strategy: String; public let steps: [PlanStep]
+    public init(strategy: String = "", steps: [PlanStep] = []) { self.strategy = strategy; self.steps = steps }
+}
+
+public struct PlanStep: Sendable {
+    public let name: String; public let description: String; public let boundRule: String?
+    public init(name: String, description: String, boundRule: String? = nil) { self.name = name; self.description = description; self.boundRule = boundRule }
+}
+
+public struct StepResult: Sendable {
+    public let stepName: String; public let output: String; public let success: Bool
+    public init(stepName: String, output: String, success: Bool = true) { self.stepName = stepName; self.output = output; self.success = success }
+}
+
+public struct ExecutionResult: Sendable {
+    public let stepResults: [StepResult]; public let artifacts: [String]
+    public init(stepResults: [StepResult] = [], artifacts: [String] = []) { self.stepResults = stepResults; self.artifacts = artifacts }
+}
+
+public struct ReviewResult: Sendable {
+    public let verdict: Bool; public let issues: [Issue]; public let evidence: [String]
+    public init(verdict: Bool = true, issues: [Issue] = [], evidence: [String] = []) { self.verdict = verdict; self.issues = issues; self.evidence = evidence }
+}
