@@ -1,0 +1,932 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.YunPatApp-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/YunPatApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatNetworking.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatCore.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatApp",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatApp.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/include/YunPatApp-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpat_ai"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatApp.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/YunPatApp.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.YunPatCore-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityDefinition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityRegistry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatNetworking.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatCore",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatCore.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityDefinition.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityRegistry.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityStats.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ToolDefinition.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/include/YunPatCore-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpatcore"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityDefinition.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityRegistry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityStats.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ToolDefinition.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatCore.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityDefinition.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityRegistry.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.YunPatNetworking-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatNetworking",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatNetworking.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatChunk.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatRequest.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/CredentialStore.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Message.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelBackend.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelRouter.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/AnthropicProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAICompatProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAIProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/RateLimiter.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Usage.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/YunPatNetworking.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/include/YunPatNetworking-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpatnetworking"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatChunk.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatRequest.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/CredentialStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Message.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelBackend.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelRouter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/AnthropicProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAICompatProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAIProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/RateLimiter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Usage.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/YunPatNetworking.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatNetworking.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "YunPatApp" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatApp",
+      "-package-name",
+      "yunpat_ai",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/YunPatApp.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/include/YunPatApp-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpat_ai",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "YunPatCore" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatCore",
+      "-package-name",
+      "yunpatcore",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityDefinition.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityRegistry.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/include/YunPatCore-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpatcore",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "YunPatNetworking" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatNetworking",
+      "-package-name",
+      "yunpatnetworking",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/include/YunPatNetworking-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpatnetworking",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "YunPatApp" : [
+      "YunPatCore",
+      "YunPatNetworking"
+    ],
+    "YunPatCore" : [
+      "YunPatNetworking"
+    ],
+    "YunPatNetworking" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/YunPatApp.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityDefinition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityRegistry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatNetworking.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

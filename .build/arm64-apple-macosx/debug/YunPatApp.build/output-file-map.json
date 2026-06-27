@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/App/YunPatApp.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/YunPatApp.dia"
+  }
+}

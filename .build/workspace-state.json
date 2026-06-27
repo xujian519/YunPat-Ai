@@ -1,0 +1,41 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "yunpatcore",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore",
+          "name" : "YunPatCore"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore"
+        },
+        "subpath" : "yunpatcore"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "yunpatnetworking",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking",
+          "name" : "YunPatNetworking"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking"
+        },
+        "subpath" : "yunpatnetworking"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}
