@@ -24,7 +24,14 @@ struct YunPatApp: App {
             }
         }
         Settings {
-            ProviderSettingsView()
+            TabView {
+                ProviderSettingsView()
+                    .tabItem { Label("接口", systemImage: "key") }
+                PluginSettingsView()
+                    .tabItem { Label("插件", systemImage: "puzzlepiece.extension") }
+                MCPSettingsView()
+                    .tabItem { Label("MCP", systemImage: "server.rack") }
+            }
         }
     }
 }
