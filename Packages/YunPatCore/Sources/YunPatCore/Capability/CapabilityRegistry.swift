@@ -32,5 +32,11 @@ extension CapabilityRegistry {
                 typicalUseCases: ["问答", "对话"]
             )
         ))
+        register(capability: CapabilityDefinition(
+            name: "knowledge.search", displayName: "知识库检索",
+            description: "从宝宸知识库检索专利法规、审查指南、判例",
+            source: .builtin, permission: .always,
+            metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["法规查询", "案例检索"])
+        ))
     }
 }
