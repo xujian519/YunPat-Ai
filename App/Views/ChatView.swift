@@ -9,10 +9,13 @@ final class ChatViewModel: ObservableObject {
 
     private let modelRouter: ModelRouter
     private let loopEngine: AgentLoopEngine
+    private let requestQueue: GlobalRequestQueue
 
-    init(modelRouter: ModelRouter) {
+    init(modelRouter: ModelRouter, requestQueue: GlobalRequestQueue? = nil) {
         self.modelRouter = modelRouter
         self.loopEngine = AgentLoopEngine(modelRouter: modelRouter)
+        // 全局共享队列：未传入时自动创建默认配置（max 3 并发）
+        self.requestQueue = requestQueue ?? GlobalRequestQueue()
     }
 
     func sendMessage(in tabManager: TabManager) async {

@@ -5,10 +5,21 @@ final class TabManager: ObservableObject {
     @Published var tabs: [ChatTab] = []
     @Published var activeTabID: UUID?
 
+    private var observer: NSObjectProtocol?
+
     init() {
         let defaultTab = ChatTab(title: "新对话")
         tabs = [defaultTab]
         activeTabID = defaultTab.id
+        observer = NotificationCenter.default.addObserver(
+            forName: .menuNewTab, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.addTab()
+        }
+    }
+
+    deinit {
+        if let observer { NotificationCenter.default.removeObserver(observer) }
     }
 
     func addTab() {
