@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.dia"
+  }
+}
