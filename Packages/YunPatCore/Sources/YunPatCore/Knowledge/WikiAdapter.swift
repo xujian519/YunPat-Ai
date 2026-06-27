@@ -1,6 +1,6 @@
 import Foundation
 
-public final class WikiAdapter {
+public final class WikiAdapter: @unchecked Sendable {
     public let vaultPath: URL
 
     public init(vaultPath: URL) { self.vaultPath = vaultPath }
