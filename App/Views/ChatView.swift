@@ -33,12 +33,25 @@ final class ChatViewModel: ObservableObject {
             switch result {
             case .completed(let text):
                 tabManager.appendMessage(to: activeID, ChatMessage(role: .assistant, content: text))
-            default: break
+            default:
+                handleLoopResult(result)
             }
         } catch {
             tabManager.appendMessage(to: activeID, ChatMessage(role: .assistant, content: "Error: \(error.localizedDescription)"))
         }
         isStreaming = false
+    }
+
+    func handleLoopResult(_ result: LoopResult) {
+        switch result {
+        case .needsClarification(let questions):
+            let items = questions.map { ApprovalItem(title: "需要澄清", detail: $0, checkpoint: "facts") }
+            NotificationCenter.default.post(name: .pendingApprovalsChanged, object: items)
+        case .needsRevision(let issues):
+            let items = issues.map { ApprovalItem(title: "需要修正", detail: $0.description, checkpoint: "review") }
+            NotificationCenter.default.post(name: .pendingApprovalsChanged, object: items)
+        default: break
+        }
     }
 }
 
@@ -55,4 +68,8 @@ struct MessageBubble: View {
             if message.role == .assistant { Spacer() }
         }
     }
+}
+
+extension Notification.Name {
+    static let pendingApprovalsChanged = Notification.Name("pendingApprovalsChanged")
 }
