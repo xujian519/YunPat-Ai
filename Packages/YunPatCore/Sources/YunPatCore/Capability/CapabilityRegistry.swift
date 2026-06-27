@@ -56,5 +56,11 @@ extension CapabilityRegistry {
             source: .builtin, permission: .perCall,
             metadata: CapabilityMetadata(costLevel: .low, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["应用操控", "UI 读取"])
         ))
+        register(capability: CapabilityDefinition(
+            name: "sandbox.execute", displayName: "沙箱执行",
+            description: "在隔离 Linux VM 中执行代码（macOS 26+）",
+            source: .builtin, permission: .perSession,
+            metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["代码执行", "依赖安装"])
+        ))
     }
 }

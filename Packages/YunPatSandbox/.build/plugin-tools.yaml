@@ -1,0 +1,47 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "YunPatSandbox-arm64-apple-macosx-debug.module": ["<YunPatSandbox-arm64-apple-macosx-debug.module>"]
+  "main": ["<YunPatSandbox-arm64-apple-macosx-debug.module>"]
+  "test": ["<YunPatSandbox-arm64-apple-macosx-debug.module>"]
+default: "main"
+nodes:
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Sources/YunPatSandbox/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Sources/YunPatSandbox/SandboxProvider.swift"]
+    outputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/sources"]
+    description: "Write auxiliary file /Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/sources"
+
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<YunPatSandbox-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.swift.o","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/Modules/YunPatSandbox.swiftmodule"]
+    outputs: ["<YunPatSandbox-arm64-apple-macosx-debug.module>"]
+
+  "C.YunPatSandbox-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Sources/YunPatSandbox/SandboxProvider.swift","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/sources"]
+    outputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.swift.o","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/Modules/YunPatSandbox.swiftmodule"]
+    description: "Compiling Swift Module 'YunPatSandbox' (1 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","YunPatSandbox","-emit-dependencies","-emit-module","-emit-module-path","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/Modules/YunPatSandbox.swiftmodule","-output-file-map","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/output-file-map.json","-parse-as-library","-incremental","-c","@/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/sources","-I","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx15.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j14","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-parse-as-library","-emit-objc-header","-emit-objc-header-path","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/.build/arm64-apple-macosx/debug/YunPatSandbox.build/include/YunPatSandbox-Swift.h","-swift-version","6","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","yunpatsandbox"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Sources/YunPatSandbox/","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Package.swift","/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
