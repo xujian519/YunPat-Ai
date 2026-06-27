@@ -1,0 +1,716 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.xctest/Contents/MacOS/YunPatDesktopPackageTests",
+      "packagePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop",
+      "productName" : "YunPatDesktopPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.YunPatDesktop-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/ShellExecutor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/VersionController.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatDesktop",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktop.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/include/YunPatDesktop-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpatdesktop"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktop.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/ShellExecutor.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/VersionController.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.YunPatDesktopPackageTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktopTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatDesktopPackageTests",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktopPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/include/YunPatDesktopPackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpatdesktop"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktopPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.YunPatDesktopTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/sources",
+      "importPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/ShellExecutorTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/VersionControllerTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktop.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "YunPatDesktopTests",
+      "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktopTests.swiftmodule",
+      "objects" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx15.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "yunpatdesktop"
+      ],
+      "outputFileMapPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktopTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/ShellExecutorTests.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/VersionControllerTests.swift"
+      ],
+      "tempsPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "YunPatDesktop" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatDesktop",
+      "-package-name",
+      "yunpatdesktop",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/ShellExecutor.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/VersionController.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/include/YunPatDesktop-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpatdesktop",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "YunPatDesktopPackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatDesktopPackageTests",
+      "-package-name",
+      "yunpatdesktop",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/include/YunPatDesktopPackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpatdesktop",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "YunPatDesktopTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "YunPatDesktopTests",
+      "-package-name",
+      "yunpatdesktop",
+      "-c",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/ShellExecutorTests.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/VersionControllerTests.swift",
+      "-I",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx15.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "yunpatdesktop",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "YunPatDesktop" : [
+
+    ],
+    "YunPatDesktopPackageTests" : [
+      "YunPatDesktopTests",
+      "YunPatDesktop"
+    ],
+    "YunPatDesktopTests" : [
+      "YunPatDesktop"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/ShellExecutor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/VersionController.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/ShellExecutorTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/VersionControllerTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/sources"
+    },
+    "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}
