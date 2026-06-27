@@ -16,6 +16,13 @@
     "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swiftdeps",
     "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.dia"
   },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.dia"
+  },
   "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift": {
     "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.d",
     "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o",

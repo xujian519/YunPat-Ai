@@ -28,7 +28,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/CollaborationPanel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Color+App.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/KnowledgeSettingsView.swift"
         },
         {
           "kind" : "file",
@@ -68,7 +80,10 @@
       "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules/YunPatApp.swiftmodule",
       "objects" : [
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ChatView.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/CollaborationPanel.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Color+App.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/KnowledgeSettingsView.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ProviderSettingsView.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Tab.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/TabBar.swift.o",
@@ -131,7 +146,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/CollaborationPanel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/Color+App.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatApp.build/KnowledgeSettingsView.swift.o"
         },
         {
           "kind" : "file",
@@ -157,7 +184,10 @@
       "prepareForIndexing" : false,
       "sources" : [
         "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/CollaborationPanel.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/Color+App.swift",
         "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift",
+        "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/KnowledgeSettingsView.swift",
         "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift",
         "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift",
         "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift",
@@ -193,6 +223,30 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/EvaluationEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/FactExtractor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/RuleEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/VaultObserver.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiAdapter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiTypes.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift"
         },
         {
@@ -202,6 +256,42 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/PatentLoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryTypes.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillParser.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillTypes.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceCollector.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceStore.swift"
         },
         {
           "kind" : "file",
@@ -229,9 +319,24 @@
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/CapabilityStats.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ToolDefinition.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/EvaluationEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/FactExtractor.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/RuleEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/VaultObserver.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/WikiAdapter.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/WikiTypes.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/PatentLoopEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryEngine.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryStore.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryTypes.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillManager.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillParser.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillTypes.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/TraceCollector.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/TraceStore.swift.o",
         "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swift.o"
       ],
       "otherArguments" : [
@@ -307,6 +412,30 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/EvaluationEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/FactExtractor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/RuleEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/VaultObserver.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/WikiAdapter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/WikiTypes.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swift.o"
         },
         {
@@ -316,6 +445,42 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/PatentLoopEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/MemoryTypes.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillParser.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/SkillTypes.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/TraceCollector.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build/TraceStore.swift.o"
         },
         {
           "kind" : "file",
@@ -333,9 +498,24 @@
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/EvaluationEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/FactExtractor.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/RuleEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/VaultObserver.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiAdapter.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiTypes.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/PatentLoopEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryEngine.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryStore.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryTypes.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillManager.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillParser.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillTypes.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceCollector.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceStore.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift"
       ],
       "tempsPath" : "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatCore.build",
@@ -555,7 +735,10 @@
       "yunpat_ai",
       "-c",
       "/Users/xujian/projects/YunPat-Ai/App/Views/ChatView.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/CollaborationPanel.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/Color+App.swift",
       "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift",
+      "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/KnowledgeSettingsView.swift",
       "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/ProviderSettingsView.swift",
       "/Users/xujian/projects/YunPat-Ai/App/Views/Tab.swift",
       "/Users/xujian/projects/YunPat-Ai/App/Views/TabBar.swift",
@@ -624,9 +807,24 @@
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/CapabilityStats.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Capability/ToolDefinition.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/EvaluationEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/FactExtractor.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/RuleEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/VaultObserver.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiAdapter.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiTypes.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/PatentLoopEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryEngine.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryStore.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryTypes.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillManager.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillParser.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillTypes.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceCollector.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceStore.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift",
       "-I",
       "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/Modules",
@@ -789,7 +987,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/CollaborationPanel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Color+App.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/App/Views/Settings/KnowledgeSettingsView.swift"
         },
         {
           "kind" : "file",
@@ -839,6 +1049,30 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/EvaluationEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/FactExtractor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/RuleEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/VaultObserver.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiAdapter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiTypes.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift"
         },
         {
@@ -848,6 +1082,42 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/PatentLoopEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryTypes.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillParser.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillTypes.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceCollector.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Trace/TraceStore.swift"
         },
         {
           "kind" : "file",

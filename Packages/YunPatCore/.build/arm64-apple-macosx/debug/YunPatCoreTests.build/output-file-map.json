@@ -22,5 +22,19 @@
     "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests~partial.swiftmodule",
     "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.swiftdeps",
     "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/ContextEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/MemoryEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/MemoryEngineTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Tests/YunPatCoreTests/PatentLoopEngineTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCoreTests.build/PatentLoopEngineTests.dia"
   }
 }

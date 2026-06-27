@@ -332,6 +332,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift"
         },
         {
@@ -357,6 +361,7 @@
       "objects" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.swift.o"
       ],
@@ -420,6 +425,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o"
         },
         {
@@ -435,6 +444,7 @@
       "sources" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/AnthropicProviderTests.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/OpenAIProviderTests.swift"
       ],
@@ -586,6 +596,7 @@
       "-c",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/AnthropicProviderTests.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/OpenAIProviderTests.swift",
       "-I",
@@ -815,6 +826,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o"
         },
         {
@@ -838,6 +853,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift"
         },
         {
           "kind" : "file",
