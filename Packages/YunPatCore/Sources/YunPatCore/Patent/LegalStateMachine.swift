@@ -1,0 +1,96 @@
+import Foundation
+
+public enum LegalState: String, Sendable, Codable {
+    case idle
+    case factFinding
+    case factAnalysis
+    case legalBasis
+    case legalScope
+    case searchIteration
+    case articleSelection
+    case factLocked
+    case planning
+    case executing
+    case reviewing
+    case completed
+    case abandoned
+}
+
+public struct Checkpoint: Sendable, Codable {
+    public let state: LegalState
+    public let timestamp: Date
+    public let description: String
+
+    public init(state: LegalState, description: String = "") {
+        self.state = state
+        self.timestamp = Date()
+        self.description = description
+    }
+}
+
+public enum TransitionResult: Sendable {
+    case success
+    case failure(String)
+}
+
+public final class LegalStateMachine: @unchecked Sendable {
+    private var _state: LegalState = .idle
+    private var _checkpoints: [Checkpoint] = []
+    private var _history: [(from: LegalState, to: LegalState, reason: String)] = []
+    private let lock = NSLock()
+
+    public var currentState: LegalState { lock.withLock { _state } }
+    public var checkpoints: [Checkpoint] { lock.withLock { _checkpoints } }
+    public var history: [(from: LegalState, to: LegalState, reason: String)] { lock.withLock { _history } }
+
+    private let validTransitions: [LegalState: [LegalState]] = [
+        .idle: [.factFinding, .factAnalysis],
+        .factFinding: [.legalBasis, .idle],
+        .factAnalysis: [.legalScope, .idle],
+        .legalBasis: [.articleSelection, .planning, .factFinding],
+        .legalScope: [.searchIteration, .factAnalysis],
+        .searchIteration: [.factLocked, .legalScope],
+        .articleSelection: [.planning, .legalBasis],
+        .factLocked: [.planning, .searchIteration],
+        .planning: [.executing, .factFinding, .legalBasis],
+        .executing: [.reviewing, .planning],
+        .reviewing: [.completed, .factFinding, .legalBasis, .planning],
+        .completed: [],
+        .abandoned: [],
+    ]
+
+    public func transition(to target: LegalState, reason: String = "") -> TransitionResult {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let allowed = validTransitions[_state], allowed.contains(target) else {
+            return .failure("非法转移: \(_state) → \(target)")
+        }
+        _history.append((_state, target, reason))
+        _state = target
+        _checkpoints.append(Checkpoint(state: target, description: reason))
+        return .success
+    }
+
+    public func rollback(to targetState: LegalState, reason: String) -> TransitionResult {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let index = _checkpoints.lastIndex(where: { $0.state == targetState }) else {
+            return .failure("无检查点: \(targetState)")
+        }
+        _checkpoints = Array(_checkpoints[0...index])
+        _state = targetState
+        _history.append((_state, targetState, "rollback: \(reason)"))
+        return .success
+    }
+
+    public func complete() {
+        lock.withLock { _state = .completed }
+    }
+
+    public func abandon(reason: String) {
+        lock.withLock {
+            _history.append((_state, .abandoned, reason))
+            _state = .abandoned
+        }
+    }
+}
