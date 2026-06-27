@@ -1,6 +1,6 @@
 import Foundation
 
-public final class ContextEngine {
+public final class ContextEngine: @unchecked Sendable {
     public init() {}
 
     public func buildPrompt(for request: UserRequest, flow: AgentFlow, maxTokenBudget: Int = 4000) async throws -> String {

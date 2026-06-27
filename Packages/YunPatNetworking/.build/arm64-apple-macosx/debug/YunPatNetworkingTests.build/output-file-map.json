@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/AnthropicProviderTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/OpenAIProviderTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.dia"
+  }
+}

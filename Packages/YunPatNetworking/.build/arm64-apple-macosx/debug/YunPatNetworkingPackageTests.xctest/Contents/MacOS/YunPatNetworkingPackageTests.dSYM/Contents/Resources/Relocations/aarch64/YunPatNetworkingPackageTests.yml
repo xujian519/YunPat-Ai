@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingPackageTests.xctest/Contents/MacOS/YunPatNetworkingPackageTests'
+relocations:     []
+...

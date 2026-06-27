@@ -2,6 +2,34 @@
   "": {
     "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/primary.swiftdeps"
   },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Context/ContextEngine.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/ContextEngine.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/AgentLoopEngine.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopEngine.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopEngine.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/LoopState.dia"
+  },
   "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/YunPatCore.swift": {
     "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.d",
     "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCore.build/YunPatCore.swift.o",
