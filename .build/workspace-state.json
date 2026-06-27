@@ -21,6 +21,20 @@
       {
         "basedOn" : null,
         "packageRef" : {
+          "identity" : "yunpatdesktop",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop",
+          "name" : "YunPatDesktop"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop"
+        },
+        "subpath" : "yunpatdesktop"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
           "identity" : "yunpatnetworking",
           "kind" : "fileSystem",
           "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking",
@@ -31,6 +45,34 @@
           "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking"
         },
         "subpath" : "yunpatnetworking"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "yunpatplugins",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatPlugins",
+          "name" : "YunPatPlugins"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatPlugins"
+        },
+        "subpath" : "yunpatplugins"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "yunpatsandbox",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox",
+          "name" : "YunPatSandbox"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox"
+        },
+        "subpath" : "yunpatsandbox"
       }
     ],
     "prebuilts" : [

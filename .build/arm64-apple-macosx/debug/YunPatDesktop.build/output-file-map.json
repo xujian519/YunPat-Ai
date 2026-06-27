@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/ShellExecutor.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/ShellExecutor.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/VersionController.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatDesktop.build/VersionController.dia"
+  }
+}

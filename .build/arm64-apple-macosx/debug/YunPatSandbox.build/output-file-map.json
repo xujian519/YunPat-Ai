@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatSandbox/Sources/YunPatSandbox/SandboxProvider.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/SandboxProvider.dia"
+  }
+}
