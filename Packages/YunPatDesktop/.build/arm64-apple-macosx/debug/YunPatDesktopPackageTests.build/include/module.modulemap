@@ -1,0 +1,3 @@
+module YunPatDesktopPackageTests {
+    header "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopPackageTests.build/include/YunPatDesktopPackageTests-Swift.h"
+}

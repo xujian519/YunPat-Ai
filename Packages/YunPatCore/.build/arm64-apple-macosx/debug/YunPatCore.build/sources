@@ -23,6 +23,11 @@
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Patent/LegalStateMachine.swift
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Patent/ReasoningStrategy.swift
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Patent/SearchCommander.swift
+/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Quality/FactMarker.swift
+/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Quality/PatentRubric.swift
+/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Quality/TabooDetector.swift
+/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Quality/TwoPassDraft.swift
+/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Quality/TypedAction.swift
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillManager.swift
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillParser.swift
 /Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/Sources/YunPatCore/Skill/SkillTypes.swift

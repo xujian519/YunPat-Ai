@@ -25,7 +25,7 @@ public actor ActionDispatcher {
 }
 
 public struct NewTabAction: TypedAction {
-    public let payload = ()
+    public let payload: Void = ()
     public static let actionName = "tab.new"
 }
 

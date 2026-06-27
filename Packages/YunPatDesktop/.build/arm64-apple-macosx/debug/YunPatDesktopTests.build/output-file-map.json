@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/primary.swiftdeps"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/ShellExecutorTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/ShellExecutorTests.dia"
+  },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Tests/YunPatDesktopTests/VersionControllerTests.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktopTests.build/VersionControllerTests.dia"
+  }
+}
