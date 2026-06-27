@@ -38,5 +38,23 @@ extension CapabilityRegistry {
             source: .builtin, permission: .always,
             metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["法规查询", "案例检索"])
         ))
+        register(capability: CapabilityDefinition(
+            name: "desktop.shell", displayName: "Shell 执行",
+            description: "执行 shell 命令（白名单）",
+            source: .builtin, permission: .perSession,
+            metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["脚本执行", "git 操作"])
+        ))
+        register(capability: CapabilityDefinition(
+            name: "desktop.file", displayName: "文件操作",
+            description: "读写工作目录文件（路径隔离）",
+            source: .builtin, permission: .perSession,
+            metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["文件读取", "文件写入"])
+        ))
+        register(capability: CapabilityDefinition(
+            name: "desktop.automation", displayName: "桌面自动化",
+            description: "操控 Mac 应用（AXorcist Accessibility API）",
+            source: .builtin, permission: .perCall,
+            metadata: CapabilityMetadata(costLevel: .low, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["应用操控", "UI 读取"])
+        ))
     }
 }
