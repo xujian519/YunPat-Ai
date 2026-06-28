@@ -16,8 +16,9 @@ public struct StructuredFacts: Sendable {
     public let inventionPoints: [String]
     public let missingInfo: [String]
     public let sourceDocument: URL?
-    public init(technicalField: String = "", problem: String = "", inventionPoints: [String] = [], missingInfo: [String] = [], sourceDocument: URL? = nil) {
-        self.technicalField = technicalField; self.problem = problem; self.inventionPoints = inventionPoints; self.missingInfo = missingInfo; self.sourceDocument = sourceDocument
+    public let caseReferences: [String]
+    public init(technicalField: String = "", problem: String = "", inventionPoints: [String] = [], missingInfo: [String] = [], sourceDocument: URL? = nil, caseReferences: [String] = []) {
+        self.technicalField = technicalField; self.problem = problem; self.inventionPoints = inventionPoints; self.missingInfo = missingInfo; self.sourceDocument = sourceDocument; self.caseReferences = caseReferences
     }
 }
 
