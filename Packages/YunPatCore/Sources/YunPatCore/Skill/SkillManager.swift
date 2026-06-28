@@ -70,4 +70,32 @@ public actor SkillManager {
     public func allSkills() -> [SkillContent] {
         skills
     }
+
+    // MARK: - File Scanning
+
+    /// 扫描磁盘上的 skill 目录，加载所有 .skill.md 文件
+    public func scan(from directory: URL) async throws -> [SkillManifest] {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: directory.path) else { return [] }
+
+        var manifests: [SkillManifest] = []
+        let parser = SkillParser()
+
+        // 收集所有 .skill.md 文件
+        let files = (try? fm.subpathsOfDirectory(atPath: directory.path)) ?? []
+        for file in files where file.hasSuffix(".skill.md") {
+            let url = directory.appendingPathComponent(file)
+            guard let content = try? String(contentsOf: url, encoding: .utf8),
+                  let parsed = parser.parse(content) else { continue }
+            skills.append(parsed)
+            manifests.append(parsed.manifest)
+        }
+        return manifests
+    }
+
+    /// 加载内置 skill（从 App Bundle Resources/Skills/ 读取）
+    public func loadBuiltinSkills() async throws -> [SkillManifest] {
+        guard let builtinURL = Bundle.main.url(forResource: "Skills", withExtension: nil) else { return [] }
+        return try await scan(from: builtinURL)
+    }
 }

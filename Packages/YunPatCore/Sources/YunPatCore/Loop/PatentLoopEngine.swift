@@ -12,6 +12,7 @@ public actor PatentLoopEngine: LoopEngine {
     private let innerLoop: PatentToolLoop
     private let evaluator: EvaluationEngine
     private let config: RuntimeConfig
+    private let memory: MemoryEngine
 
     private let loopGuard: LoopGuard
     private var stuckGuard: StuckGuard
@@ -24,7 +25,8 @@ public actor PatentLoopEngine: LoopEngine {
         modelRouter: ModelRouter,
         wikiAdapter: WikiAdapter,
         provider: ModelProvider = .deepseek,
-        config: RuntimeConfig = RuntimeConfig()
+        config: RuntimeConfig = RuntimeConfig(),
+        memory: MemoryEngine = MemoryEngine()
     ) {
         self.modelRouter = modelRouter
         self.wikiAdapter = wikiAdapter
@@ -36,6 +38,7 @@ public actor PatentLoopEngine: LoopEngine {
         self.innerLoop = PatentToolLoop()
         self.evaluator = EvaluationEngine()
         self.config = config
+        self.memory = memory
         self.loopGuard = LoopGuard(maxIterations: config.maxIterations)
         self.stuckGuard = StuckGuard(nudgeThreshold: config.stuckNudgeThreshold, giveUpThreshold: config.stuckGiveUpThreshold)
         self.subAgentEngine = .shared
@@ -53,6 +56,11 @@ public actor PatentLoopEngine: LoopEngine {
 
         state = .running(step: "extracting-facts")
         let facts = await factExtractor.extract(from: request)
+        // 记录事实到记忆
+        await memory.addSessionFact(facts.technicalField, category: .technicalFeature)
+        for point in facts.inventionPoints {
+            await memory.addSessionFact(point, category: .technicalFeature)
+        }
         if !facts.missingInfo.isEmpty, flow == .guided {
             return .needsClarification(facts.missingInfo)
         }
@@ -64,6 +72,10 @@ public actor PatentLoopEngine: LoopEngine {
             CapabilityTrace(capability: "knowledge.search", tool: "retrieveRules", latency: Date().timeIntervalSince(rulesStepStart)),
             parent: traceID
         )
+        // 记录规则到记忆
+        for candidate in rules.candidates.prefix(5) {
+            await memory.addSessionFact(candidate.title, category: .legalRule)
+        }
 
         // ── [协作点 ②] 规则确认（Guided 模式）──
         if flow == .guided && !rules.candidates.isEmpty {
@@ -158,6 +170,8 @@ public actor PatentLoopEngine: LoopEngine {
                     toolCount: toolCount, llmCallCount: llmCallCount
                 )
                 try? await TraceCollector().finishTrace(traceID, summary: summary)
+                // 蒸馏会话记忆到 CaseContext
+                _ = try? await memory.consolidate()
                 if let rubric = review.rubric {
                     return .completed(prefix + "\n\n---\n\(rubric.report())")
                 }
