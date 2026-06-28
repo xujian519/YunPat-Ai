@@ -11,8 +11,9 @@ public struct CapabilityDefinition: Codable, Sendable {
     public let source: CapabilitySource
     public let permission: CapabilityPermission
     public let metadata: CapabilityMetadata
-    public init(name: String, displayName: String, description: String, source: CapabilitySource = .builtin, permission: CapabilityPermission = .always, metadata: CapabilityMetadata = CapabilityMetadata()) {
-        self.name = name; self.displayName = displayName; self.description = description; self.source = source; self.permission = permission; self.metadata = metadata
+    public let toolNames: [String]
+    public init(name: String, displayName: String, description: String, source: CapabilitySource = .builtin, permission: CapabilityPermission = .always, metadata: CapabilityMetadata = CapabilityMetadata(), toolNames: [String] = []) {
+        self.name = name; self.displayName = displayName; self.description = description; self.source = source; self.permission = permission; self.metadata = metadata; self.toolNames = toolNames
     }
 }
 
@@ -21,7 +22,9 @@ public struct CapabilityMetadata: Codable, Sendable {
     public let requiresNetwork: Bool
     public let isIdempotent: Bool
     public let typicalUseCases: [String]
-    public init(costLevel: CostLevel = .free, requiresNetwork: Bool = false, isIdempotent: Bool = true, typicalUseCases: [String] = []) {
-        self.costLevel = costLevel; self.requiresNetwork = requiresNetwork; self.isIdempotent = isIdempotent; self.typicalUseCases = typicalUseCases
+    /// T0 纯本地 / T1 软依赖(本地DB/索引) / T2 硬依赖(网络API/LLM)
+    public let dependencyTier: ToolDependencyTier
+    public init(costLevel: CostLevel = .free, requiresNetwork: Bool = false, isIdempotent: Bool = true, typicalUseCases: [String] = [], dependencyTier: ToolDependencyTier = .t0) {
+        self.costLevel = costLevel; self.requiresNetwork = requiresNetwork; self.isIdempotent = isIdempotent; self.typicalUseCases = typicalUseCases; self.dependencyTier = dependencyTier
     }
 }
