@@ -7,6 +7,7 @@ struct ContentView: View {
     @StateObject private var chatManager: ChatManager
     @State private var sidebarCollapsed = false
     @State private var collaborationVisible = false
+    @State private var documentSplitVisible = false
 
     init(router: ModelRouter) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -23,35 +24,14 @@ struct ContentView: View {
                 toolbar
                 Divider()
 
-                VStack(spacing: 0) {
-                    messageList
-
-                    if let checklist = activeTabChecklist, !checklist.isEmpty {
-                        ChecklistView(markdown: checklist)
-                            .padding(.horizontal)
+                if documentSplitVisible {
+                    HSplitView {
+                        chatArea
+                        DocumentWorkspace()
+                            .frame(minWidth: 300, maxWidth: 600)
                     }
-
-                    if chatManager.clarifying, let clarifyReq = activeTabClarify {
-                        ClarifyOverlay(
-                            request: ClarifyRequestDisplay(from: clarifyReq),
-                            onAnswer: { answer in
-                                Task { await chatManager.answerClarify(answer, in: tabManager) }
-                            },
-                            onDismiss: { chatManager.dismissClarify(in: tabManager) }
-                        )
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                    }
-
-                    Divider()
-
-                    HStack {
-                        TextField("输入消息...", text: $chatManager.inputText)
-                            .textFieldStyle(.roundedBorder)
-                            .onSubmit { Task { await chatManager.sendMessage(in: tabManager) } }
-                        Button("发送") { Task { await chatManager.sendMessage(in: tabManager) } }
-                            .disabled(chatManager.isStreaming || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                    .padding()
+                } else {
+                    chatArea
                 }
             }
 
@@ -88,6 +68,13 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .help("显示/隐藏协作面板")
+
+            Button(action: { withAnimation { documentSplitVisible.toggle() } }) {
+                Image(systemName: "doc.plaintext")
+                    .font(.system(size: 12))
+            }
+            .buttonStyle(.plain)
+            .help("切换文档工作区分屏")
         }
         .padding(.horizontal)
         .padding(.top, 4)
@@ -147,6 +134,41 @@ struct ContentView: View {
         }
         .task {
             await chatManager.wireTodoTo(tabManager)
+        }
+    }
+
+    // MARK: - Chat Area
+
+    private var chatArea: some View {
+        VStack(spacing: 0) {
+            messageList
+
+            if let checklist = activeTabChecklist, !checklist.isEmpty {
+                ChecklistView(markdown: checklist)
+                    .padding(.horizontal)
+            }
+
+            if chatManager.clarifying, let clarifyReq = activeTabClarify {
+                ClarifyOverlay(
+                    request: ClarifyRequestDisplay(from: clarifyReq),
+                    onAnswer: { answer in
+                        Task { await chatManager.answerClarify(answer, in: tabManager) }
+                    },
+                    onDismiss: { chatManager.dismissClarify(in: tabManager) }
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            Divider()
+
+            HStack {
+                TextField("输入消息...", text: $chatManager.inputText)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit { Task { await chatManager.sendMessage(in: tabManager) } }
+                Button("发送") { Task { await chatManager.sendMessage(in: tabManager) } }
+                    .disabled(chatManager.isStreaming || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding()
         }
     }
 }

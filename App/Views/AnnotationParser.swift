@@ -8,7 +8,7 @@ public enum AnnotationType: String, Sendable { case deletion; case insertion; ca
 
 public final class AnnotationParser {
     public func parse(_ text: String) -> (cleanText: String, annotations: [DocumentAnnotation], edits: [TextEdit]) {
-        var cleanText = text; var annotations: [DocumentAnnotation] = []; var edits: [TextEdit] = []
+        var cleanText = text; var annotations: [DocumentAnnotation] = []; let edits: [TextEdit] = []
         let lines = text.components(separatedBy: .newlines)
         for (i, line) in lines.enumerated() {
             if let match = parsePattern("{del:", "}", in: line) {
@@ -22,6 +22,13 @@ public final class AnnotationParser {
             if line.contains("{???}") {
                 let content = line.replacingOccurrences(of: "{???}", with: "").trimmingCharacters(in: .whitespaces)
                 annotations.append(DocumentAnnotation(line: i+1, type: .question, content: content))
+            }
+            if line.contains("💬") {
+                let parts = line.components(separatedBy: "💬")
+                if parts.count > 1 {
+                    let comment = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
+                    annotations.append(DocumentAnnotation(line: i+1, type: .comment, content: comment))
+                }
             }
         }
         return (cleanText, annotations, edits)
