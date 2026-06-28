@@ -8,6 +8,10 @@ struct ContentView: View {
     @State private var sidebarCollapsed = false
     @State private var collaborationVisible = false
     @State private var documentSplitVisible = false
+    @State private var browserVisible = false
+    @State private var folderTreeVisible = false
+    @State private var caseGraphMode = false
+    @State private var filePickerOpen = false
 
     init(router: ModelRouter) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -15,34 +19,81 @@ struct ContentView: View {
 
     var body: some View {
         HSplitView {
+            // ── 侧栏 ──
             if !sidebarCollapsed {
-                SidebarView(tabManager: tabManager)
-                    .frame(minWidth: 180, idealWidth: 220, maxWidth: 280)
+                CaseListSidebar(tabManager: tabManager)
+                    .frame(minWidth: 200, idealWidth: 240, maxWidth: 300)
             }
 
+            // ── 主区域 ──
             VStack(spacing: 0) {
                 toolbar
                 Divider()
 
-                if documentSplitVisible {
+                if browserVisible {
+                    PatentBrowser()
+                } else if documentSplitVisible {
                     HSplitView {
                         chatArea
-                        DocumentWorkspace()
-                            .frame(minWidth: 300, maxWidth: 600)
+                        rightPanel
                     }
                 } else {
                     chatArea
                 }
+
+                Divider()
+                BottomToolbar(
+                    filePickerOpen: $filePickerOpen,
+                    browserVisible: $browserVisible,
+                    folderTreeVisible: $folderTreeVisible,
+                    documentSplit: $documentSplitVisible,
+                    onSave: { saveCurrentDocument() },
+                    onSync: { syncToAgent() }
+                )
             }
 
+            // ── 协作面板 ──
             if collaborationVisible {
-                CollaborationPanel(tabManager: tabManager, chatManager: chatManager)
-                    .frame(minWidth: 200, idealWidth: 260, maxWidth: 360)
+                if caseGraphMode {
+                    CaseGraphView(
+                        caseId: activeTab?.caseId,
+                        relatedCases: sampleRelatedCases()
+                    )
+                    .frame(minWidth: 240, idealWidth: 280, maxWidth: 360)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
+                } else {
+                    CollaborationPanel(tabManager: tabManager, chatManager: chatManager)
+                        .frame(minWidth: 240, idealWidth: 280, maxWidth: 360)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
         }
         .animation(.easeInOut(duration: 0.25), value: collaborationVisible)
         .animation(.easeInOut(duration: 0.25), value: sidebarCollapsed)
+        .animation(.easeInOut(duration: 0.25), value: browserVisible)
+        .animation(.easeInOut(duration: 0.25), value: documentSplitVisible)
+        .fileImporter(isPresented: $filePickerOpen, allowedContentTypes: [.plainText, .pdf, .data], allowsMultipleSelection: true) { result in
+            if case .success(let urls) = result {
+                for url in urls {
+                    guard url.startAccessingSecurityScopedResource() else { continue }
+                    defer { url.stopAccessingSecurityScopedResource() }
+                    let content = (try? String(contentsOf: url, encoding: .utf8)) ?? "[二进制文件: \(url.lastPathComponent)]"
+                    let msg = "📎 已打开: \(url.lastPathComponent)\n\n\(String(content.prefix(2000)))"
+                    Task { @MainActor in
+                        if let activeID = tabManager.activeTabID {
+                            tabManager.appendMessage(to: activeID, ChatMessage(role: .user, content: msg))
+                            await chatManager.sendMessage(in: tabManager)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Right Panel (Folder Tree)
+
+    private var rightPanel: some View {
+        FolderTreeView(rootPath: activeTab?.workspacePath)
     }
 
     // MARK: - Toolbar
@@ -63,18 +114,20 @@ struct ContentView: View {
             flowModePicker
 
             Button(action: { withAnimation { collaborationVisible.toggle() } }) {
-                Image(systemName: "panel.right")
+                Image(systemName: "checklist")
                     .font(.system(size: 12))
             }
             .buttonStyle(.plain)
-            .help("显示/隐藏协作面板")
+            .help("协作面板")
 
-            Button(action: { withAnimation { documentSplitVisible.toggle() } }) {
-                Image(systemName: "doc.plaintext")
-                    .font(.system(size: 12))
+            if collaborationVisible {
+                Button(action: { withAnimation { caseGraphMode.toggle() } }) {
+                    Image(systemName: caseGraphMode ? "list.bullet" : "point.3.connected.trianglepath.dotted")
+                        .font(.system(size: 12))
+                }
+                .buttonStyle(.plain)
+                .help(caseGraphMode ? "待确认列表" : "案件关系图")
             }
-            .buttonStyle(.plain)
-            .help("切换文档工作区分屏")
         }
         .padding(.horizontal)
         .padding(.top, 4)
@@ -96,7 +149,7 @@ struct ContentView: View {
         .help("Copilot: 直接响应 | Guided: 分步确认 | FullAgent: 自主五步")
     }
 
-    // MARK: - Computed Properties
+    // MARK: - Computed
 
     private var activeTab: ChatTab? {
         guard let id = tabManager.activeTabID else { return nil }
@@ -111,29 +164,23 @@ struct ContentView: View {
         activeTab?.clarifyRequest
     }
 
-    // MARK: - Message List
+    // MARK: - Sample data
 
-    private var messageList: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 12) {
-                    if let activeTab = activeTab {
-                        ForEach(activeTab.messages) { message in
-                            MessageBubble(message: message)
-                                .id(message.id)
-                        }
-                    }
-                }
-                .padding()
+    private func sampleRelatedCases() -> [CaseGraphView.RelatedCase] {
+        guard activeTab?.type == .patent else { return [] }
+        return [
+            .init(id: "CN202310000001", title: "在先申请", relation: .priority),
+            .init(id: "CN202310000002", title: "分案申请", relation: .divisional),
+            .init(id: "US2024/012345", title: "对比文件 D1", relation: .reference),
+        ]
+    }
+
+    private func saveCurrentDocument() {}
+    private func syncToAgent() {
+        Task {
+            if let activeID = tabManager.activeTabID {
+                tabManager.appendMessage(to: activeID, ChatMessage(role: .system, content: "📄 文档已同步至 Agent"))
             }
-            .onChange(of: activeTab?.messages.count ?? 0) { _, _ in
-                if let lastID = activeTab?.messages.last?.id {
-                    withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
-                }
-            }
-        }
-        .task {
-            await chatManager.wireTodoTo(tabManager)
         }
     }
 
@@ -171,54 +218,31 @@ struct ContentView: View {
             .padding()
         }
     }
-}
 
-// MARK: - Sidebar
+    // MARK: - Message List
 
-struct SidebarView: View {
-    @ObservedObject var tabManager: TabManager
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("标签")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-
-            Divider()
-
-            List(selection: $tabManager.activeTabID) {
-                ForEach(tabManager.tabs) { tab in
-                    HStack {
-                        Image(systemName: tab.flowIcon)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(tab.title)
-                            .lineLimit(1)
-                        Spacer()
-                        Text(tab.flowLabel)
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
+    private var messageList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 12) {
+                    if let activeTab = activeTab {
+                        ForEach(activeTab.messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
                     }
-                    .tag(tab.id)
+                }
+                .padding()
+            }
+            .onChange(of: activeTab?.messages.count ?? 0) { _, _ in
+                if let lastID = activeTab?.messages.last?.id {
+                    withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
                 }
             }
-            .listStyle(.sidebar)
-
-            Spacer()
-
-            Divider()
-            HStack {
-                Button(action: { tabManager.addTab() }) {
-                    Label("新建", systemImage: "plus")
-                        .font(.caption)
-                }
-                .buttonStyle(.plain)
-                Spacer()
-            }
-            .padding(8)
         }
-        .background(.thickMaterial)
+        .task {
+            await chatManager.wireTodoTo(tabManager)
+        }
     }
 }
 
@@ -292,8 +316,6 @@ struct CollaborationPanel: View {
         .background(Color.windowBackgroundColor)
     }
 }
-
-// MARK: - Approval Item
 
 struct ApprovalItem: Identifiable, Sendable {
     let id = UUID()

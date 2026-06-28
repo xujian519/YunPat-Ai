@@ -2,24 +2,33 @@ import SwiftUI
 import YunPatCore
 import YunPatNetworking
 
+enum TabType: String, CaseIterable, Sendable {
+    case patent   // 案件专用标签
+    case general  // 通用对话标签
+}
+
 struct ChatTab: Identifiable, Equatable {
     let id: UUID
     var title: String
+    var type: TabType
     var messages: [ChatMessage]
     var loopState: LoopState
     var loopPreference: AgentFlow
     var loopModel: String
     var sessionMemory: SessionMemory
+    var caseId: String?       // 案件编号（patent 类型）
+    var workspacePath: URL?    // 工作目录
 
     /// todo 清单（markdown checklist，由 Agent 通过 todo 工具设置）
     var todoChecklist: String = ""
     /// 待处理的 clarify 询问（nil = 无待处理）
     var clarifyRequest: ClarifyRequest? = nil
 
-    init(title: String = "新对话", flow: AgentFlow = .copilot) {
+    init(title: String = "新对话", type: TabType = .general, flow: AgentFlow = .copilot) {
         let tabId = UUID()
         self.id = tabId
         self.title = title
+        self.type = type
         self.messages = []
         self.loopState = .idle
         self.loopPreference = flow
@@ -40,6 +49,13 @@ struct ChatTab: Identifiable, Equatable {
         case .copilot: return "circle"
         case .guided: return "circle.dotted"
         case .fullAgent: return "circle.circle"
+        }
+    }
+
+    var typeIcon: String {
+        switch type {
+        case .patent: return "doc.text.magnifyingglass"
+        case .general: return "bubble.left"
         }
     }
 
