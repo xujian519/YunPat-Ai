@@ -38,6 +38,12 @@ final class TabManager: ObservableObject {
         guard let index = tabs.firstIndex(where: { $0.id == tabID }) else { return }
         tabs[index].messages.append(message)
     }
+
+    func appendToLastMessage(to tabID: UUID, _ delta: String) {
+        guard let index = tabs.firstIndex(where: { $0.id == tabID }),
+              let lastIdx = tabs[index].messages.indices.last else { return }
+        tabs[index].messages[lastIdx].content += delta
+    }
 }
 
 struct TabBar: View {
