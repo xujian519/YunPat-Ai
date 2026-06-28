@@ -9,6 +9,15 @@ public struct PatentRubric: Sendable {
     public var criteria: [RubricCriterion]; public let passThreshold: Int; public let minPerCriterion: Int
     public init(criteria: [RubricCriterion], passThreshold: Int = 32, minPerCriterion: Int = 3) { self.criteria = criteria; self.passThreshold = passThreshold; self.minPerCriterion = minPerCriterion }
 
+    /// 更新指定维度的得分
+    public func withScore(id: String, score: Int) -> PatentRubric {
+        var copy = self
+        if let idx = copy.criteria.firstIndex(where: { $0.id == id }) {
+            copy.criteria[idx].score = min(copy.criteria[idx].maxScore, max(0, score))
+        }
+        return copy
+    }
+
     public static let drafting = PatentRubric(criteria: [
         RubricCriterion(id: "statute_accuracy", name: "法条引用准确性", description: "是否正确引用法条号和审查指南章节"),
         RubricCriterion(id: "fact_coverage", name: "事实覆盖完整性", description: "覆盖所有发明点和必要技术特征"),

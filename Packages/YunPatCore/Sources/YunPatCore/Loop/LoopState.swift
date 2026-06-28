@@ -18,6 +18,16 @@ public enum LoopState: Sendable {
     case waitingApproval(ApprovalRequest)
     case error(Error)
     case conflictPause(ConflictResolutionRequest)
+
+    public var description: String {
+        switch self {
+        case .idle: return "空闲"
+        case .running(let step): return "运行中: \(step)"
+        case .waitingApproval: return "等待确认"
+        case .error: return "错误"
+        case .conflictPause: return "冲突暂停"
+        }
+    }
 }
 
 public struct ApprovalRequest: Sendable {
@@ -86,5 +96,25 @@ public struct ExecutionResult: Sendable {
 
 public struct ReviewResult: Sendable {
     public let verdict: Bool; public let issues: [Issue]; public let evidence: [String]
-    public init(verdict: Bool = true, issues: [Issue] = [], evidence: [String] = []) { self.verdict = verdict; self.issues = issues; self.evidence = evidence }
+    public let rubric: PatentRubric?; public let rubricVerdict: RubricVerdict?
+    public init(verdict: Bool = true, issues: [Issue] = [], evidence: [String] = [], rubric: PatentRubric? = nil, rubricVerdict: RubricVerdict? = nil) {
+        self.verdict = verdict; self.issues = issues; self.evidence = evidence; self.rubric = rubric; self.rubricVerdict = rubricVerdict
+    }
+
+    /// 生成面向用户的审查报告
+    public var report: String {
+        var lines: [String] = []
+        if let rubric = rubric {
+            lines.append(rubric.report())
+            lines.append("")
+        }
+        if !issues.isEmpty {
+            lines.append("## 发现问题")
+            for issue in issues {
+                let icon = issue.severity == .error ? "❌" : "⚠️"
+                lines.append("- \(icon) \(issue.description)")
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
 }

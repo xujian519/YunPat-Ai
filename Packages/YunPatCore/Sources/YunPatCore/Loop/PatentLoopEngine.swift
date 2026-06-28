@@ -56,6 +56,19 @@ public actor PatentLoopEngine: LoopEngine {
         state = .running(step: "retrieving-rules")
         let rules = try await ruleEngine.retrieveRules(for: facts)
 
+        // ── [协作点 ②] 规则确认（Guided 模式）──
+        if flow == .guided && !rules.candidates.isEmpty {
+            let candidateList = rules.candidates.prefix(5).map { c in
+                "\(c.sourceLevel <= 2 ? "📜" : "📋") \(c.title)"
+            }.joined(separator: "\n")
+            state = .waitingApproval(ApprovalRequest(
+                summary: "规则确认",
+                detail: "以下规则适用于当前案件，是否确认？\n\n\(candidateList)",
+                options: ["确认执行", "修改规则", "跳过规则"]
+            ))
+            return .needsClarification(["请确认适用规则: \(rules.candidates.prefix(3).map(\.title).joined(separator: "、"))"])
+        }
+
         while revisionCount < config.maxIterations {
             if let _ = loopGuard.checkIteration(revisionCount) {
                 state = .running(step: "iterating(\(revisionCount)/\(config.maxIterations))")
@@ -113,11 +126,38 @@ public actor PatentLoopEngine: LoopEngine {
                 artifacts: artifacts
             )
 
+            // ── [协作点 ④] 中途干预（Guided 模式，执行后暂停确认）──
+            if flow == .guided && !artifacts.isEmpty {
+                let preview = String(artifacts.first?.prefix(300) ?? "")
+                state = .waitingApproval(ApprovalRequest(
+                    summary: "执行结果预览",
+                    detail: "第 \(revisionCount + 1) 轮执行完成：\n\n\(preview)\n\n是否继续审查？",
+                    options: ["继续审查", "修改需求", "采纳结果"]
+                ))
+                if revisionCount == 0 {
+                    return .needsClarification(["执行预览: \(preview)"])
+                }
+            }
+
             state = .running(step: "reviewing")
             let review = await evaluator.evaluate(execution: result, rules: rules, facts: facts)
             if review.verdict {
                 state = .idle
-                return .completed(artifacts.joined(separator: "\n\n"))
+                let prefix = artifacts.joined(separator: "\n\n")
+                if let rubric = review.rubric {
+                    return .completed(prefix + "\n\n---\n\(rubric.report())")
+                }
+                return .completed(prefix)
+            }
+
+            // ── [协作点 ⑤] 最终审核确认（Guided 模式，审查未通过）──
+            if flow == .guided {
+                state = .waitingApproval(ApprovalRequest(
+                    summary: "审查未通过",
+                    detail: review.report,
+                    options: ["重新执行", "忽略问题继续", "放弃"]
+                ))
+                return .needsRevision(review.issues)
             }
             revisionCount += 1
         }
