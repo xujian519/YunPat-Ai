@@ -46,6 +46,10 @@ public actor PatentLoopEngine: LoopEngine {
         var revisionCount = 0
         stuckGuard.resetAll()
         consecutiveReads = 0
+        let traceID = await TraceCollector().startTrace()
+        let startTime = Date()
+        var toolCount = 0
+        var llmCallCount = 0
 
         state = .running(step: "extracting-facts")
         let facts = await factExtractor.extract(from: request)
@@ -54,7 +58,12 @@ public actor PatentLoopEngine: LoopEngine {
         }
 
         state = .running(step: "retrieving-rules")
+        let rulesStepStart = Date()
         let rules = try await ruleEngine.retrieveRules(for: facts)
+        await TraceCollector().recordCapability(
+            CapabilityTrace(capability: "knowledge.search", tool: "retrieveRules", latency: Date().timeIntervalSince(rulesStepStart)),
+            parent: traceID
+        )
 
         // ── [协作点 ②] 规则确认（Guided 模式）──
         if flow == .guided && !rules.candidates.isEmpty {
@@ -144,6 +153,11 @@ public actor PatentLoopEngine: LoopEngine {
             if review.verdict {
                 state = .idle
                 let prefix = artifacts.joined(separator: "\n\n")
+                let summary = TraceSummary(
+                    totalCost: 0, totalLatency: Date().timeIntervalSince(startTime),
+                    toolCount: toolCount, llmCallCount: llmCallCount
+                )
+                try? await TraceCollector().finishTrace(traceID, summary: summary)
                 if let rubric = review.rubric {
                     return .completed(prefix + "\n\n---\n\(rubric.report())")
                 }
@@ -165,7 +179,13 @@ public actor PatentLoopEngine: LoopEngine {
         state = .idle
         let exceededMsg = loopGuard.checkIteration(config.maxIterations + 1)
             ?? "超过最大修订次数 \(config.maxIterations)"
-        return .exceededRevisionLimit([Issue(description: exceededMsg)])
+        let result = LoopResult.exceededRevisionLimit([Issue(description: exceededMsg)])
+        let summary = TraceSummary(
+            totalCost: 0, totalLatency: Date().timeIntervalSince(startTime),
+            toolCount: toolCount, llmCallCount: llmCallCount
+        )
+        try? await TraceCollector().finishTrace(traceID, summary: summary)
+        return result
     }
 
     /// Step 3: 使用 LLM 构建策略
