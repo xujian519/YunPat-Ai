@@ -99,7 +99,7 @@ public actor PatentLoopEngine: LoopEngine {
             }
 
             state = .running(step: "planning")
-            let planText = try await buildPlan(facts: facts, rules: rules)
+            let planText = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
             _ = ExecutionPlan(
                 strategy: planText,
                 steps: [PlanStep(
@@ -203,7 +203,7 @@ public actor PatentLoopEngine: LoopEngine {
     }
 
     /// Step 3: 使用 LLM 构建策略
-    private func buildPlan(facts: StructuredFacts, rules: ApplicableRules) async throws -> String {
+    private func buildPlan(facts: StructuredFacts, rules: ApplicableRules, traceID: TraceID) async throws -> String {
         let prompt = """
         你是一位资深中国专利代理人。基于以下信息制定策略：
 
@@ -220,6 +220,7 @@ public actor PatentLoopEngine: LoopEngine {
         3. 风险点和应对
         """
 
+        let startTime = Date()
         let chatReq = ChatRequest(
             model: loopModel,
             messages: [Message(role: .user, content: prompt)]
@@ -229,7 +230,26 @@ public actor PatentLoopEngine: LoopEngine {
         for try await chunk in stream {
             if case .text(let t) = chunk { full += t }
         }
+
+        // 记录 PromptTrace（系统提示词 hash 脱敏）
+        let promptHash = Self.sha256(prompt.prefix(200))
+        await TraceCollector().recordPrompt(
+            PromptTrace(
+                systemPromptHash: promptHash,
+                cost: 0,
+                latency: Date().timeIntervalSince(startTime),
+                model: loopModel
+            ),
+            parent: traceID
+        )
+
         return full.isEmpty ? "策略制定完成" : full
+    }
+
+    private static func sha256(_ text: some StringProtocol) -> String {
+        var hasher = Hasher()
+        hasher.combine(String(text))
+        return String(format: "%016lx", hasher.finalize())
     }
 
     /// 用 PatentToolLoop 执行一次分析任务

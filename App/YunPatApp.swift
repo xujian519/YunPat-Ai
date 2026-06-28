@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import YunPatNetworking
+import YunPatCore
 
 @main
 struct YunPatApp: App {
@@ -9,18 +10,60 @@ struct YunPatApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(router: appState.modelRouter)
+                .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                    for provider in providers {
+                        _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                            guard let url = url else { return }
+                            NotificationCenter.default.post(name: .dropFile, object: url)
+                        }
+                    }
+                    return true
+                }
         }
+        .windowResizability(.contentSize)
         .commands {
+            // ── App Info ──
             CommandGroup(replacing: .appInfo) {
-                Button("About YunPat-Ai") {
-                    NSApp.orderFrontStandardAboutPanel(options: [:])
-                }
+                Button("关于 YunPat-Ai") { NSApp.orderFrontStandardAboutPanel(options: [:]) }
             }
+
+            // ── File Menu ──
             CommandGroup(replacing: .newItem) {
-                Button("New Tab") {
-                    NotificationCenter.default.post(name: .menuNewTab, object: nil)
+                Button("新建标签") { NotificationCenter.default.post(name: .menuNewTab, object: nil) }
+                    .keyboardShortcut("t", modifiers: .command)
+                Button("新建案件") { NotificationCenter.default.post(name: .menuNewCase, object: nil) }
+                    .keyboardShortcut("n", modifiers: [.command, .shift])
+                Divider()
+                Button("打开文件…") { NotificationCenter.default.post(name: .menuOpenFile, object: nil) }
+                    .keyboardShortcut("o", modifiers: .command)
+                Divider()
+                Button("保存当前文档") { NotificationCenter.default.post(name: .menuSave, object: nil) }
+                    .keyboardShortcut("s", modifiers: .command)
+            }
+
+            // ── Edit Menu ──
+            CommandGroup(replacing: .undoRedo) {
+                Button("撤销") { NotificationCenter.default.post(name: .menuUndo, object: nil) }
+                    .keyboardShortcut("z", modifiers: .command)
+                Button("重做") { NotificationCenter.default.post(name: .menuRedo, object: nil) }
+                    .keyboardShortcut("z", modifiers: [.command, .shift])
+            }
+
+            // ── View Menu ──
+            CommandMenu("显示") {
+                Button("切换侧栏") { NotificationCenter.default.post(name: .menuToggleSidebar, object: nil) }
+                    .keyboardShortcut("s", modifiers: [.command, .option])
+                Button("切换协作面板") { NotificationCenter.default.post(name: .menuToggleCollaboration, object: nil) }
+                    .keyboardShortcut("c", modifiers: [.command, .option])
+                Button("切换浏览器") { NotificationCenter.default.post(name: .menuToggleBrowser, object: nil) }
+                    .keyboardShortcut("b", modifiers: [.command, .option])
+                Divider()
+                Button("文档分屏模式") { NotificationCenter.default.post(name: .menuToggleSplitScreen, object: nil) }
+                    .keyboardShortcut("d", modifiers: [.command, .option])
+                Button("进入全屏") {
+                    NSApp.keyWindow?.toggleFullScreen(nil)
                 }
-                .keyboardShortcut("t", modifiers: .command)
+                .keyboardShortcut("f", modifiers: [.command, .control])
             }
         }
         Settings {
@@ -31,6 +74,8 @@ struct YunPatApp: App {
                     .tabItem { Label("插件", systemImage: "puzzlepiece.extension") }
                 MCPSettingsView()
                     .tabItem { Label("MCP", systemImage: "server.rack") }
+                KnowledgeSettingsView()
+                    .tabItem { Label("知识库", systemImage: "books.vertical") }
             }
         }
     }
@@ -55,10 +100,47 @@ final class AppState: ObservableObject {
         if let key = store.apiKey(for: .glm), !key.isEmpty {
             Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: URL(string: "https://open.bigmodel.cn/api/paas/v4")!, provider: .glm)) }
         }
+
+        let filter = PrivacyFilter.shared
+        Task {
+            await router.setScrubHandler { request, provider, caseId in
+                let (scrubbedReq, result) = try await filter.scrub(request: request, provider: provider, caseId: caseId)
+                if result.blocked {
+                    let kinds = Set(result.detections.filter { $0.source == .regex }.map(\.kind.rawValue))
+                    throw ModelRouter.ScrubBlockedError(detections: Array(kinds))
+                }
+                return (scrubbedReq, result.placeholderMap)
+            }
+        }
+
+        Task {
+            var converger = StorageConverger.shared
+            let fvEnabled = await converger.checkFileVaultStatus()
+            if !fvEnabled { print("[Storage] FileVault is OFF") }
+        }
+
+        Task {
+            let consolidator = MemoryConsolidator.shared
+            while true {
+                if await consolidator.shouldRun { await consolidator.run() }
+                try? await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
+            }
+        }
+
         self.modelRouter = router
     }
 }
 
 extension Notification.Name {
     static let menuNewTab = Notification.Name("menuNewTab")
+    static let menuNewCase = Notification.Name("menuNewCase")
+    static let menuOpenFile = Notification.Name("menuOpenFile")
+    static let menuSave = Notification.Name("menuSave")
+    static let menuUndo = Notification.Name("menuUndo")
+    static let menuRedo = Notification.Name("menuRedo")
+    static let menuToggleSidebar = Notification.Name("menuToggleSidebar")
+    static let menuToggleCollaboration = Notification.Name("menuToggleCollaboration")
+    static let menuToggleBrowser = Notification.Name("menuToggleBrowser")
+    static let menuToggleSplitScreen = Notification.Name("menuToggleSplitScreen")
+    static let dropFile = Notification.Name("dropFile")
 }
