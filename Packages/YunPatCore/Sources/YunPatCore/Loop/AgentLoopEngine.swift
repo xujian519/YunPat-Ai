@@ -40,7 +40,16 @@ public actor AgentLoopEngine: LoopEngine {
         state = .running(step: "building-context")
         let systemPrompt = try await contextEngine.buildPrompt(for: request, flow: flow)
 
-        let hooks = makeHooks(systemPrompt: systemPrompt, request: request, model: model ?? provider.defaultModel, history: history, onStreamChunk: onStreamChunk)
+        // 智能路由：无显式指定模型时按任务特征自动选择
+        let effectiveModel: String
+        if let m = model {
+            effectiveModel = m
+        } else {
+            let category = SmartModelRouter.classify(request)
+            effectiveModel = SmartModelRouter.selectModel(for: category, preferred: provider)
+        }
+
+        let hooks = makeHooks(systemPrompt: systemPrompt, request: request, model: effectiveModel, history: history, onStreamChunk: onStreamChunk)
 
         state = .running(step: "executing")
         let exit = await loop.run(

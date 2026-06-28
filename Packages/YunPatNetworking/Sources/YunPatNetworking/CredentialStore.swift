@@ -42,6 +42,20 @@ public struct CredentialStore: Sendable {
     }
 }
 
-public enum CredentialError: Error {
+public enum CredentialError: Error, LocalizedError {
     case keychainError(OSStatus)
+    case storeFailed(OSStatus)
+    case biometricsUnavailable(String?)
+    case keyGenFailed(String?)
+    case decryptFailed
+
+    public var errorDescription: String? {
+        switch self {
+        case .keychainError(let s): "Keychain 错误 (OSStatus: \(s))"
+        case .storeFailed(let s): "Keychain 存储失败 (OSStatus: \(s))"
+        case .biometricsUnavailable(let m): m ?? "生物识别不可用"
+        case .keyGenFailed(let m): m ?? "密钥生成失败"
+        case .decryptFailed: "解密失败"
+        }
+    }
 }

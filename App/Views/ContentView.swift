@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var folderTreeVisible = false
     @State private var caseGraphMode = false
     @State private var filePickerOpen = false
+    @State private var settingsOpen = false
+    @State private var showWizard = false
 
     init(router: ModelRouter) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -72,6 +74,17 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.25), value: sidebarCollapsed)
         .animation(.easeInOut(duration: 0.25), value: browserVisible)
         .animation(.easeInOut(duration: 0.25), value: documentSplitVisible)
+        .sheet(isPresented: $settingsOpen) {
+            TabSettingsView(tabManager: tabManager, chatManager: chatManager, isPresented: $settingsOpen)
+        }
+        .sheet(isPresented: $showWizard) {
+            KnowledgeSetupWizard(isPresented: $showWizard)
+        }
+        .onAppear {
+            if UserDefaults.standard.string(forKey: "yunpat.vaultPath") == nil {
+                showWizard = true
+            }
+        }
         .fileImporter(isPresented: $filePickerOpen, allowedContentTypes: [.plainText, .pdf, .data], allowsMultipleSelection: true) { result in
             if case .success(let urls) = result {
                 for url in urls {
@@ -106,6 +119,13 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .help("显示/隐藏侧栏")
+
+            Button(action: { withAnimation { settingsOpen.toggle() } }) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 12))
+            }
+            .buttonStyle(.plain)
+            .help("标签设置")
 
             TabBar(tabManager: tabManager)
 

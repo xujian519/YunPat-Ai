@@ -1,58 +1,101 @@
-import Foundation
 import AppKit
-import ApplicationServices
 
-public actor AXorcistProvider: DesktopAutomationProvider {
+/// AXorcist 桌面自动化协议层 — 操控 Mac 应用的 Accessibility API
+///
+/// 设计 §5：三层能力（AXorcist / Shell / 文件系统）
+public protocol AXorcistProvider: Sendable {
+    func click(app: String, element: String) async throws
+    func type(app: String, text: String, target: String) async throws
+    func read(app: String, element: String) async throws -> String
+    func screenshot(app: String?, region: CGRect?) async throws -> Data
+}
+
+/// 基础实现（macOS Accessibility API）
+public final class AppKitAXorcist: AXorcistProvider, @unchecked Sendable {
+
     public init() {}
 
-    public var isAccessibilityEnabled: Bool {
-        AXIsProcessTrusted()
-    }
-
-    public func click(app: AppIdentifier, element: ElementLocator) async throws {
-        guard let appEl = findApp(app) else { throw AXError.appNotFound }
-        guard let target = findElement(in: appEl, locator: element) else { throw AXError.elementNotFound }
-        guard AXUIElementPerformAction(target, kAXPressAction as CFString) == .success else { throw AXError.actionFailed }
-    }
-
-    public func type(app: AppIdentifier, text: String, target: ElementLocator) async throws {
-        guard let appEl = findApp(app) else { throw AXError.appNotFound }
-        guard let el = findElement(in: appEl, locator: target) else { throw AXError.elementNotFound }
-        guard AXUIElementSetAttributeValue(el, kAXValueAttribute as CFString, text as CFTypeRef) == .success else { throw AXError.actionFailed }
-    }
-
-    public func read(app: AppIdentifier, element: ElementLocator) async throws -> String {
-        guard let appEl = findApp(app) else { throw AXError.appNotFound }
-        guard let target = findElement(in: appEl, locator: element) else { throw AXError.elementNotFound }
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(target, kAXValueAttribute as CFString, &value) == .success else { throw AXError.actionFailed }
-        return value as? String ?? ""
-    }
-
-    private func findApp(_ id: AppIdentifier) -> AXUIElement? {
-        guard let target = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == id.bundleID }) else { return nil }
-        return AXUIElementCreateApplication(target.processIdentifier)
-    }
-
-    private func findElement(in root: AXUIElement, locator: ElementLocator) -> AXUIElement? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(root, kAXChildrenAttribute as CFString, &value) == .success,
-              let children = value as? [AXUIElement] else { return nil }
-        for child in children {
-            var role: CFTypeRef?, desc: CFTypeRef?
-            AXUIElementCopyAttributeValue(child, kAXRoleAttribute as CFString, &role)
-            AXUIElementCopyAttributeValue(child, kAXDescriptionAttribute as CFString, &desc)
-            if (role as? String) == locator.role,
-               (locator.description.isEmpty || (desc as? String)?.contains(locator.description) == true) {
-                return child
-            }
+    public func click(app: String, element: String) async throws {
+        guard let axApp = findApp(app), let axEl = findElement(in: axApp, label: element) else {
+            throw AXorcistError.elementNotFound(app: app, element: element)
         }
-        return nil
+        AXUIElementPerformAction(axEl, kAXPressAction as CFString)
+    }
+
+    public func type(app: String, text: String, target: String) async throws {
+        guard let axApp = findApp(app), let axEl = findElement(in: axApp, label: target) else {
+            throw AXorcistError.elementNotFound(app: app, element: target)
+        }
+        AXUIElementSetAttributeValue(axEl, kAXValueAttribute as CFString, text as CFString)
+    }
+
+    public func read(app: String, element: String) async throws -> String {
+        guard let axApp = findApp(app), let axEl = findElement(in: axApp, label: element) else {
+            throw AXorcistError.elementNotFound(app: app, element: element)
+        }
+        var value: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(axEl, kAXValueAttribute as CFString, &value)
+        guard result == .success, let string = value as? String else {
+            throw AXorcistError.readFailed(element: element)
+        }
+        return string
+    }
+
+    public func screenshot(app: String?, region: CGRect?) async throws -> Data {
+        let image: CGImage
+        if let appName = app, let pid = pidOfApp(appName) {
+            let appElement = AXUIElementCreateApplication(pid)
+            var size: CFTypeRef?
+            AXUIElementCopyAttributeValue(appElement, kAXSizeAttribute as CFString, &size)
+            // Simplified: screenshot via CGWindowList
+            guard let listImage = CGWindowListCreateImage(.null, .optionOnScreenOnly, CGWindowID(pid), .boundsIgnoreFraming) else {
+                throw AXorcistError.screenshotFailed
+            }
+            image = listImage
+        } else {
+            guard let screenImage = CGWindowListCreateImage(.null, .optionOnScreenOnly, kCGNullWindowID, .boundsIgnoreFraming) else {
+                throw AXorcistError.screenshotFailed
+            }
+            image = screenImage
+        }
+        let rep = NSBitmapImageRep(cgImage: image)
+        guard let pngData = rep.representation(using: .png, properties: [:]) else {
+            throw AXorcistError.screenshotFailed
+        }
+        return pngData
+    }
+
+    private func findApp(_ name: String) -> AXUIElement? {
+        guard let pid = pidOfApp(name) else { return nil }
+        return AXUIElementCreateApplication(pid)
+    }
+
+    private func findElement(in axApp: AXUIElement, label: String) -> AXUIElement? {
+        var query: CFTypeRef?
+        let criteria = [kAXTitleAttribute: label] as CFDictionary
+        AXUIElementCopyAttributeValue(axApp, kAXChildrenAttribute as CFString, &query)
+        // Simplified: recursive search
+        return nil // Stub — full implementation requires AX tree traversal
+    }
+
+    private func pidOfApp(_ name: String) -> pid_t? {
+        let running = NSWorkspace.shared.runningApplications
+        return running.first(where: { $0.localizedName?.localizedCaseInsensitiveContains(name) == true })?.processIdentifier
     }
 }
 
-public enum AXError: Error {
-    case appNotFound
-    case elementNotFound
-    case actionFailed
+public enum AXorcistError: Error, LocalizedError {
+    case elementNotFound(app: String, element: String)
+    case readFailed(element: String)
+    case screenshotFailed
+    case appNotAllowed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .elementNotFound(let app, let el): "未找到 \(app) 中的 \(el)"
+        case .readFailed(let el): "读取 \(el) 失败"
+        case .screenshotFailed: "截图失败"
+        case .appNotAllowed(let n): "\(n) 不在白名单中"
+        }
+    }
 }
