@@ -21,7 +21,7 @@ final class CostTrackerTests: XCTestCase {
 
     func test_nilUsage_ignored_returnsZero() async {
         let tracker: CostTracker = CostTracker(maxBudgetTokens: 10_000)
-        let delta: Int = await tracker.record(usage: nil, model: "test")
+        let delta: Double = await tracker.record(usage: nil, model: "test")
         XCTAssertEqual(delta, 0)
         let snap: CostSnapshot = await tracker.snapshot
         XCTAssertTrue(snap.isZero)

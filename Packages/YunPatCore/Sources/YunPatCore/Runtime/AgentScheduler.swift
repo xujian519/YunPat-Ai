@@ -119,9 +119,8 @@ public final class MockToolDispatcher: ToolDispatcher, @unchecked Sendable {
     public func dispatch(name: String, input: [String: String], ctx: ToolContext) async -> ToolHandlerResult {
         lock.withLock { _dispatchLog.append((name, input)) }
         if let handler = preloaded[name] {
-            // 注意: handler 仍然接收 [String: Any]，此处桥接
-            let anyInput: [String: Any] = input
-            return await handler(name, anyInput, ctx)
+            let jsonInput: [String: JSONValue] = input.mapValues { .from($0) }
+            return await handler(name, jsonInput, ctx)
         }
         return .handled("[mock] tool '\(name)' executed")
     }

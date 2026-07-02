@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - AuthorityLevel
 
-/// 来源权威等级
+/// 来源权威等级 — primary / secondary / tertiary，决定检索结果的采信顺序
 ///
 /// 法律知识检索中，不同来源的公信力决定结果的采信顺序。
 /// 例如：法律条文 > 司法解释 > 学术论文。

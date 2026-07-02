@@ -1,9 +1,7 @@
 import Foundation
 import YunPatNetworking
 
-/// 轻量会话记忆 —— 跟踪当前标签页的对话历史。
-/// 与 MemoryEngine 的五层记忆互补：MemoryEngine 管理案件级长期知识，
-/// SessionMemory 管理 UI 层的即时对话上下文。
+/// 轻量会话记忆 — 跟踪当前标签页的对话历史，与 MemoryEngine 的五层记忆互补
 public struct SessionMemory: Sendable {
     public private(set) var messages: [Message] = []
     public let tabId: UUID

@@ -1,6 +1,16 @@
 import Foundation
 import YunPatNetworking
 
+/// 专利五步流程引擎 — 封装 PatentToolLoop 实现专利分析全流程
+///
+/// 步骤：
+/// 1. 从 UserRequest 提取结构化事实（FactExtractor）
+/// 2. 检索适用法规/判例（RuleEngine）
+/// 3. 构建策略（LLM 生成 plan）
+/// 4. 执行策略（委托 PatentToolLoop）
+/// 5. 评估结果 / 迭代修订
+///
+/// 支持三路并行分析（新颖性 / 创造性 / 侵权判定）。
 public actor PatentLoopEngine: LoopEngine {
     public var state: LoopState = .idle
     private let modelRouter: ModelRouter
@@ -47,7 +57,15 @@ public actor PatentLoopEngine: LoopEngine {
         self.subAgentEngine = .shared
     }
 
-    /// 五步专利流程 — 基于 PatentToolLoop + PlanMode
+    /// 执行五步专利分析流程
+    ///
+    /// 流程：提取事实 → 检索规则 → 确认规则（Guided 模式）→ 迭代执行 → 返回结果
+    /// - Parameters:
+    ///   - request: 用户请求
+    ///   - flow: 对话模式（guided 模式下会暂停等待规则确认）
+    ///   - model: 指定模型（nil 时使用 loopModel）
+    ///   - history: 历史消息（当前未使用）
+    ///   - onStreamChunk: 流式输出回调（当前未使用）
     public func run(
         request: UserRequest, flow: AgentFlow, model: String? = nil,
         history: [Message] = [],
@@ -243,7 +261,14 @@ public actor PatentLoopEngine: LoopEngine {
         return LoopResult(exit: exit)
     }
 
-    /// 专利三路并行分析: 新颖性 / 创造性 / 侵权判定
+    /// 专利三路并行分析：新颖性 / 创造性 / 侵权判定
+    ///
+    /// 通过 SubAgentEngine 同时启动三个子任务并行分析，
+    /// 等待全部完成（超时 300s）后合并为汇总报告。
+    /// - Parameters:
+    ///   - request: 包含技术方案的请求
+    ///   - provider: 模型提供商
+    /// - Returns: 三路分析汇总结果
     public func runParallelAnalysis(
         request: UserRequest,
         provider: ModelProvider = .deepseek

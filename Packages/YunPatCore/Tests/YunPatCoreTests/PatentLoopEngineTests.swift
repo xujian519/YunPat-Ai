@@ -45,7 +45,7 @@ final class PatentLoopEngineTests: XCTestCase {
         let mock = TestMockBackend(mockResponse: "分析完成：该机构具备创造性。")
         await router.register(mock)
         let engine = PatentLoopEngine(
-            modelRouter: router, wikiAdapter: adapter, provider: .openai, config: LoopConfig(maxRevisionCycles: 1))
+            modelRouter: router, wikiAdapter: adapter, provider: .openai, config: RuntimeConfig(maxIterations: 1))
         let result: LoopResult = try await engine.run(request: UserRequest(content: "分析螺旋传动机构的创造性"), flow: .fullAgent)
         switch result {
         case .completed(let text): XCTAssertTrue(text.contains("创造"))

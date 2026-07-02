@@ -1,17 +1,20 @@
 import Foundation
 
+/// 代理执行流程模式 — 控制用户干预程度（copilot / guided / fullAgent）
 public enum AgentFlow: Sendable {
     case copilot
     case guided
     case fullAgent
 }
 
+/// 计划模式 — 控制专利流程中的交互策略（auto / interactive / readOnly）
 public enum PlanMode: Sendable {
     case auto
     case interactive
     case readOnly
 }
 
+/// 循环引擎状态 — idle / running / waitingApproval / error / conflictPause
 public enum LoopState: Sendable {
     case idle
     case running(step: String)
@@ -30,6 +33,7 @@ public enum LoopState: Sendable {
     }
 }
 
+/// 审批请求 — 等待用户确认的上下文，包含摘要、详细说明和选项列表
 public struct ApprovalRequest: Sendable {
     public let id: UUID
     public let summary: String
@@ -43,6 +47,7 @@ public struct ApprovalRequest: Sendable {
     }
 }
 
+/// 冲突解决请求 — AI 与用户同时编辑同一文档时暂停并提示用户
 public struct ConflictResolutionRequest: Sendable {
     public let document: String
     public let message: String
@@ -52,11 +57,13 @@ public struct ConflictResolutionRequest: Sendable {
     }
 }
 
+/// 循环配置 — 最大修订次数等基础参数
 public struct LoopConfig: Sendable {
     public let maxRevisionCycles: Int
     public init(maxRevisionCycles: Int = 3) { self.maxRevisionCycles = maxRevisionCycles }
 }
 
+/// 循环执行结果 — completed / needsClarification / cancelled 等终结状态
 public enum LoopResult: Sendable {
     case completed(String)
     case needsClarification([String])
@@ -65,6 +72,7 @@ public enum LoopResult: Sendable {
     case exceededRevisionLimit([Issue])
 }
 
+/// 问题描述 — 含警告/错误的描述信息及严重级别
 public struct Issue: Sendable {
     public let severity: IssueSeverity
     public let description: String
@@ -74,11 +82,13 @@ public struct Issue: Sendable {
     }
 }
 
+/// 问题严重级别 — warning 或 error
 public enum IssueSeverity: Sendable {
     case warning
     case error
 }
 
+/// 执行计划 — 由策略描述和步骤列表组成
 public struct ExecutionPlan: Sendable {
     public let strategy: String
     public let steps: [PlanStep]
@@ -88,6 +98,7 @@ public struct ExecutionPlan: Sendable {
     }
 }
 
+/// 计划步骤 — 执行计划中的一个步骤，含名称、描述和绑定规则
 public struct PlanStep: Sendable {
     public let name: String
     public let description: String
@@ -99,6 +110,7 @@ public struct PlanStep: Sendable {
     }
 }
 
+/// 步骤执行结果 — 单步的名称、输出和成功状态
 public struct StepResult: Sendable {
     public let stepName: String
     public let output: String
@@ -110,6 +122,7 @@ public struct StepResult: Sendable {
     }
 }
 
+/// 执行结果 — 包含步骤结果列表和产物路径列表
 public struct ExecutionResult: Sendable {
     public let stepResults: [StepResult]
     public let artifacts: [String]
@@ -119,6 +132,7 @@ public struct ExecutionResult: Sendable {
     }
 }
 
+/// 审查结果 — 包含裁定、问题列表、证据和 PatentRubric 评分
 public struct ReviewResult: Sendable {
     public let verdict: Bool
     public let issues: [Issue]

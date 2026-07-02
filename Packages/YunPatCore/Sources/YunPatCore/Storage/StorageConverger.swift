@@ -44,12 +44,14 @@ public struct StorageConverger: Sendable {
     }
 }
 
-public enum StoragePosture: Sendable {
+  /// 存储姿态 — 升迁（migrate）或降级（degrade）
+  public enum StoragePosture: Sendable {
     case plaintext
     case encryptedRecommended
 }
 
-public struct DatabaseConfig: Sendable {
+  /// 数据库配置 — 包含标识符和文件路径
+  public struct DatabaseConfig: Sendable {
     public let name: String
     public let displayName: String
     public let path: String

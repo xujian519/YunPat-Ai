@@ -1,6 +1,6 @@
 import Foundation
 
-/// 语义检索服务 — 混合 BM25 + 向量（通过 BGE-M3 API）
+/// 语义检索服务 — 混合 BM25 + 向量（BGE-M3），不可用时降级为关键词匹配
 ///
 /// 向量检索通过本地 MCP Server `bge-embeddings` 提供。
 /// 不可用时降级为简单关键词匹配。

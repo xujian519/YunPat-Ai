@@ -1,5 +1,6 @@
 import Foundation
 
+/// 技能管理器 — 注册、匹配和生命周期管理
 public actor SkillManager {
     private var skills: [SkillContent] = []
 

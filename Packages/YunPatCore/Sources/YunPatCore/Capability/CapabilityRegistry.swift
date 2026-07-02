@@ -1,17 +1,21 @@
 import Foundation
 
+/// 能力注册表 — 管理所有 Capability 的注册、查询和工具 usage guide 加载
 public actor CapabilityRegistry {
     private var capabilities: [CapabilityDefinition] = []
     public init() {}
+    /// 注册一个能力定义，添加到能力列表
     public func register(capability: CapabilityDefinition) {
         capabilities.append(capability)
     }
+    /// 列出所有已注册的能力定义
     public func listCapabilities() -> [CapabilityDefinition] {
         capabilities
     }
 }
 
 extension CapabilityRegistry {
+    /// 注册全部内置能力（core.chat, desktop.file, desktop.shell, patent.search 等）
     public func registerBuiltinCapabilities() {
         register(
             capability: CapabilityDefinition(

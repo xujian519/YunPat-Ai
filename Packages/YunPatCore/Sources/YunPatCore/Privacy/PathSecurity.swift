@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - PathSecurity
 
-/// 路径安全工具 — 对齐 Osaurus resolvePath + validatePath 设计（Plugin.swift:30-38）
+/// 路径安全工具 — 提供 resolvePath / validatePath / safeResolve 三步路径防护
 ///
 /// 提供两类防护：
 /// 1. `resolvePath` — 相对路径 → 工作目录下的绝对路径

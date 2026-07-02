@@ -46,7 +46,7 @@ final class PathSecurityTests: XCTestCase {
 
     func testValidateSymlinkInPath() {
         let linkPath: String = "\(base)/sub/../sym/../secret.txt"
-        let resolved: NSString = (linkPath as NSString).standardizingPath
+        let resolved: String = (linkPath as NSString).standardizingPath
         XCTAssertTrue(resolved.hasPrefix(base))
     }
 

@@ -1,5 +1,6 @@
 import Foundation
 
+/// 禁用词规则 — 正则匹配、原因、严重级别和替换建议
 public struct TabooRule: Sendable {
     public let pattern: String
     public let reason: String
@@ -19,18 +20,21 @@ public struct TabooRule: Sendable {
     }
 }
 
+/// 禁用词严重级别 — error / warning / info
 public enum TabooSeverity: String, Sendable {
     case error
     case warning
     case info
 }
 
+/// 禁用词检测范围 — claims / description / all
 public enum TabooScope: String, Sendable {
     case claims
     case description
     case all
 }
 
+/// 禁用词匹配结果 — 匹配的规则、行号和原文
 public struct TabooMatch: Sendable {
     public let rule: TabooRule
     public let line: Int

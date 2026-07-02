@@ -55,7 +55,7 @@ public struct KgReasoningStrategy: ReasoningStrategy {
     public let name: String = "kg_reasoning"
 
     public func execute(context: ReasoningContext) async throws -> ReasoningOutput {
-        let chains: [ReasoningChain] = context.blackboard.reasoningChains
+        let chains: [ReasoningChain] = await context.blackboard.reasoningChains
         let summary = chains.map { "\($0.from) → \($0.toNode)" }.joined(separator: "; ")
         return ReasoningOutput(result: "KG推理: \(summary)", metadata: ["chains": "\(chains.count)"])
     }

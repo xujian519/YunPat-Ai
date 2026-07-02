@@ -1,5 +1,9 @@
 import Foundation
 
+/// 规则检索引擎 — 六步检索管道：概念索引 → 语义兜底 → 模块广度 → 冲突解决
+///
+/// 输入：`StructuredFacts`（技术方案结构化事实）
+/// 输出：`ApplicableRules`（适用于本案的法条/判例/指南规则）
 public actor RuleEngine {
     private let adapter: WikiAdapter
     private let vectorSearch: VectorSearch
@@ -64,6 +68,7 @@ public actor RuleEngine {
             candidates: resolved, constraintSummary: resolved.prefix(3).map(\.title).joined(separator: "、"))
     }
 
+    /// 解决规则冲突 — 按 sourceLevel 升序（效力高优先）、同级按 score 降序
     public func resolveConflicts(_ candidates: [RuleCandidate]) -> [RuleCandidate] {
         candidates.sorted { $0.sourceLevel == $1.sourceLevel ? $0.score > $1.score : $0.sourceLevel < $1.sourceLevel }
     }

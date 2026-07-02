@@ -1,8 +1,7 @@
 import Foundation
 
 // MARK: - Layer 1: WorkingMemory (iteration lifetime)
-/// Active reasoning state within a single loop iteration.
-/// Never persisted — cleared between iterations.
+/// Layer 1: 工作记忆 — 单次循环迭代内的活跃推理状态，从不持久化
 public struct WorkingMemory: Sendable, Codable {
     public var currentGoal: String
     public var activeHypotheses: [String]
@@ -23,6 +22,7 @@ public struct WorkingMemory: Sendable, Codable {
 }
 
 // MARK: - Layer 2: SessionFact (session lifetime)
+/// Layer 2: 会话事实 — 当前 session 内短期事实，含分类和时间戳
 public struct SessionFact: Sendable, Codable {
     public let id: UUID
     public let fact: String
@@ -37,6 +37,7 @@ public struct SessionFact: Sendable, Codable {
     }
 }
 
+/// 事实分类 — technicalFeature / legalRule / decision / strategy / other
 public enum FactCategory: String, Sendable, Codable {
     case technicalFeature
     case legalRule
@@ -46,7 +47,7 @@ public enum FactCategory: String, Sendable, Codable {
 }
 
 // MARK: - Layer 3: CaseContext (case lifetime)
-/// Per-patent-case context — persisted per caseId.
+/// Layer 3: 案件上下文 — 按 caseId 持久化的案件信息，案件结束后归档
 public struct CaseContext: Sendable, Codable {
     public let caseId: String
     public var applicationNumber: String?
@@ -75,8 +76,7 @@ public struct CaseContext: Sendable, Codable {
 }
 
 // MARK: - Layer 4: LongTermMemory (cross-case lifetime)
-/// Accumulated knowledge across cases — legal precedents,
-/// successful argument patterns, learned domain refinements.
+/// Layer 4: 长期记忆 — 跨案件累积的知识（法理先例、成功策略、陷阱教训）
 public struct LongTermMemory: Sendable, Codable {
     public var legalPrecedents: [String]
     public var successfulStrategies: [String]
@@ -102,6 +102,7 @@ public struct LongTermMemory: Sendable, Codable {
     }
 }
 
+/// 记忆条目 — LTM 中的基本单位，包含内容和显著性评分
 public struct MemoryItem: Sendable, Codable {
     public let id: UUID
     public let content: String
@@ -116,6 +117,7 @@ public struct MemoryItem: Sendable, Codable {
     }
 }
 
+/// 事件片段 — 记录一次推理或交互的有意义片段，含话题、实体和决策
 public struct Episode: Sendable, Codable {
     public let id: UUID
     public let topics: [String]
@@ -137,6 +139,7 @@ public struct Episode: Sendable, Codable {
     }
 }
 
+/// LTM 条目 — 带来源和显著性评分的长期知识片段
 public struct LTMItem: Sendable, Codable {
     public let id: UUID
     public let content: String
@@ -156,6 +159,7 @@ public struct LTMItem: Sendable, Codable {
     }
 }
 
+/// 固定事实 — 被多次确认的核心事实，显著性高不会被遗忘
 public struct PinnedFact: Sendable, Codable {
     public let id: UUID
     public let fact: String
@@ -175,6 +179,7 @@ public struct PinnedFact: Sendable, Codable {
     }
 }
 
+/// 工具依赖层级 — T0~T3 用于分档测试和 CI 调度
 public enum ToolDependencyTier: String, Codable, Sendable {
     case tier0
     case tier1
@@ -183,7 +188,7 @@ public enum ToolDependencyTier: String, Codable, Sendable {
 }
 
 // MARK: - Layer 5: GlobalMemory (user preferences lifetime)
-/// Cross-session user preferences — writing style, terminology, providers.
+/// Layer 5: 全局记忆 — 跨 session 持久化的用户偏好（写作风格、术语偏好、首选提供商）
 public struct GlobalMemory: Sendable, Codable {
     public var writingStyle: String
     public var terminologyPreferences: [String: String]

@@ -1,6 +1,6 @@
 import Foundation
 
-/// 用户查询意图分类
+/// 用户查询意图分类 — lawLookup / conceptExplain / caseAnalysis / comparison / ruleExplore / general
 public enum QueryIntent: String, Sendable, CaseIterable {
     /// 法条查找：查询具体专利法条文
     case lawLookup

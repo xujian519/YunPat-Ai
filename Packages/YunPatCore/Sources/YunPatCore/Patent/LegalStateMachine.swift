@@ -33,15 +33,14 @@ public enum TransitionResult: Sendable {
     case failure(String)
 }
 
-public final class LegalStateMachine: @unchecked Sendable {
+public actor LegalStateMachine {
     private var _state: LegalState = .idle
     private var _checkpoints: [Checkpoint] = []
     private var _history: [TransitionRecord] = []
-    private let lock = NSLock()
 
-    public var currentState: LegalState { lock.withLock { _state } }
-    public var checkpoints: [Checkpoint] { lock.withLock { _checkpoints } }
-    public var history: [TransitionRecord] { lock.withLock { _history } }
+    public var currentState: LegalState { _state }
+    public var checkpoints: [Checkpoint] { _checkpoints }
+    public var history: [TransitionRecord] { _history }
 
     private let validTransitions: [LegalState: [LegalState]] = [
         .idle: [.factFinding, .factAnalysis],
@@ -60,8 +59,6 @@ public final class LegalStateMachine: @unchecked Sendable {
     ]
 
     public func transition(to target: LegalState, reason: String = "") -> TransitionResult {
-        lock.lock()
-        defer { lock.unlock() }
         guard let allowed = validTransitions[_state], allowed.contains(target) else {
             return .failure("非法转移: \(_state) → \(target)")
         }
@@ -72,8 +69,6 @@ public final class LegalStateMachine: @unchecked Sendable {
     }
 
     public func rollback(to targetState: LegalState, reason: String) -> TransitionResult {
-        lock.lock()
-        defer { lock.unlock() }
         guard let index = _checkpoints.lastIndex(where: { $0.state == targetState }) else {
             return .failure("无检查点: \(targetState)")
         }
@@ -84,14 +79,12 @@ public final class LegalStateMachine: @unchecked Sendable {
     }
 
     public func complete() {
-        lock.withLock { _state = .completed }
+        _state = .completed
     }
 
     public func abandon(reason: String) {
-        lock.withLock {
-            _history.append(TransitionRecord(from: _state, to: .abandoned, reason: reason))
-            _state = .abandoned
-        }
+        _history.append(TransitionRecord(from: _state, to: .abandoned, reason: reason))
+        _state = .abandoned
     }
 }
 

@@ -74,6 +74,7 @@ public struct CapabilityManifest: Sendable {
     }
 }
 
+/// Manifest 条目 — 对应一个能力或技能
 public struct ManifestEntry: Sendable, Equatable {
     public let name: String
     public let displayName: String
@@ -96,6 +97,7 @@ public struct ManifestEntry: Sendable, Equatable {
     }
 }
 
+/// 能力类型 — 工具或技能
 public enum CapabilityKind: String, Sendable {
     case tool
     case skill

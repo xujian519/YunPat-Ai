@@ -57,7 +57,7 @@ public actor MemoryReadPath {
     }
 }
 
-/// 装配后的记忆块
+/// 装配后的记忆块 — 包含技术领域、发明点、关键引用和 LTM 补充
 public struct MemoryBlock: Sendable {
     public let technicalField: String?
     public let inventionPoints: [String]

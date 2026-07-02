@@ -9,7 +9,7 @@ final class EventBusTests: XCTestCase {
         let bus = EventBus()
         let exp = expectation(description: "Received")
 
-        let subId: EventSubscriptionID = await bus.subscribe { event in
+        let subId: UUID = await bus.subscribe { event in
             if case .taskStarted(let prompt) = event {
                 XCTAssertEqual(prompt, "test")
                 exp.fulfill()
@@ -42,7 +42,7 @@ final class EventBusTests: XCTestCase {
         let bus = EventBus()
         let counter = TestCounter()
 
-        let unsubId: EventSubscriptionID = await bus.subscribe { _ in await counter.increment() }
+        let unsubId: UUID = await bus.subscribe { _ in await counter.increment() }
         await bus.publish(.taskStarted(prompt: ""))
         var afterSub: Int = await counter.value
         XCTAssertEqual(afterSub, 1)
@@ -75,11 +75,11 @@ final class EventBusTests: XCTestCase {
         var subCount: Int = await bus.subscriberCount
         XCTAssertEqual(subCount, 0)
 
-        let id1: EventSubscriptionID = await bus.subscribe { _ in }
+        let id1: UUID = await bus.subscribe { _ in }
         subCount = await bus.subscriberCount
         XCTAssertEqual(subCount, 1)
 
-        let id2: EventSubscriptionID = await bus.subscribe { _ in }
+        let id2: UUID = await bus.subscribe { _ in }
         subCount = await bus.subscriberCount
         XCTAssertEqual(subCount, 2)
 

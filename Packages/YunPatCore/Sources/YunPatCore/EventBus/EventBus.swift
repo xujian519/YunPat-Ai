@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - AgentEvent
 
-/// Agent 运行时事件 — 供 EventBus 广播
+/// Agent 运行时事件枚举 — 工具执行/任务开始/完成/预算超限/错误等
 public enum AgentEvent: Sendable {
     case toolPreExecute(toolName: String, callId: String)
     case toolDenied(toolName: String, reason: String)
@@ -15,9 +15,8 @@ public enum AgentEvent: Sendable {
 
 // MARK: - PreExecutionDecision
 
-/// 工具执行前的拦截决策
+/// 工具执行前的拦截决策 — 在权限检查之后由 preExecutionGate 返回
 ///
-/// 在工具执行前（权限检查之后）由 `preExecutionGate` 返回。
 /// - `.allow` — 正常执行
 /// - `.deny(reason)` — 跳过执行，reason 作为工具结果喂回 model
 public enum PreExecutionDecision: Sendable {
@@ -42,6 +41,7 @@ public actor EventBus {
 
     public init() {}
 
+    /// 订阅事件，返回 subscription ID（可用于取消订阅）
     @discardableResult
     public func subscribe(_ handler: @Sendable @escaping (AgentEvent) async -> Void) -> UUID {
         let id: UUID = UUID()
@@ -49,19 +49,23 @@ public actor EventBus {
         return id
     }
 
+    /// 取消指定 ID 的订阅
     public func unsubscribe(_ id: UUID) {
         subscribers.removeValue(forKey: id)
     }
 
+    /// 取消所有订阅
     public func unsubscribeAll() {
         subscribers.removeAll()
     }
 
+    /// 发布事件通知所有订阅者
     public func publish(_ event: AgentEvent) async {
         for handler in subscribers.values {
             await handler(event)
         }
     }
 
+    /// 当前订阅者数量
     public var subscriberCount: Int { subscribers.count }
 }

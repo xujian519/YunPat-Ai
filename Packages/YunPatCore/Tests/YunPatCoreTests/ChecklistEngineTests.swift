@@ -5,7 +5,7 @@ import XCTest
 final class ChecklistEngineTests: XCTestCase {
     func testLoadDraftingConstraints() async {
         let engine: ChecklistEngine = ChecklistEngine()
-        let constraints: [CheckConstraint] = await engine.loadConstraints(for: "drafting")
+        let constraints: [RuleConstraint] = await engine.loadConstraints(for: "drafting")
         XCTAssertEqual(constraints.count, 6)
         XCTAssertEqual(constraints.first?.articleId, "A22.2")
     }

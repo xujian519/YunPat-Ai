@@ -1,10 +1,12 @@
 import Foundation
 import YunPatNetworking
 
-public enum PrivacyTypes {}  // namespace for privacy-related types
+/// 隐私相关类型的命名空间
+public enum PrivacyTypes {}
 
 // MARK: - Entity Kind
 
+/// 敏感实体类型枚举 — email / phone / idNumber / bankCard / unifiedSocialCreditCode 等
 public enum EntityKind: String, Sendable, Codable {
     case email
     case phone
@@ -16,6 +18,7 @@ public enum EntityKind: String, Sendable, Codable {
     case custom  // 自定义敏感词
 }
 
+/// 检测来源 — 正则匹配（regex）或自定义词表（customList）
 public enum DetectionSource: String, Sendable, Codable {
     case regex
     case customList
@@ -23,6 +26,7 @@ public enum DetectionSource: String, Sendable, Codable {
 
 // MARK: - Detection
 
+/// 敏感信息检测结果 — 实体类型、原文、占位符、匹配范围和检测来源
 public struct Detection: Sendable, Codable, Identifiable {
     public let id: UUID
     public let kind: EntityKind
@@ -46,6 +50,7 @@ public struct Detection: Sendable, Codable, Identifiable {
 
 // MARK: - Scrub Request / Result
 
+/// 脱敏请求 — 待脱敏文本、模型提供商和案件上下文
 public struct ScrubRequest: Sendable {
     public let text: String
     public let provider: ModelProvider
@@ -58,6 +63,7 @@ public struct ScrubRequest: Sendable {
     }
 }
 
+/// 脱敏结果 — 脱敏后文本、检测列表、占位符映射和 fail-closed 阻断标记
 public struct ScrubResult: Sendable {
     public let scrubbedText: String
     public let detections: [Detection]

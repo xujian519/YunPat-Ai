@@ -1,7 +1,7 @@
 import Foundation
 import SQLite3
 
-/// 结构化案件数据库 — SQLite 存储权利要求树、对比文件矩阵、审查意见逐条
+/// 结构化案件数据库 — 每案件独立 SQLite 存储权利要求树、对比文件矩阵、审查意见逐条
 ///
 /// 设计 §1 用户数据目录：~/.yunpat/memory/cases/{case-id}.sqlite
 /// 每案件独立 SQLite 文件，支持 SQLCipher 可选加密（通过 FileVault）
@@ -89,6 +89,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
 
     // MARK: - Claims Tree
 
+    /// 保存权利要求树到案件数据库（先删除再插入）
     public func saveClaimsTree(_ tree: ClaimsTree, caseId: String) async throws {
         guard let db = openDB(for: caseId) else { throw dbError(nil) }
         defer { sqlite3_close(db) }
@@ -113,6 +114,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
         }
     }
 
+    /// 加载案件的权利要求树
     public func loadClaimsTree(caseId: String) async -> ClaimsTree? {
         guard let db = openDB(for: caseId) else { return nil }
         defer { sqlite3_close(db) }
@@ -146,6 +148,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
 
     // MARK: - Comparison Matrix
 
+    /// 保存技术特征对比矩阵（先删除再插入）
     public func saveComparisonMatrix(_ matrix: ComparisonMatrix, caseId: String) async throws {
         guard let db = openDB(for: caseId) else { throw dbError(nil) }
         defer { sqlite3_close(db) }
@@ -170,6 +173,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
         }
     }
 
+    /// 加载技术特征对比矩阵
     public func loadComparisonMatrix(caseId: String) async -> ComparisonMatrix? {
         guard let db = openDB(for: caseId) else { return nil }
         defer { sqlite3_close(db) }
@@ -203,6 +207,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
 
     // MARK: - OA Points
 
+    /// 保存一条审查意见
     public func saveOAPoint(_ point: OAPoint, caseId: String) async throws {
         guard let db = openDB(for: caseId) else { throw dbError(nil) }
         defer { sqlite3_close(db) }
@@ -224,6 +229,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
         sqlite3_finalize(stmt)
     }
 
+    /// 加载案件的所有审查意见
     public func loadOAPoints(caseId: String) async -> [OAPoint] {
         guard let db = openDB(for: caseId) else { return [] }
         defer { sqlite3_close(db) }
@@ -291,6 +297,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
 
 // MARK: - Claims Tree
 
+/// 权利要求树 — 包含独立权利要求和从属权利要求
 public struct ClaimsTree: Sendable, Codable {
     public let caseId: String
     public var independentClaims: [ClaimNode]
@@ -302,6 +309,7 @@ public struct ClaimsTree: Sendable, Codable {
     }
 }
 
+/// 权利要求节点
 public struct ClaimNode: Sendable, Codable, Identifiable {
     public let id: UUID
     public let number: String
@@ -319,6 +327,7 @@ public struct ClaimNode: Sendable, Codable, Identifiable {
     }
 }
 
+/// 权利要求类别
 public enum ClaimCategory: String, Sendable, Codable {
     case independent
     case dependent
@@ -327,6 +336,7 @@ public enum ClaimCategory: String, Sendable, Codable {
 
 // MARK: - Comparison Matrix
 
+/// 技术特征对比矩阵 — 将权利要求特征映射到对比文件
 public struct ComparisonMatrix: Sendable, Codable {
     public let caseId: String
     public let featureRows: [FeatureRow]
@@ -338,6 +348,7 @@ public struct ComparisonMatrix: Sendable, Codable {
     }
 }
 
+/// 对比矩阵的一行 — 单个技术特征及其在权利要求和对比文件中的映射
 public struct FeatureRow: Sendable, Codable {
     public let feature: String
     public let claimMapping: String
@@ -351,6 +362,7 @@ public struct FeatureRow: Sendable, Codable {
 
 // MARK: - OA Points
 
+/// 审查意见（OA）逐条 — 审查员论点及代理人答复策略
 public struct OAPoint: Sendable, Codable, Identifiable {
     public let id: UUID
     public let objectionType: OAObjectionType
@@ -371,6 +383,7 @@ public struct OAPoint: Sendable, Codable, Identifiable {
     }
 }
 
+/// 审查意见反对类型
 public enum OAObjectionType: String, Sendable, Codable {
     case novelty
     case inventiveStep

@@ -65,6 +65,18 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
     /// 是否启用详细日志
     public var verboseLogging: Bool
 
+    // ── 存储路径（可选，默认 nil 表示使用各模块内置默认值） ──
+    /// 知识库 vault 目录
+    public var vaultPath: URL?
+    /// 本地 embedding 模型路径
+    public var embeddingModelPath: URL?
+    /// 语义索引存储路径
+    public var semanticIndexPath: URL?
+
+    // ── 检索模式 ──
+    /// 检索模式："disabled" / "keyword" / "semantic"
+    public var retrievalMode: String
+
     // MARK: - Init
 
     public init(
@@ -84,7 +96,11 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
         defaultModel: String = "deepseek-chat",
         planningModel: String = "claude-opus",
         fastModel: String = "deepseek-chat",
-        verboseLogging: Bool = false
+        verboseLogging: Bool = false,
+        vaultPath: URL? = nil,
+        embeddingModelPath: URL? = nil,
+        semanticIndexPath: URL? = nil,
+        retrievalMode: String = "disabled"
     ) {
         self.maxIterations = maxIterations
         self.eventInterval = eventInterval
@@ -103,6 +119,10 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
         self.planningModel = planningModel
         self.fastModel = fastModel
         self.verboseLogging = verboseLogging
+        self.vaultPath = vaultPath
+        self.embeddingModelPath = embeddingModelPath
+        self.semanticIndexPath = semanticIndexPath
+        self.retrievalMode = retrievalMode
     }
 }
 
@@ -117,19 +137,21 @@ public struct RuntimeConfigBuilder: Sendable {
 
     public init() {}
 
-    // Agent 循环
+    /// 设置最大迭代次数
     @discardableResult
     public func maxIterations(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.maxIterations = value
         return copy
     }
+    /// 设置事件检查间隔（迭代次数）
     @discardableResult
     public func eventInterval(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.eventInterval = value
         return copy
     }
+    /// 设置协作调度预算
     @discardableResult
     public func coopBudget(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -137,19 +159,21 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // 子代理
+    /// 设置最大并发子代理数
     @discardableResult
     public func maxSubAgents(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.maxSubAgents = value
         return copy
     }
+    /// 设置子代理超时（秒）
     @discardableResult
     public func subAgentTimeout(_ value: TimeInterval) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.subAgentTimeout = value
         return copy
     }
+    /// 设置子代理失败重试次数
     @discardableResult
     public func subAgentRetry(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -157,19 +181,21 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // 工具执行
+    /// 设置单个工具调用超时（秒）
     @discardableResult
     public func toolTimeout(_ value: TimeInterval) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.toolTimeout = value
         return copy
     }
+    /// 设置工具调用失败最大重试次数
     @discardableResult
     public func maxToolRetries(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.maxToolRetries = value
         return copy
     }
+    /// 设置连续只读操作阈值（超过触发 nudge）
     @discardableResult
     public func readOnlyStreakLimit(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -177,13 +203,14 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // Stuck Guard
+    /// 设置编辑失败 nudge 阈值
     @discardableResult
     public func stuckNudgeThreshold(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.stuckNudgeThreshold = value
         return copy
     }
+    /// 设置编辑失败放弃阈值
     @discardableResult
     public func stuckGiveUpThreshold(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -191,7 +218,7 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // Context
+    /// 设置压缩触发阈值（token 数）
     @discardableResult
     public func compactTokenThreshold(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -199,7 +226,7 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // 成本预算
+    /// 设置单次任务最大 token 预算（0 = 不限制）
     @discardableResult
     public func maxBudgetTokens(_ value: Int) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -207,19 +234,21 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // 模型路由
+    /// 设置默认模型
     @discardableResult
     public func defaultModel(_ value: String) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.defaultModel = value
         return copy
     }
+    /// 设置规划模型（复杂推理）
     @discardableResult
     public func planningModel(_ value: String) -> Self {
         var copy: RuntimeConfigBuilder = self
         copy.config.planningModel = value
         return copy
     }
+    /// 设置快速模型（简单分类/判断）
     @discardableResult
     public func fastModel(_ value: String) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -227,7 +256,7 @@ public struct RuntimeConfigBuilder: Sendable {
         return copy
     }
 
-    // 调试
+    /// 设置是否启用详细日志
     @discardableResult
     public func verboseLogging(_ value: Bool) -> Self {
         var copy: RuntimeConfigBuilder = self
@@ -254,6 +283,27 @@ extension RuntimeConfig {
         guard let data = try? Data(contentsOf: path),
             let config = try? JSONDecoder().decode(RuntimeConfig.self, from: data)
         else { return RuntimeConfig() }
+        return config
+    }
+
+    /// 从 UserDefaults 加载运行时配置（覆盖文件中加载的值）
+    public static func loadFromUserDefaults() -> RuntimeConfig {
+        let defaults: UserDefaults = UserDefaults.standard
+        var config = RuntimeConfig.load()
+
+        if let vaultPathStr = defaults.string(forKey: "yunpat.vaultPath") {
+            config.vaultPath = URL(fileURLWithPath: vaultPathStr)
+        }
+        if let embeddingPathStr = defaults.string(forKey: "yunpat.embeddingModelPath") {
+            config.embeddingModelPath = URL(fileURLWithPath: embeddingPathStr)
+        }
+        if let indexPathStr = defaults.string(forKey: "yunpat.semanticIndexPath") {
+            config.semanticIndexPath = URL(fileURLWithPath: indexPathStr)
+        }
+        if let mode = defaults.string(forKey: "yunpat.retrievalMode") {
+            config.retrievalMode = mode
+        }
+
         return config
     }
 

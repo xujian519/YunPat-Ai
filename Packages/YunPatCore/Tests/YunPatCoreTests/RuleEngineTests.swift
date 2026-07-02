@@ -44,7 +44,7 @@ struct RuleEngineTests {
             inventionPoints: ["创造性判断"]
         )
 
-        let retrievedRules: RuleResult = try await engine.retrieveRules(for: facts)
+        let retrievedRules: ApplicableRules = try await engine.retrieveRules(for: facts)
 
         #expect(!retrievedRules.candidates.isEmpty)
         #expect(retrievedRules.candidates.allSatisfy { !$0.title.isEmpty })
@@ -75,7 +75,7 @@ struct RuleEngineTests {
             .write(to: wikiDir.appendingPathComponent("宽泛规则.md"), atomically: true, encoding: .utf8)
 
         let facts2 = StructuredFacts(technicalField: "无关", problem: "", inventionPoints: [])
-        let fallbackRules: RuleResult = try await engine.retrieveRules(for: facts2)
+        let fallbackRules: ApplicableRules = try await engine.retrieveRules(for: facts2)
 
         #expect(!fallbackRules.candidates.isEmpty)
         #expect(fallbackRules.candidates.first?.title == "宽泛规则")
@@ -90,7 +90,7 @@ struct RuleEngineTests {
 
         // Empty vault — no indexes, no concept index
         let facts3 = StructuredFacts(technicalField: "机械", problem: "创造性", inventionPoints: ["创造性"])
-        let emptyRules: RuleResult = try await engine.retrieveRules(for: facts3)
+        let emptyRules: ApplicableRules = try await engine.retrieveRules(for: facts3)
 
         #expect(emptyRules.candidates.isEmpty)
     }

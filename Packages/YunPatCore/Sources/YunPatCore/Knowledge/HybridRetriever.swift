@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Search Source
 
-/// 检索来源 — 标识结果由哪个检索通道产生
+/// 检索来源枚举 — fts / vector / graph / hybrid 四种检索通道
 public enum RetrievalSource: String, Sendable, CaseIterable {
     case fts
     case vector

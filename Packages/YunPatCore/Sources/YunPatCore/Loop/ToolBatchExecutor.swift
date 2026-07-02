@@ -1,16 +1,17 @@
 import Foundation
 
-/// 并行工具批处理器
-///
-/// 两阶段设计：
-/// 1. 权限 gate 按模型顺序串行 resolve
-/// 2. 批准集 TaskGroup 并行执行，结果按模型顺序还原
-///
-/// 规则：
-/// - intercept（complete/clarify）强制串行
-/// - intra-batch dedup：读类重复预先判定
-/// - state-before-cancel：结果先入 taskState 再处理 cancel
 // swiftlint:disable function_parameter_count
+
+// 并行工具批处理器 — 权限串行审批 + TaskGroup 并行执行，支持 intercept 和 dedup
+//
+// 两阶段设计：
+// 1. 权限 gate 按模型顺序串行 resolve
+// 2. 批准集 TaskGroup 并行执行，结果按模型顺序还原
+//
+// 规则：
+// - intercept（complete/clarify）强制串行
+// - intra-batch dedup：读类重复预先判定
+// - state-before-cancel：结果先入 taskState 再处理 cancel
 
 public struct ToolBatchExecutor: Sendable {
 
@@ -182,6 +183,7 @@ public struct ToolBatchExecutor: Sendable {
 
 // MARK: - InterceptAction
 
+/// 拦截动作 — 工具执行后的流程控制决策（continue / endRun / skipSiblings）
 public enum InterceptAction: Sendable {
     case `continue`
     case endRun

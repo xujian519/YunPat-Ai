@@ -1,10 +1,12 @@
 import Foundation
 
+/// 追踪标识符 — 一次请求的唯一 Trace ID
 public struct TraceID: Sendable, Hashable {
     public let id: UUID
     public init() { id = UUID() }
 }
 
+/// 能力调用追踪 — 工具名、延迟和错误
 public struct CapabilityTrace: Sendable, Codable {
     public let capability: String
     public let tool: String
@@ -18,6 +20,7 @@ public struct CapabilityTrace: Sendable, Codable {
     }
 }
 
+/// Prompt 追踪 — 系统提示 hash、成本、延迟和模型
 public struct PromptTrace: Sendable, Codable {
     public let systemPromptHash: String
     public let cost: Double
@@ -31,6 +34,7 @@ public struct PromptTrace: Sendable, Codable {
     }
 }
 
+/// 追踪汇总 — 总成本、总延迟、工具调用数和 LLM 调用数
 public struct TraceSummary: Sendable, Codable {
     public let totalCost: Double
     public let totalLatency: TimeInterval

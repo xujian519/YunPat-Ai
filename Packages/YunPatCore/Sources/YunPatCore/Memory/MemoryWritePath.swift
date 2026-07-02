@@ -82,6 +82,7 @@ public actor MemoryWritePath {
 
 // MARK: - Types
 
+/// 待处理信号 — 缓冲一次对话轮次的输入输出
 public struct PendingSignal: Sendable {
     public let id: UUID
     public let user: String
@@ -97,6 +98,7 @@ public struct PendingSignal: Sendable {
     }
 }
 
+/// 蒸馏结果 — 包含事件摘要和提取的事实列表
 public struct DistillResult: Sendable {
     public let episode: EpisodeDigest
     public let facts: [String]
@@ -106,6 +108,7 @@ public struct DistillResult: Sendable {
     }
 }
 
+/// 事件摘要 — 包含摘要、话题、实体和决策要点
 public struct EpisodeDigest: Sendable {
     public let summary: String
     public let topics: [String]

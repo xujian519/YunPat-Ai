@@ -1,6 +1,7 @@
 import Foundation
 
-public final class SkillParser {
+/// 技能文件解析器 — 解析 YAML front matter + Markdown 正文格式的技能文件
+public struct SkillParser {
     public func parse(_ markdown: String) -> SkillContent? {
         let parts = markdown.components(separatedBy: "---\n")
         guard parts.count >= 3 else { return nil }

@@ -25,6 +25,10 @@ author: YunPat-AI Team
 | ---------- | ------ | -------- | ------- | ------------------------------------------------ |
 | `command`  | string | yes      | —       | The shell command to execute. Shown up to 100 characters in approval previews. |
 
+> ⚠️ 以下参数尚未实现（计划中）：
+> - `cwd` (string) — 工作目录，默认 projectFolder 或当前目录
+> - `timeout` (number, 默认 `30`) — 超时秒数
+
 ## Return Value
 
 Success (`ok: true`):

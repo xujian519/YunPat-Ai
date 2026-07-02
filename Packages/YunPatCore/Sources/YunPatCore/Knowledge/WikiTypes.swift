@@ -1,5 +1,6 @@
 import Foundation
 
+/// 知识库模块枚举 — 对应 Wiki 知识库中的不同领域模块
 public enum WikiModule: String, CaseIterable {
     case patentPractice = "专利实务"
     case examinationGuide = "审查指南"
@@ -10,6 +11,7 @@ public enum WikiModule: String, CaseIterable {
     case books = "书籍"
 }
 
+/// 从用户请求中提取的结构化事实 — 包含技术领域、问题、发明点、缺失信息等
 public struct StructuredFacts: Sendable {
     public let technicalField: String
     public let problem: String
@@ -30,6 +32,7 @@ public struct StructuredFacts: Sendable {
     }
 }
 
+/// 规则来源类型 — 法律条文 / 审查指南 / 判例 / 判决 / 学术 / 自定义
 public enum RuleSource: Sendable {
     case statute(String)
     case guideline(String)
@@ -38,6 +41,7 @@ public enum RuleSource: Sendable {
     case doctrine
 }
 
+/// 证据链接 — 指向规则的原始来源及其摘录
 public struct EvidenceLink: Sendable {
     public let source: RuleSource
     public let wikilink: String
@@ -49,12 +53,14 @@ public struct EvidenceLink: Sendable {
     }
 }
 
+/// 规则冲突性质 — 覆盖/矛盾/分歧
 public enum ConflictNature: String, Sendable {
     case override
     case contradiction
     case divergence
 }
 
+/// 规则冲突描述 — 含冲突性质和解决方案
 public struct RuleConflict: Sendable {
     public let description: String
     public let nature: ConflictNature
@@ -66,6 +72,7 @@ public struct RuleConflict: Sendable {
     }
 }
 
+/// 规则候选 — 经检索匹配的法规/判例/指南条目
 public struct RuleCandidate: Sendable {
     public let wikilink: String
     public let title: String
@@ -92,6 +99,7 @@ public struct RuleCandidate: Sendable {
     }
 }
 
+/// 适用规则集合 — 包含候选规则、冲突和约束摘要
 public struct ApplicableRules: Sendable {
     public let candidates: [RuleCandidate]
     public let conflicts: [RuleConflict]
@@ -120,6 +128,7 @@ public struct ApplicableRules: Sendable {
     }
 }
 
+/// 检索结果条目
 public struct SearchResultItem: Sendable {
     public let title: String
     public let score: Double
@@ -131,6 +140,7 @@ public struct SearchResultItem: Sendable {
     }
 }
 
+/// 规则检索结果 — 包含所有候选规则
 public struct RuleRetrievalResult: Sendable {
     public let candidates: [RuleCandidate]
     public init(candidates: [RuleCandidate] = []) {
@@ -138,6 +148,7 @@ public struct RuleRetrievalResult: Sendable {
     }
 }
 
+/// 卡片变更类型 — 用于观察者通知
 public enum CardChange: Sendable {
     case created(String)
     case modified(String)

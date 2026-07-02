@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Enhanced Hook Events
 
-/// Hook 事件类型 — 扩展自 HookPoint，增加 block/allow 判断
+/// Hook 事件类型枚举 — preToolUse / postToolUse / taskStart / taskComplete / buildFailure
 public enum HookEvent: String, CaseIterable, Codable, Sendable {
     case preToolUse  // 工具执行前 — 可 block
     case postToolUse  // 工具执行后 — 可 transform 输出
@@ -11,18 +11,20 @@ public enum HookEvent: String, CaseIterable, Codable, Sendable {
     case buildFailure  // 构建失败
 }
 
-/// Hook 决策: 允许或阻止工具调用
+/// Hook 决策 — 允许（allow）或阻止（block）工具调用
 public enum HookDecision: String, Sendable {
     case allow  // 允许执行
     case block  // 阻止，返回 message 作为替代结果
 }
 
-/// Hook 执行错误
+/// Hook 执行错误 — exitCode 等运行时错误
 public enum HookError: Error, Sendable {
     case exitCode(Int32)
 }
 
 // MARK: - Hook Rule
+
+/// Hook 规则 — 按事件类型和工具名匹配，执行 Shell 命令
 public struct HookRule: Codable, Identifiable, Sendable {
     public let id: UUID
     public var name: String
@@ -65,8 +67,7 @@ public struct HookRule: Codable, Identifiable, Sendable {
 
 // MARK: - Sendable-safe Tool Input
 
-/// Sendable 安全包装器，用于跨 actor 传递 JSON 兼容的 [String: Any] 字典。
-/// 所有值来自 JSON 反序列化，本质上是 Sendable（String/Number/Bool/Array/Dict）。
+/// Sendable 安全包装器 — 用于跨 actor 传递 JSON 兼容的 [String: Any] 字典
 public struct ToolInput: @unchecked Sendable {
     public let raw: [String: Any]
     public init(_ raw: [String: Any]) { self.raw = raw }
@@ -102,16 +103,19 @@ public actor HooksService {
 
     // MARK: - CRUD
 
+    /// 添加一条 Hook 规则并持久化
     public func add(_ rule: HookRule) {
         rules.append(rule)
         save()
     }
 
+    /// 删除指定 ID 的 Hook 规则并持久化
     public func remove(id: UUID) {
         rules.removeAll { $0.id == id }
         save()
     }
 
+    /// 更新 Hook 规则并持久化
     public func update(_ rule: HookRule) {
         if let idx = rules.firstIndex(where: { $0.id == rule.id }) {
             rules[idx] = rule
@@ -119,6 +123,7 @@ public actor HooksService {
         }
     }
 
+    /// 切换 Hook 规则的启用/禁用状态并持久化
     public func toggle(id: UUID) {
         if let idx = rules.firstIndex(where: { $0.id == id }) {
             rules[idx].enabled.toggle()
@@ -128,7 +133,7 @@ public actor HooksService {
 
     // MARK: - Execution
 
-    /// 执行所有匹配的 pre-tool hooks。返回 .block(message) 如果有 hook 阻止。
+    /// 执行所有匹配的 pre-tool hooks，返回是否允许执行
     public func runPreToolHooks(toolName: String, input: ToolInput) async -> (decision: HookDecision, message: String?)
     {  // swiftlint:disable:this opening_brace
         let snapshot: [HookRule] = rules
@@ -143,6 +148,7 @@ public actor HooksService {
         return (.allow, nil)
     }
 
+    /// 执行所有匹配的 post-tool hooks，返回可能被转换的输出
     public func runPostToolHooks(toolName: String, input: ToolInput, output: String) async -> String? {
         let snapshot: [HookRule] = rules
         var transformed: String = output
@@ -156,6 +162,7 @@ public actor HooksService {
         return transformed != output ? transformed : nil
     }
 
+    /// 执行指定事件类型的所有 Hook
     public func runEventHooks(_ event: HookEvent, context: [String: String] = [:]) async {
         let snapshot: [HookRule] = rules
         for rule in snapshot where rule.event == event && rule.enabled {

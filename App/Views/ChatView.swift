@@ -61,9 +61,9 @@ final class ChatManager: ObservableObject {
         let capturedTabID: UUID = activeID
 
         // 流式回调：每收到文本增量，更新最后一条消息
-        let onChunk: PatentLoopHooks.OnStreamChunk = { [tabManager] text in
-            Task { @MainActor in
-                guard let idx = tabManager.tabs.firstIndex(where: { $0.id == capturedTabID }),
+        let onChunk: PatentLoopHooks.OnStreamChunk = { [weak tabManager] text in
+            Task { @MainActor [weak tabManager] in
+                guard let tabManager, let idx = tabManager.tabs.firstIndex(where: { $0.id == capturedTabID }),
                     let lastIdx = tabManager.tabs[idx].messages.indices.last
                 else { return }
                 tabManager.tabs[idx].messages[lastIdx].content += text

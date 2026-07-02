@@ -2,8 +2,7 @@ import Foundation
 
 // MARK: - SSR (Server-Side Request Forgery) Guard
 
-/// SSR 防护 — 对齐 Osaurus fetch 工具的 SSRF 检测
-/// 防止工具被诱导发送请求到内网/本地/云元数据端点
+/// SSR（服务端请求伪造）防护 — 防止工具被诱导向内网/本地/云元数据端点发送请求
 public enum SSRGuard: Sendable {
 
     // MARK: - Check Result

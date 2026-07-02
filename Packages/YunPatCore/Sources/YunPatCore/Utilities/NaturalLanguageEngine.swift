@@ -111,6 +111,7 @@ public actor NaturalLanguageEngine {
     }
 }
 
+/// 实体 — 自然语言提取的命名实体，含类型、值和范围
 public struct Entity: Sendable {
     public let type: String
     public let value: String

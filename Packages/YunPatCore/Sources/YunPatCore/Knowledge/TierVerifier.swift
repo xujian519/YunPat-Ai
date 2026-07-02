@@ -3,12 +3,14 @@ import Foundation
 
 // MARK: - Tier 数据清单模型
 
+/// 数据分层 — T1（核心）/ T2（常用）/ T3（扩展）
 public enum DataTier: String, Codable, Sendable {
     case tier1 = "T1"
     case tier2 = "T2"
     case tier3 = "T3"
 }
 
+/// 分层文件条目 — 路径、SHA256 校验和及大小
 public struct TierFileEntry: Codable, Sendable {
     public let path: String
     public let sha256: String

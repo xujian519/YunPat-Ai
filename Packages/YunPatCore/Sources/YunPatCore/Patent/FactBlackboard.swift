@@ -48,9 +48,7 @@ public struct ArticleJudgment: Sendable {
     }
 }
 
-public final class FactBlackboard: @unchecked Sendable {
-    private let lock = NSLock()
-
+public actor FactBlackboard {
     private var _technicalField: String = ""
     private var _problem: String = ""
     private var _inventionPoints: [String] = []
@@ -65,53 +63,47 @@ public final class FactBlackboard: @unchecked Sendable {
 
     public init() {}
 
-    public var technicalField: String { lock.withLock { _technicalField } }
-    public var problem: String { lock.withLock { _problem } }
-    public var inventionPoints: [String] { lock.withLock { _inventionPoints } }
-    public var missingInfo: [String] { lock.withLock { _missingInfo } }
-    public var reasoningChains: [ReasoningChain] { lock.withLock { _reasoningChains } }
-    public var ruleConstraints: [RuleConstraint] { lock.withLock { _ruleConstraints } }
-    public var articleJudgments: [ArticleJudgment] { lock.withLock { _articleJudgments } }
-    public var executionPlan: ExecutionPlan? { lock.withLock { _executionPlan } }
-    public var isFactsLocked: Bool { lock.withLock { _factsLocked } }
+    public var technicalField: String { _technicalField }
+    public var problem: String { _problem }
+    public var inventionPoints: [String] { _inventionPoints }
+    public var missingInfo: [String] { _missingInfo }
+    public var reasoningChains: [ReasoningChain] { _reasoningChains }
+    public var ruleConstraints: [RuleConstraint] { _ruleConstraints }
+    public var articleJudgments: [ArticleJudgment] { _articleJudgments }
+    public var executionPlan: ExecutionPlan? { _executionPlan }
+    public var isFactsLocked: Bool { _factsLocked }
 
     public func writeFacts(
         technicalField: String, problem: String, inventionPoints: [String], missingInfo: [String] = []
     ) {
-        lock.withLock {
-            _technicalField = technicalField
-            _problem = problem
-            _inventionPoints = inventionPoints
-            _missingInfo = missingInfo
-        }
+        _technicalField = technicalField
+        _problem = problem
+        _inventionPoints = inventionPoints
+        _missingInfo = missingInfo
     }
 
     public func writeReasoningResults(chains: [ReasoningChain], constraints: [RuleConstraint]) {
-        lock.withLock {
-            _reasoningChains = chains
-            _ruleConstraints = constraints
-        }
+        _reasoningChains = chains
+        _ruleConstraints = constraints
     }
 
     public func writeArticleJudgments(_ judgments: [ArticleJudgment]) {
-        lock.withLock { _articleJudgments = judgments }
+        _articleJudgments = judgments
     }
 
     public func writeExecutionPlan(_ plan: ExecutionPlan) {
-        lock.withLock { _executionPlan = plan }
+        _executionPlan = plan
     }
 
     public func lockFacts() {
-        lock.withLock { _factsLocked = true }
+        _factsLocked = true
     }
 
     public func toStructuredFacts() -> StructuredFacts {
-        lock.withLock {
-            StructuredFacts(
-                technicalField: _technicalField,
-                problem: _problem,
-                inventionPoints: _inventionPoints,
-                missingInfo: _missingInfo)
-        }
+        StructuredFacts(
+            technicalField: _technicalField,
+            problem: _problem,
+            inventionPoints: _inventionPoints,
+            missingInfo: _missingInfo)
     }
 }

@@ -1,16 +1,19 @@
 import Foundation
 
+/// 能力来源类型
 public enum CapabilitySource: String, Codable, Sendable {
     case builtin
     case mcp
     case plugin
 }
+/// 能力权限级别
 public enum CapabilityPermission: String, Codable, Sendable {
     case always
     case perSession
     case perCall
     case never
 }
+/// 能力成本级别
 public enum CostLevel: String, Codable, Sendable {
     case free
     case low
@@ -18,6 +21,7 @@ public enum CostLevel: String, Codable, Sendable {
     case high
 }
 
+/// 能力定义 — 描述一个可注册的能力及其属性
 public struct CapabilityDefinition: Codable, Sendable {
     public let name: String
     public let displayName: String
@@ -41,6 +45,7 @@ public struct CapabilityDefinition: Codable, Sendable {
     }
 }
 
+/// 能力元数据 — 成本、网络需求、幂等性、典型用例、依赖层级
 public struct CapabilityMetadata: Codable, Sendable {
     public let costLevel: CostLevel
     public let requiresNetwork: Bool

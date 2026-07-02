@@ -1,5 +1,6 @@
 import Foundation
 
+/// 技能清单 — 名称、版本、描述、作者、标签和触发词
 public struct SkillManifest: Sendable, Codable {
     public let name: String
     public let displayName: String
@@ -23,6 +24,7 @@ public struct SkillManifest: Sendable, Codable {
     }
 }
 
+/// 技能内容 — 清单 + Markdown 正文
 public struct SkillContent: Sendable {
     public let manifest: SkillManifest
     public let body: String
@@ -33,6 +35,7 @@ public struct SkillContent: Sendable {
     }
 }
 
+/// 技能匹配结果 — 匹配的技能内容和相似度评分
 public struct SkillMatch: Sendable {
     public let skill: SkillContent
     public let score: Double

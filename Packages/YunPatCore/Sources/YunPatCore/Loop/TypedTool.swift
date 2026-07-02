@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - TypedTool 协议
 
-/// 类型安全的工具协议 — 对齐 Osaurus VisionTool 设计（Plugin.swift:235-254）
+/// 类型安全工具协议 — 通过 Decodable Args 实现编译期类型检查，自动桥接 ToolHandler
 ///
 /// 对比裸 `ToolHandler` 闭包的优势：
 /// - `Args` 为 Decodable 结构体，编译期类型检查
@@ -45,7 +45,8 @@ extension TypedTool {
     /// 桥接为 ToolHandler 闭包，供 ToolDispatch.register() 使用
     public var handler: ToolHandler {
         { _, rawInput, ctx in
-            guard let data = try? JSONSerialization.data(withJSONObject: rawInput),
+            // JSONValue → Data → Decodable Args（单次编码，无 JSONSerialization）
+            guard let data = try? JSONEncoder().encode(JSONValue.object(rawInput)),
                 let args = try? JSONDecoder().decode(Args.self, from: data)
             else {
                 return .handled(
@@ -65,7 +66,7 @@ extension TypedTool {
 
 // MARK: - TypedToolRegistry
 
-/// 强类型工具注册表 — 统一注册 TypedTool 实例到 ToolDispatch
+/// 强类型工具注册表 — 统一注册 TypedTool 实例到 ToolDispatch，避免重复注册
 ///
 /// 用法：
 /// ```swift

@@ -27,11 +27,13 @@ author: YunPat-AI Team
 | Parameter   | Type   | Required | Default | Description                                          |
 | ----------- | ------ | -------- | ------- | ---------------------------------------------------- |
 | `query`     | string | yes      | —       | 检索式：支持布尔运算符（AND/OR/NOT）、括号、通配符   |
-| `source`    | string | no       | `all`   | 数据源：`cnipa` / `google` / `soopat` / `all`        |
-| `limit`     | int    | no       | `20`    | 返回结果数量上限（1–100）                            |
-| `date_from` | string | no       | —       | 公开日起始，ISO 8601 格式（如 `2020-01-01`）         |
-| `date_to`   | string | no       | —       | 公开日截止，ISO 8601 格式（如 `2024-12-31`）         |
-| `category`  | string | no       | —       | IPC 分类号（如 `G06F40/279`），支持前缀匹配          |
+
+> ⚠️ 以下参数尚未实现（计划中）：
+> - `source` (string, 默认 `all`) — 数据源：`cnipa` / `google` / `soopat` / `all`
+> - `limit` (int, 默认 `20`) — 返回结果数量上限（1–100）
+> - `date_from` (string) — 公开日起始，ISO 8601 格式
+> - `date_to` (string) — 公开日截止，ISO 8601 格式
+> - `category` (string) — IPC 分类号（如 `G06F40/279`）
 
 ## Return Value
 

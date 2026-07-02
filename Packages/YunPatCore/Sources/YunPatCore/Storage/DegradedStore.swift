@@ -55,6 +55,7 @@ public actor DegradedStore {
 
 // MARK: - Types
 
+/// 数据库降级原因 — 密钥丢失或 Keychain 不可用
 public enum DegradedReason: Sendable {
     case keyNotFound(String)
     case keychainUnavailable(String)
@@ -83,7 +84,8 @@ public enum DegradedReason: Sendable {
     }
 }
 
-public struct DegradedDiagnostics: Sendable {
+  /// 降级诊断信息 — 状态、消息及恢复方案
+  public struct DegradedDiagnostics: Sendable {
     public let dbId: String
     public let status: DatabaseStatus
     public let message: String
@@ -99,7 +101,8 @@ public struct DegradedDiagnostics: Sendable {
     }
 }
 
-public enum DatabaseStatus: Sendable {
+  /// 数据库状态 — healthy 或 degraded
+  public enum DatabaseStatus: Sendable {
     case healthy
     case degraded(DegradedReason)
 }

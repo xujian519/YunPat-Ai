@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Structured Tool Error Codes
 
-/// 工具层结构化错误码 — 对齐 Osaurus 模式，所有工具统一使用
+/// 工具层结构化错误码 — 所有工具统一使用的标准错误码枚举，对齐 Osaurus 模式
 public enum ToolErrorCode: String, Sendable, Codable {
 
     // MARK: 通用

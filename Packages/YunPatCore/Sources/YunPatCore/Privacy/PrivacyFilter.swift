@@ -1,8 +1,10 @@
 import Foundation
 import YunPatNetworking
 
-/// 云端发送前 PII 脱敏 — on-device 正则 + 客户自定义词表
-/// MVP 先上正则层，后期可接 on-device 分类器（oMLX / privacy-filter）
+/// PII 脱敏过滤器 — 云端发送前对请求文本进行正则 + 客户自定义词表脱敏
+///
+/// MVP 先上正则层，后期可接 on-device 分类器（oMLX / privacy-filter）。
+/// 支持 ChatRequest 全量脱敏、单文本脱敏、流式回复反脱敏（unscrub）。
 public actor PrivacyFilter { // swiftlint:disable:this type_body_length
 
     public static let shared: PrivacyFilter = PrivacyFilter()
@@ -122,7 +124,7 @@ public actor PrivacyFilter { // swiftlint:disable:this type_body_length
 
     // MARK: - Internal
 
-    /// 对文本依次应用所有模式
+    /// 对文本依次应用所有脱敏模式（正则 → 自定义词表）
     private func applyAll(to text: String, caseId: String?) async -> ScrubResult {
         var current: String = text
         var allDetections: [Detection] = []

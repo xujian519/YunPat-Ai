@@ -1,7 +1,7 @@
 import Foundation
 import YunPatNetworking
 
-/// 中文友好的 token 估算
+/// 中文友好的 token 估算器 — 按 provider 和语言估算每 token 字符数
 public enum TokenEstimator: Sendable {
 
     /// 每 token 的平均字符数（按 provider/语言）

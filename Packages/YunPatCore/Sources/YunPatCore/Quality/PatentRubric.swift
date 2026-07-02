@@ -1,5 +1,6 @@
 import Foundation
 
+/// 评定量规标准项 — 含名称、描述、满分和实际得分
 public struct RubricCriterion: Sendable, Codable, Identifiable {
     public let id: String
     public let name: String
@@ -16,6 +17,7 @@ public struct RubricCriterion: Sendable, Codable, Identifiable {
     }
 }
 
+/// 专利质量评定量规 — 按多维度评分标准评估专利文书质量
 public struct PatentRubric: Sendable {
     public var criteria: [RubricCriterion]
     public let passThreshold: Int
@@ -76,6 +78,7 @@ public struct PatentRubric: Sendable {
     }
 }
 
+/// 评定量规裁定 — pass / conditionalPass / fail
 public enum RubricVerdict: Sendable {
     case pass
     case conditionalPass([String])

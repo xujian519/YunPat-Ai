@@ -5,6 +5,8 @@ public protocol KnowledgeEventObserver: Sendable {
     func indexChanged(_ module: WikiModule)
 }
 
+// 保持 @unchecked Sendable 因为 FSEventStreamRef (OpaquePointer) 不可 Sendable，
+// 且 C callback 需要 Unmanaged 指针传递。actor 无法解决这些底层 C 互操作约束。详见 docs/ARCHITECTURE.md 特例说明。
 public final class VaultObserver: @unchecked Sendable {
     private var stream: FSEventStreamRef?
     private let vaultPath: URL

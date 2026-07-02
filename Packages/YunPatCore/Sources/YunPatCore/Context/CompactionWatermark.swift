@@ -21,6 +21,12 @@ public struct CompactionWatermark: Sendable {
     /// 受保护的最近 turn-pair 数
     public let protectedRecentPairs: Int
 
+    // ── Token 估算缓存（增量优化，避免 O(n²)） ──
+    /// 缓存的完整消息数组 token 估算值
+    private var cachedTokenCount: Int?
+    /// 上次调用 compact 时的消息数量
+    private var lastMessageCount: Int = 0
+
     /// count-free trim note（固定字节）
     public static let trimNote: String = "[Note: Earlier messages were trimmed…]"
     public init(protectedRecentPairs: Int = 3) {
@@ -37,7 +43,22 @@ public struct CompactionWatermark: Sendable {
         provider: ModelProvider
     ) -> CompactResult {
         let history: [Message] = messages
-        let totalTokens = TokenEstimator.estimate(messages: history, provider: provider)
+        let totalTokens: Int = {
+            if messages.count == lastMessageCount, let cached = cachedTokenCount {
+                return cached
+            } else if messages.count > lastMessageCount, let cached = cachedTokenCount {
+                let newCount: Int = messages.count - lastMessageCount
+                let newMessages = messages.suffix(newCount)
+                let addedTokens = TokenEstimator.estimate(messages: Array(newMessages), provider: provider)
+                return cached + addedTokens
+            } else {
+                return TokenEstimator.estimate(messages: history, provider: provider)
+            }
+        }()
+
+        // 更新缓存
+        cachedTokenCount = totalTokens
+        lastMessageCount = messages.count
 
         guard totalTokens > budget.availableForHistory else {
             return CompactResult(messages: history, note: nil, overBudget: false)
@@ -139,7 +160,8 @@ public struct CompactionWatermark: Sendable {
 
 // MARK: - CompactResult
 
-public struct CompactResult: Sendable {
+  /// 压缩结果 — 压缩前后的条目统计
+  public struct CompactResult: Sendable {
     public let messages: [Message]
     public let note: String?
     public let overBudget: Bool

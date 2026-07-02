@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Stuck File Guard
 
-/// 编辑失败检测和恢复指引
+/// 编辑失败检测和恢复指引 — 防止 Agent 在同一文件上卡死
 ///
 /// 设计参考 Agent-main (macOS26/Agent) 的 StuckGuard:
 /// - 同一文件连续编辑失败 2 次 → 注入恢复提示 (重新读取、切换工具)
@@ -39,7 +39,7 @@ public struct StuckGuard: Sendable {
 
     // MARK: - Detection
 
-    /// 判断工具输出是否为失败
+    /// 根据工具输出文本判断是否为失败
     public static func isFailure(output: String) -> Bool {
         let lower = output.lowercased()
         return lower.hasPrefix("error")
@@ -49,7 +49,7 @@ public struct StuckGuard: Sendable {
             || lower.contains("rejected")
     }
 
-    /// 检测编辑失败并返回需要注入的指引消息 (nil = 无指引)
+    /// 检测编辑失败，达到阈值时返回恢复指引或放弃通知
     public mutating func check(
         toolName: String,
         filePath: String?,
@@ -90,12 +90,12 @@ public struct StuckGuard: Sendable {
         return nil
     }
 
-    /// 重置特定文件的失败计数
+    /// 重置指定文件的失败计数（成功后调用）
     public mutating func reset(filePath: String) {
         failures[filePath] = 0
     }
 
-    /// 重置所有计数
+    /// 重置所有文件的失败计数
     public mutating func resetAll() {
         failures.removeAll()
     }

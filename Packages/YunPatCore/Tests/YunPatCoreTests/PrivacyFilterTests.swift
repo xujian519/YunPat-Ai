@@ -29,7 +29,7 @@ struct PrivacyFilterTests {
             caseId: nil
         )
         #expect(!result.detections.isEmpty)
-        let emailDets: [ScrubDetection] = result.detections.filter { $0.kind == .email }
+        let emailDets: [Detection] = result.detections.filter { $0.kind == .email }
         #expect(!emailDets.isEmpty)
         #expect(emailDets[0].entity == "alice@example.com")
         // 占位符不应是原文
@@ -45,7 +45,7 @@ struct PrivacyFilterTests {
             provider: .deepseek,
             caseId: nil
         )
-        let phoneDets: [ScrubDetection] = result.detections.filter { $0.kind == .phone }
+        let phoneDets: [Detection] = result.detections.filter { $0.kind == .phone }
         #expect(!phoneDets.isEmpty)
         #expect(!result.scrubbedText.contains("13800138000"))
     }
@@ -57,7 +57,7 @@ struct PrivacyFilterTests {
             provider: .deepseek,
             caseId: nil
         )
-        let phoneDets: [ScrubDetection] = result.detections.filter { $0.kind == .phone }
+        let phoneDets: [Detection] = result.detections.filter { $0.kind == .phone }
         #expect(phoneDets.isEmpty)
     }
 
@@ -69,7 +69,7 @@ struct PrivacyFilterTests {
             provider: .deepseek,
             caseId: nil
         )
-        let idDets: [ScrubDetection] = result.detections.filter { $0.kind == .idNumber }
+        let idDets: [Detection] = result.detections.filter { $0.kind == .idNumber }
         #expect(!idDets.isEmpty)
         #expect(!result.scrubbedText.contains("110101199001011234"))
     }
@@ -136,7 +136,7 @@ struct PrivacyFilterTests {
             provider: .deepseek,
             caseId: nil
         )
-        let customDets: [ScrubDetection] = result.detections.filter { $0.kind == .applicantName }
+        let customDets: [Detection] = result.detections.filter { $0.kind == .applicantName }
         #expect(!customDets.isEmpty)
         #expect(!result.scrubbedText.contains("华为技术有限公司"))
     }

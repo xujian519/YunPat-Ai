@@ -1,7 +1,7 @@
 import Foundation
 import YunPatNetworking
 
-/// 上下文摘要器 —— Apple Intelligence 主路径 + LLM API 降级
+/// 上下文摘要器 — Apple Intelligence 主路径 + LLM API 降级方案
 ///
 /// macOS 26+ 使用 Apple FoundationModels 本地摘要，
 /// macOS 15.5 降级为 LLM API 调用做摘要。

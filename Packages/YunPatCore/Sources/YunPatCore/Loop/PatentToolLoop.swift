@@ -1,8 +1,12 @@
+// swiftlint:disable file_length
 import Foundation
 import YunPatNetworking
 
 // MARK: - LoopExit (6 种退出分类)
 
+/// 循环退出类型 — 6 种退出分类
+///
+/// 每次 `PatentToolLoop.run()` 返回一种退出类型，包含执行摘要。
 public enum LoopExit: Sendable, Equatable {
     /// 正常结束，带最终回复
     case finalResponse(String)
@@ -17,6 +21,7 @@ public enum LoopExit: Sendable, Equatable {
     /// 窗口放不下（压缩后仍超限）
     case overBudget(String)
 
+    /// 获取退出的文本摘要
     public var summary: String {
         switch self {
         case .finalResponse(let text): return text
@@ -29,8 +34,11 @@ public enum LoopExit: Sendable, Equatable {
     }
 }
 
+/// 由 surface 拦截结束循环的详细信息
 public struct EndedBySurface: Sendable, Equatable {
+    /// 结束类型（complete / clarify）
     public let kind: SurfaceKind
+    /// 结束摘要
     public let summary: String
     public init(kind: SurfaceKind, summary: String) {
         self.kind = kind
@@ -38,13 +46,19 @@ public struct EndedBySurface: Sendable, Equatable {
     }
 }
 
+/// Surface 拦截结束类型
 public enum SurfaceKind: String, Sendable, Equatable {
-    case complete  // task_complete 拦截
-    case clarify  // ask_user/clarify 拦截
+    /// task_complete 拦截
+    case complete
+    /// ask_user/clarify 拦截
+    case clarify
 }
 
 // MARK: - PatentLoopPolicy（命名旋钮）
 
+/// 循环策略 — 控制最大迭代次数、工具拒绝行为、预算警告等
+///
+/// 提供三种预设：`.chat`（对话）、`.http`（无交互）、`.patentFlow`（专利分析）
 public struct PatentLoopPolicy: Sendable {
     public let maxIterations: Int
     public let stopOnToolRejection: Bool
@@ -86,6 +100,7 @@ public struct PatentLoopPolicy: Sendable {
 
 // MARK: - 流式模型输出分块
 
+/// 流式模型输出分块 — 供 PatentLoopHooks.modelStream 使用
 public enum ModelStepChunk: Sendable {
     case textDelta(String)  // 增量文本（流式）
     case toolCall(ToolCall)  // 完整工具调用
@@ -95,6 +110,10 @@ public enum ModelStepChunk: Sendable {
 
 // MARK: - PatentLoopHooks（surface 提供的回调）
 
+/// Surface 提供的回调集合 — 桥接 PatentToolLoop 与外部 surface（Chat/HTTP/Plugin）
+///
+/// 每个 surface 提供 buildMessages、modelStream/modelStep、executeTool 等回调，
+/// PatentToolLoop 通过此 hooks 驱动模型调用与工具执行。
 public struct PatentLoopHooks: Sendable {
     public typealias BuildMessages = @Sendable () async -> [Message]
     public typealias ModelStep = @Sendable ([Message], [ToolSpec]) async throws -> ModelStepResult
@@ -139,12 +158,14 @@ public struct PatentLoopHooks: Sendable {
 
 // MARK: - 模型调用结果
 
+/// 模型调用结果 — PatentLoopHooks.modelStep 的返回类型
 public enum ModelStepResult: Sendable {
     case textResponse(String)
     case toolCalls([ToolCall])
     case error(String)
 }
 
+/// LLM 发起的工具调用请求
 public struct ToolCall: Sendable, Equatable {
     public let id: String
     public let name: String
@@ -161,6 +182,7 @@ public struct ToolCall: Sendable, Equatable {
     }
 }
 
+/// 工具规范描述 — 供 LLM function calling 使用
 public struct ToolSpec: Sendable {
     public let name: String
     public let description: String
@@ -172,6 +194,7 @@ public struct ToolSpec: Sendable {
     }
 }
 
+/// 工具执行结果信封 — 包含结果内容、类型、错误信息等
 public struct ToolEnvelope: Sendable {
     public let toolName: String
     public let content: String
@@ -217,6 +240,7 @@ extension ToolEnvelope {
     }
 }
 
+/// 工具结果类型分类
 public enum ToolResultKind: String, Sendable {
     case listing  // 目录/检索结果 → entries 含可复制 path
     case file  // 文件内容
@@ -225,6 +249,7 @@ public enum ToolResultKind: String, Sendable {
     case other
 }
 
+/// 可复制的路径条目 — 用于检索/目录结果
 public struct Entry: Sendable {
     public let path: String
     public let kind: EntryKind
@@ -235,6 +260,7 @@ public struct Entry: Sendable {
         self.label = label
     }
 }
+/// 条目类型
 public enum EntryKind: String, Sendable {
     case file
     case directory
@@ -244,6 +270,7 @@ public enum EntryKind: String, Sendable {
 
 // MARK: - ClarifyRequest
 
+/// 澄清请求 — 当 LLM 需要用户补充信息时使用
 public struct ClarifyRequest: Sendable {
     public let question: String
     public let options: [String]
@@ -257,7 +284,14 @@ public struct ClarifyRequest: Sendable {
 
 // MARK: - PatentToolLoop（单一驱动）
 
-/// 单一 Loop 驱动 — 所有 surface 共用
+/// 单一 Agent 循环驱动 — 所有 surface（Chat/HTTP/Plugin）共用
+///
+/// 职责：
+/// - 构建消息序列（含 manifest、system notice）
+/// - 消息压缩（CompactionWatermark）
+/// - 模型调用（流式或整段）
+/// - 工具批处理（ToolBatchExecutor）
+/// - 拦截 complete/clarify 等循环控制工具
 public actor PatentToolLoop {
 
     private var taskState: PatentHarnessTaskState = PatentHarnessTaskState()
@@ -267,12 +301,20 @@ public actor PatentToolLoop {
 
     public init() {}
 
-    /// 设置 session 初始化的 capability manifest
+    /// 设置 session 的 Capability manifest（首次迭代注入到 system message）
     public func setManifest(_ manifest: CapabilityManifest) {
         self.manifest = manifest
     }
 
     /// 运行一次 agent 循环
+    ///
+    /// 循环体：构建消息 → 压缩 → 模型调用 → 工具批处理 → 检查退出条件 → 下一轮
+    /// - Parameters:
+    ///   - request: 用户请求
+    ///   - policy: 循环策略（最大迭代次数、工具拒绝行为等）
+    ///   - hooks: surface 回调集合
+    ///   - provider: 模型提供商
+    /// - Returns: 循环退出类型和摘要
     public func run(
         request: UserRequest,
         policy: PatentLoopPolicy,
@@ -477,7 +519,7 @@ public actor PatentToolLoop {
     }
 }
 
-/// complete/clarify 工具校验
+/// complete/clarify 工具校验 — 拒绝占位符，要求实质性描述
 public enum AgentLoopTools: Sendable {
     /// complete summary 校验 — 拒绝占位符，要求 ≥30 字实质描述
     public static func validate(summary: String) -> Bool {
@@ -494,6 +536,7 @@ public enum AgentLoopTools: Sendable {
 
 // MARK: - Harness Task State (结构化去重 + reactive nudge + canonical invalidation)
 
+/// 任务执行状态 — 同一消息内调用去重、写操作 invalidate、连续 listing 黏性提醒
 public struct PatentHarnessTaskState: Sendable {
     /// within-message 调用缓存：canonicalCall → 结果文本（重放用）
     private var freshResults: [String: String] = [:]

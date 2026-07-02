@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Sync Wrapper
 
-/// 对标 Tokio `util/sync_wrapper.rs`：将 `Send + !Sync` 类型转换为 `Sync`
+/// Send+Sync 包装器 — 对标 Tokio util/sync_wrapper.rs，将 Send+!Sync 类型转换为 Sync
 /// 通过禁止所有不可变访问来安全跨线程共享。
 ///
 /// ## 原理
@@ -47,7 +47,7 @@ public struct SyncWrapper<T: Sendable>: @unchecked Sendable {
 
 // MARK: - SendableBox
 
-/// 将非 Sendable 类型包装为 Sendable 的 unsafe 桥接
+/// Sendable 桥接 — 将非 Sendable 类型 unsafe 包装为 Sendable
 ///
 /// 对标 Tokio `util/sync_wrapper.rs` 的扩展用途：
 /// 在某些必须跨越 Sendable 边界的场景下使用。

@@ -1,5 +1,6 @@
 import Foundation
 
+/// 事实标记 — 单个事实条目及其来源和验证状态
 public struct FactMarker: Sendable, Codable {
     public let id: UUID
     public let fact: String

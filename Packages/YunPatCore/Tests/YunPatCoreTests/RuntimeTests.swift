@@ -99,7 +99,7 @@ final class AgentMetricsTests: XCTestCase {
                 }
             }
         }
-        let snap: MetricsSnapshot = metrics.snapshot()
+        let snap: AgentMetricsSnapshot = metrics.snapshot()
         XCTAssertEqual(snap.toolCallCount, concurrency * incsPerTask)
         XCTAssertEqual(snap.llmInputTokens, concurrency * incsPerTask * 10)
     }
@@ -110,7 +110,7 @@ final class AgentMetricsTests: XCTestCase {
         metrics.incStuckNudge()
         metrics.addInputTokens(100)
         metrics.reset()
-        let snap: MetricsSnapshot = metrics.snapshot()
+        let snap: AgentMetricsSnapshot = metrics.snapshot()
         XCTAssertEqual(snap.toolCallCount, 0)
         XCTAssertEqual(snap.stuckNudgeCount, 0)
         XCTAssertEqual(snap.llmInputTokens, 0)

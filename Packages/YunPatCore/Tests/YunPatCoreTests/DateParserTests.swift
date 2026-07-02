@@ -220,7 +220,7 @@ final class DateParserTests: XCTestCase {
         // If it parses (Foundation adjusts), the day won't be 29
         if let parsed = date {
             var cal = Calendar(identifier: .gregorian)
-            cal.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+            cal.timeZone = try! TimeZone(secondsFromGMT: 0)!
             let day = cal.component(.day, from: parsed)
             XCTAssertNotEqual(day, 29, "2023-02-29 should not resolve to Feb 29")
         }
