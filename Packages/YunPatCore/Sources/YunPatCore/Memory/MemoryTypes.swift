@@ -83,20 +83,103 @@ public struct LongTermMemory: Sendable, Codable {
     public var domainVocabulary: [String: String]
     public var learnedPitfalls: [String]
     public var lastConsolidated: Date
+    public var items: [MemoryItem]
 
     public init(
         legalPrecedents: [String] = [],
         successfulStrategies: [String] = [],
         domainVocabulary: [String: String] = [:],
         learnedPitfalls: [String] = [],
-        lastConsolidated: Date = Date()
+        lastConsolidated: Date = Date(),
+        items: [MemoryItem] = []
     ) {
         self.legalPrecedents = legalPrecedents
         self.successfulStrategies = successfulStrategies
         self.domainVocabulary = domainVocabulary
         self.learnedPitfalls = learnedPitfalls
         self.lastConsolidated = lastConsolidated
+        self.items = items
     }
+}
+
+public struct MemoryItem: Sendable, Codable {
+    public let id: UUID
+    public let content: String
+    public var salience: Float
+    public let createdAt: Date
+
+    public init(id: UUID = UUID(), content: String, salience: Float = 0.5, createdAt: Date = Date()) {
+        self.id = id
+        self.content = content
+        self.salience = salience
+        self.createdAt = createdAt
+    }
+}
+
+public struct Episode: Sendable, Codable {
+    public let id: UUID
+    public let topics: [String]
+    public let entities: [String]
+    public let decisions: [String]
+    public let salience: Float
+    public let summary: String
+    public let createdAt: Date
+
+    public init(id: UUID = UUID(), topics: [String] = [], entities: [String] = [], decisions: [String] = [],
+                salience: Float = 0.5, summary: String = "", createdAt: Date = Date()) {
+        self.id = id
+        self.topics = topics
+        self.entities = entities
+        self.decisions = decisions
+        self.salience = salience
+        self.summary = summary
+        self.createdAt = createdAt
+    }
+}
+
+public struct LTMItem: Sendable, Codable {
+    public let id: UUID
+    public let content: String
+    public let source: String
+    public let salience: Float
+    public let createdAt: Date
+
+    public init(
+        id: UUID = UUID(), content: String, source: String = "",
+        salience: Float = 0.5, createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.content = content
+        self.source = source
+        self.salience = salience
+        self.createdAt = createdAt
+    }
+}
+
+public struct PinnedFact: Sendable, Codable {
+    public let id: UUID
+    public let fact: String
+    public let salience: Float
+    public let sourceCount: Int
+    public let createdAt: Date
+
+    public init(
+        id: UUID = UUID(), fact: String,
+        salience: Float = 0.5, sourceCount: Int = 1, createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.fact = fact
+        self.salience = salience
+        self.sourceCount = sourceCount
+        self.createdAt = createdAt
+    }
+}
+
+public enum ToolDependencyTier: String, Codable, Sendable {
+    case tier0
+    case tier1
+    case tier2
+    case tier3
 }
 
 // MARK: - Layer 5: GlobalMemory (user preferences lifetime)

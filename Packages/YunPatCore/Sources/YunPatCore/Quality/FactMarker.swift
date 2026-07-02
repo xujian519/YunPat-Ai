@@ -35,15 +35,13 @@ public actor FactMarkerEngine {
         guard let regex = try? NSRegularExpression(pattern: pattern) else {
             return []
         }
-        return regex.matches(in: text, range: NSRange(text.startIndex..., in: text)).compactMap {
-            match in
+        return regex.matches(in: text, range: NSRange(text.startIndex..., in: text)).compactMap { match in
             guard let range = Range(match.range(at: 1), in: text) else { return nil }
             return FactMarker(fact: String(text[range]), source: "extracted")
         }
     }
 
-    public func verify(inputFacts: [FactMarker], outputText: String) -> FactVerificationResult
-    {
+    public func verify(inputFacts: [FactMarker], outputText: String) -> FactVerificationResult {
         let markedFacts = extract(from: outputText)
         let markedIDs = Set(markedFacts.map(\.fact))
         let inputIDs = Set(inputFacts.map(\.fact))

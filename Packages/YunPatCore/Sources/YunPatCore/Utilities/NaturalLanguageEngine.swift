@@ -17,7 +17,7 @@ public actor NaturalLanguageEngine {
         tagger.setLanguage(.simplifiedChinese, range: text.startIndex..<text.endIndex)
 
         var tokens: [String] = []
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass) { tag, range in
+        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass) { _, range in
             let token = String(text[range])
             if token.count > 1 { tokens.append(token) }
             return true
@@ -34,7 +34,8 @@ public actor NaturalLanguageEngine {
         var entities: [Entity] = []
         let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
 
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: options) { tag, range in
+        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: options) {
+            tag, range in
             if let tag = tag {
                 let value = String(text[range])
                 entities.append(Entity(type: tag.rawValue, value: value, range: range))
@@ -90,7 +91,8 @@ public actor NaturalLanguageEngine {
             return true
         }
 
-        return scored
+        return
+            scored
             .uniqued(by: \.0)
             .sorted { $0.1 > $1.1 }
             .prefix(topK)
@@ -115,7 +117,9 @@ public struct Entity: Sendable {
     public let range: Range<String.Index>
 
     public init(type: String, value: String, range: Range<String.Index>) {
-        self.type = type; self.value = value; self.range = range
+        self.type = type
+        self.value = value
+        self.range = range
     }
 }
 

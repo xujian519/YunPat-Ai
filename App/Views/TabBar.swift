@@ -40,8 +40,8 @@ final class TabManager: ObservableObject {
     func closeTab(_ id: UUID) {
         guard tabs.count > 1 else { return }
         if let tab = tabs.first(where: { $0.id == id }) {
-            var archived = tab
-            archived.sessionMemory = SessionMemory(tabId: id) // 清空记忆
+            var archived: ChatTab = tab
+            archived.sessionMemory = SessionMemory(tabId: id)  // 清空记忆
             archivedTabs.insert(archived, at: 0)
         }
         tabs.removeAll { $0.id == id }
@@ -69,7 +69,8 @@ final class TabManager: ObservableObject {
 
     func appendToLastMessage(to tabID: UUID, _ delta: String) {
         guard let index = tabs.firstIndex(where: { $0.id == tabID }),
-              let lastIdx = tabs[index].messages.indices.last else { return }
+            let lastIdx = tabs[index].messages.indices.last
+        else { return }
         tabs[index].messages[lastIdx].content += delta
     }
 }
@@ -87,9 +88,9 @@ struct TabBar: View {
                     onClose: { Task { @MainActor in tabManager.closeTab(tab.id) } }
                 )
             }
-            Button(action: { Task { @MainActor in tabManager.addTab() } }) {
+            Button(action: { Task { @MainActor in tabManager.addTab() } }, label: {
                 Image(systemName: "plus").font(.caption)
-            }
+            })
             .buttonStyle(.plain).padding(.horizontal, 8)
         }
     }
@@ -107,7 +108,8 @@ struct TabButton: View {
                 .font(.system(size: 8))
                 .foregroundStyle(tab.type == .patent ? .blue : .secondary)
             Text(tab.title).font(.system(size: 12, weight: isActive ? .semibold : .regular)).lineLimit(1)
-            Button(action: onClose) { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)) }.buttonStyle(.plain)
+            Button(action: onClose) { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)) }.buttonStyle(
+                .plain)
         }
         .padding(.horizontal, 12).padding(.vertical, 6)
         .background(isActive ? Color.accentColor.opacity(0.15) : Color.clear)

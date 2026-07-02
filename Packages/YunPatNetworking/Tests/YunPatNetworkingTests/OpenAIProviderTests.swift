@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import YunPatNetworking
 
 final class OpenAIProviderTests: XCTestCase {
@@ -6,7 +7,7 @@ final class OpenAIProviderTests: XCTestCase {
         let provider = OpenAIProvider(apiKey: "")
         let request = ChatRequest(model: "gpt-4o", messages: [Message(role: .user, content: "Hello")])
         var caughtError: Error?
-        do { for try await _ in provider.chat(request) { } } catch { caughtError = error }
+        do { for try await _ in provider.chat(request) {} } catch { caughtError = error }
         XCTAssertNotNil(caughtError, "Expected error when API key is empty")
     }
 

@@ -23,10 +23,10 @@ public actor AgentLoopEngine: LoopEngine {
         self.contextEngine = ContextEngine()
 
         // 生成并注入 frozen capability manifest（异步）
-        let reg = CapabilityRegistry()
+        let reg: CapabilityRegistry = CapabilityRegistry()
         Task {
             await reg.registerBuiltinCapabilities()
-            let manifest = await CapabilityManifest.build(registry: reg, skills: [])
+            let manifest: CapabilityManifest = await CapabilityManifest.build(registry: reg, skills: [])
             await self.loop.setManifest(manifest)
         }
     }
@@ -36,23 +36,29 @@ public actor AgentLoopEngine: LoopEngine {
         self.onTodoUpdate = block
     }
 
-    public func run(request: UserRequest, flow: AgentFlow, model: String? = nil, history: [Message] = [], onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil) async throws -> LoopResult {
+    public func run(
+        request: UserRequest, flow: AgentFlow, model: String? = nil,
+        history: [Message] = [],
+        onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil
+    ) async throws -> LoopResult {
         state = .running(step: "building-context")
-        let systemPrompt = try await contextEngine.buildPrompt(for: request, flow: flow)
+        let systemPrompt: String = try await contextEngine.buildPrompt(for: request, flow: flow)
 
         // 智能路由：无显式指定模型时按任务特征自动选择
         let effectiveModel: String
-        if let m = model {
-            effectiveModel = m
+        if let specifiedModel = model {
+            effectiveModel = specifiedModel
         } else {
-            let category = SmartModelRouter.classify(request)
+            let category: SmartModelRouter.TaskCategory = SmartModelRouter.classify(request)
             effectiveModel = SmartModelRouter.selectModel(for: category, preferred: provider)
         }
 
-        let hooks = makeHooks(systemPrompt: systemPrompt, request: request, model: effectiveModel, history: history, onStreamChunk: onStreamChunk)
+        let hooks: PatentLoopHooks = makeHooks(
+            systemPrompt: systemPrompt, request: request,
+            model: effectiveModel, history: history, onStreamChunk: onStreamChunk)
 
         state = .running(step: "executing")
-        let exit = await loop.run(
+        let exit: LoopExit = await loop.run(
             request: request,
             policy: flow == .copilot ? .chat : .patentFlow,
             hooks: hooks,
@@ -65,32 +71,38 @@ public actor AgentLoopEngine: LoopEngine {
 
     // MARK: - Chat Hooks
 
-    private func makeHooks(systemPrompt: String, request: UserRequest, model: String, history: [Message] = [], onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil) -> PatentLoopHooks {
+    private func makeHooks(
+        systemPrompt: String, request: UserRequest, model: String,
+        history: [Message] = [],
+        onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil
+    ) -> PatentLoopHooks {
         PatentLoopHooks(
             buildMessages: { [systemPrompt, request, history] in
-                var all = [Message(role: .system, content: systemPrompt)]
+                var all: [Message] = [Message(role: .system, content: systemPrompt)]
                 all.append(contentsOf: history)
                 all.append(Message(role: .user, content: request.content))
                 return all
             },
             modelStream: { [modelRouter, provider, model] messages, _ in
-                let chatReq = ChatRequest(model: model, messages: messages)
-                let rawStream = try await modelRouter.chat(chatReq, provider: provider)
+                let chatReq: ChatRequest = ChatRequest(model: model, messages: messages)
+                let rawStream: AsyncThrowingStream<ChatChunk, Error> =
+                    try await modelRouter
+                    .chat(chatReq, provider: provider)
                 return AsyncThrowingStream { continuation in
                     Task {
                         do {
-                            var accumulated = ""
+                            var accumulated: String = ""
                             for try await chunk in rawStream {
                                 switch chunk {
-                                case .text(let t):
-                                    accumulated += t
-                                    continuation.yield(.textDelta(t))
+                                case .text(let text):
+                                    accumulated += text
+                                    continuation.yield(.textDelta(text))
                                 case .finish:
                                     continuation.yield(.done(accumulated))
                                     continuation.finish()
                                     return
-                                case .error(let e):
-                                    continuation.yield(.error(e.localizedDescription))
+                                case .error(let error):
+                                    continuation.yield(.error(error.localizedDescription))
                                     continuation.finish()
                                     return
                                 default:
@@ -105,13 +117,16 @@ public actor AgentLoopEngine: LoopEngine {
                 }
             },
             executeTool: { [provider] call in
-                let ctx = ToolContext(toolId: call.id, projectFolder: "", selectedProvider: provider)
+                let ctx: ToolContext = ToolContext(toolId: call.id, projectFolder: "", selectedProvider: provider)
                 return await ToolDispatch.executeCall(call, ctx: ctx)
             },
             executeBatch: { [provider] calls, ctx in
                 var results: [ToolEnvelope] = []
                 for call in calls {
-                    let toolCtx = ToolContext(toolId: call.id, projectFolder: ctx.projectFolder, selectedProvider: provider)
+                    let toolCtx: ToolContext = ToolContext(
+                        toolId: call.id,
+                        projectFolder: ctx.projectFolder,
+                        selectedProvider: provider)
                     results.append(await ToolDispatch.executeCall(call, ctx: toolCtx))
                 }
                 return results
@@ -129,17 +144,17 @@ public actor AgentLoopEngine: LoopEngine {
 extension LoopResult {
     public init(exit: LoopExit) {
         switch exit {
-        case .finalResponse(let s): self = .completed(s)
-        case .iterationCapReached(let s): self = .completed(s)
-        case .toolRejected(let s): self = .exceededRevisionLimit([Issue(severity: .error, description: s)])
+        case .finalResponse(let text): self = .completed(text)
+        case .iterationCapReached(let text): self = .completed(text)
+        case .toolRejected(let text): self = .exceededRevisionLimit([Issue(severity: .error, description: text)])
         case .cancelled: self = .cancelled
-        case .endedBySurface(let e):
-            if e.kind == .clarify {
-                self = .needsClarification([e.summary])
+        case .endedBySurface(let event):
+            if event.kind == .clarify {
+                self = .needsClarification([event.summary])
             } else {
-                self = .completed(e.summary)
+                self = .completed(event.summary)
             }
-        case .overBudget(let s): self = .completed(s)
+        case .overBudget(let text): self = .completed(text)
         }
     }
 }

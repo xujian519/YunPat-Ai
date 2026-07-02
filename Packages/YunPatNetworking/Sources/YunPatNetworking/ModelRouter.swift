@@ -13,7 +13,9 @@ public actor ModelRouter {
         backends[provider]
     }
 
-    public func chat(_ request: ChatRequest, provider: ModelProvider) async throws -> AsyncThrowingStream<ChatChunk, Error> {
+    public func chat(_ request: ChatRequest, provider: ModelProvider) async throws -> AsyncThrowingStream<
+        ChatChunk, Error
+    > {
         guard let backend = backends[provider] else {
             throw ModelRouterError.providerNotRegistered(provider)
         }
@@ -22,6 +24,10 @@ public actor ModelRouter {
 
     public var registeredProviders: [ModelProvider] {
         Array(backends.keys)
+    }
+
+    public var allBackends: [ModelProvider: any ModelBackend] {
+        backends
     }
 }
 

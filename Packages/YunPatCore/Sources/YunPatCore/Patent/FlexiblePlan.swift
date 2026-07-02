@@ -48,18 +48,18 @@ public actor FlexiblePlan {
         stages.removeAll { $0.id == id }
     }
 
-    public func reorder(from: Int, to: Int) {
-        guard stages.indices.contains(from), stages.indices.contains(to) else { return }
-        let s = stages.remove(at: from)
-        stages.insert(s, at: to)
+    public func reorder(from: Int, destination: Int) {
+        guard stages.indices.contains(from), stages.indices.contains(destination) else { return }
+        let stage = stages.remove(at: from)
+        stages.insert(stage, at: destination)
     }
 
     public func markStage(_ id: String, status: StageStatus) {
-        guard let i = stages.firstIndex(where: { $0.id == id }) else { return }
-        stages[i].status = status
+        guard let index = stages.firstIndex(where: { $0.id == id }) else { return }
+        stages[index].status = status
     }
 
-    public func setConstraints(_ c: [RuleConstraint]) {
-        _constraints = c
+    public func setConstraints(_ constraints: [RuleConstraint]) {
+        _constraints = constraints
     }
 }

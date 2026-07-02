@@ -31,7 +31,7 @@ public actor VersionController {
     }
 
     public func gitStatus() async throws -> String {
-        let output = try await shell.execute("git status --porcelain", cwd: workspaceRoot)
+        let output: ShellResult = try await shell.execute("git status --porcelain", cwd: workspaceRoot)
         return output.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
@@ -45,8 +45,8 @@ public actor VersionController {
     }
 
     public func log(limit: Int = 10) async throws -> [VersionInfo] {
-        let output = try await shell.execute("git log --format='%H|%s|%aI|%an' -\(limit)", cwd: workspaceRoot)
-        let lines = output.stdout
+        let output: ShellResult = try await shell.execute("git log --format='%H|%s|%aI|%an' -\(limit)", cwd: workspaceRoot)
+        let lines: [String] = output.stdout
             .components(separatedBy: "\n")
             .filter { !$0.isEmpty }
         return lines.compactMap(VersionController.parseLogLine)
@@ -58,7 +58,7 @@ public actor VersionController {
     /// or the process lacks permissions.
     @discardableResult
     public func timeMachineSnapshot() async throws -> Bool {
-        let output = try await shell.execute("tmutil localsnapshot / 2>/dev/null", cwd: workspaceRoot, timeout: 10)
+        let output: ShellResult = try await shell.execute("tmutil localsnapshot / 2>/dev/null", cwd: workspaceRoot, timeout: 10)
         return output.exitCode == 0
     }
 
@@ -72,14 +72,15 @@ public actor VersionController {
     // MARK: - Private helpers
 
     private static func parseLogLine(_ line: String) -> VersionInfo? {
-        let parts = line.components(separatedBy: "|")
+        let parts: [String] = line.components(separatedBy: "|")
         guard parts.count >= 4 else { return nil }
-        let hash = parts[0]
-        let message = parts[1]
-        let author = parts[3]
-        let formatter = ISO8601DateFormatter()
+        let hash: String = parts[0]
+        let message: String = parts[1]
+        let author: String = parts[3]
+        let formatter: ISO8601DateFormatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let timestamp = formatter.date(from: parts[2])
+        let timestamp =
+            formatter.date(from: parts[2])
             ?? ISO8601DateFormatter().date(from: parts[2])
             ?? Date()
         return VersionInfo(hash: hash, message: message, timestamp: timestamp, author: author)

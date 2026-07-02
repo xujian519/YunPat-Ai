@@ -1,16 +1,17 @@
 import Testing
+
 @testable import YunPatDesktop
 
 struct ShellExecutorTests {
 
     @Test func echoReturnsOutput() async throws {
-        let executor = ShellExecutor()
-        let output = try await executor.execute("echo hello world")
+        let executor: ShellExecutor = ShellExecutor()
+        let output: ShellOutput = try await executor.execute("echo hello world")
         #expect(output.stdout.trimmingCharacters(in: .whitespacesAndNewlines) == "hello world")
         #expect(output.exitCode == 0)
     }
     @Test func blockedCommandThrows() async {
-        let executor = ShellExecutor(allowedCommands: ["echo"]) // rm not in allowlist
+        let executor: ShellExecutor = ShellExecutor(allowedCommands: ["echo"])  // rm not in allowlist
         do {
             _ = try await executor.execute("rm -rf /tmp/test")
             #expect(Bool(false), "Expected ShellError.commandNotAllowed, but no error thrown")

@@ -12,9 +12,17 @@ public final class OpenAIProvider: ModelBackend {
     private let baseURL: URL
     private let session: URLSession
 
+    public static let defaultBaseURL: URL = {
+        let urlString = "https://api.openai.com/v1"
+        guard let url = URL(string: urlString) else {
+            preconditionFailure("Invalid URL: \(urlString)")
+        }
+        return url
+    }()
+
     public init(
         apiKey: String,
-        baseURL: URL = URL(string: "https://api.openai.com/v1")!,
+        baseURL: URL = OpenAIProvider.defaultBaseURL,
         provider: ModelProvider = .openai,
         session: URLSession = .shared
     ) {
@@ -35,7 +43,7 @@ public final class OpenAIProvider: ModelBackend {
                 }
 
                 do {
-                    let urlRequest = try buildRequest(request)
+                    let urlRequest: URLRequest = try buildRequest(request)
                     let (bytes, response) = try await session.bytes(for: urlRequest)
 
                     guard let httpResponse = response as? HTTPURLResponse else {
@@ -44,14 +52,15 @@ public final class OpenAIProvider: ModelBackend {
                     }
 
                     guard httpResponse.statusCode == 200 else {
-                        let body = try await collectErrorBody(bytes)
+                        let body: String = try await collectErrorBody(bytes)
                         if httpResponse.statusCode == 429 {
                             let retryAfter = httpResponse.value(forHTTPHeaderField: "Retry-After")
                                 .flatMap(Double.init)
-                            continuation.finish(throwing: RateLimitError(
-                                retryAfter: retryAfter,
-                                message: "Rate limited: \(body)"
-                            ))
+                            continuation.finish(
+                                throwing: RateLimitError(
+                                    retryAfter: retryAfter,
+                                    message: "Rate limited: \(body)"
+                                ))
                         } else {
                             continuation.finish(throwing: ProviderError.httpError(httpResponse.statusCode, body))
                         }
@@ -69,7 +78,7 @@ public final class OpenAIProvider: ModelBackend {
                         }
 
                         guard let data = payload.data(using: .utf8),
-                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                         else { continue }
 
                         parseSSEChunk(json, into: continuation)
@@ -115,13 +124,14 @@ public final class OpenAIProvider: ModelBackend {
                 if let name = msg.name { dict["name"] = name }
                 return dict
             },
-            "stream": true,
+            "stream": true
         ]
         if let systemPrompt = request.systemPrompt {
             // system 作为第一条 message
-            body["messages"] = [
-                ["role": "system", "content": systemPrompt]
-            ] + (body["messages"] as? [[String: Any]] ?? [])
+            body["messages"] =
+                [
+                    ["role": "system", "content": systemPrompt]
+                ] + (body["messages"] as? [[String: Any]] ?? [])
         }
         if let temp = request.temperature { body["temperature"] = temp }
         if let maxTokens = request.maxTokens { body["max_tokens"] = maxTokens }
@@ -130,24 +140,27 @@ public final class OpenAIProvider: ModelBackend {
         return urlRequest
     }
 
-    private func parseSSEChunk(_ json: [String: Any], into continuation: AsyncThrowingStream<ChatChunk, Error>.Continuation) {
+    private func parseSSEChunk(
+        _ json: [String: Any], into continuation: AsyncThrowingStream<ChatChunk, Error>.Continuation
+    ) {
         // choices[0].delta.content
         if let choices = json["choices"] as? [[String: Any]],
-           let firstChoice = choices.first {
-            let delta = firstChoice["delta"] as? [String: Any]
+            let firstChoice = choices.first {
+            let delta: [String: Any]? = firstChoice["delta"] as? [String: Any]
 
             if let content = delta?["content"] as? String, !content.isEmpty {
                 continuation.yield(.text(content))
             }
             if let toolCalls = delta?["tool_calls"] as? [[String: Any]] {
-                for tc in toolCalls {
-                    if let id = tc["id"] as? String,
-                       let function = tc["function"] as? [String: Any],
-                       let name = function["name"] as? String {
-                        continuation.yield(.toolCall(id: id, name: name, arguments: (function["arguments"] as? String) ?? ""))
-                    } else if let function = tc["function"] as? [String: Any],
-                              let args = function["arguments"] as? String {
-                        let id = (tc["id"] as? String) ?? ""
+                for toolCall in toolCalls {
+                    if let id = toolCall["id"] as? String,
+                        let function = toolCall["function"] as? [String: Any],
+                        let name = function["name"] as? String {
+                        continuation.yield(
+                            .toolCall(id: id, name: name, arguments: (function["arguments"] as? String) ?? ""))
+                    } else if let function = toolCall["function"] as? [String: Any],
+                        let args = function["arguments"] as? String {
+                        let id: String = (toolCall["id"] as? String) ?? ""
                         continuation.yield(.toolCallDelta(id: id, arguments: args))
                     }
                 }
@@ -155,12 +168,13 @@ public final class OpenAIProvider: ModelBackend {
 
             // finish_reason
             if let finishReason = firstChoice["finish_reason"] as? String {
-                let reason: FinishReason = switch finishReason {
-                case "stop": .stop
-                case "length": .length
-                case "tool_calls": .toolCalls
-                default: .stop
-                }
+                let reason: FinishReason =
+                    switch finishReason {
+                    case "stop": .stop
+                    case "length": .length
+                    case "tool_calls": .toolCalls
+                    default: .stop
+                    }
                 // usage（如果存在）
                 var usage: Usage?
                 if let usageDict = json["usage"] as? [String: Any] {
@@ -176,7 +190,7 @@ public final class OpenAIProvider: ModelBackend {
     }
 
     private func collectErrorBody(_ bytes: URLSession.AsyncBytes) async throws -> String {
-        var body = ""
+        var body: String = ""
         for try await line in bytes.lines { body += line }
         return body
     }

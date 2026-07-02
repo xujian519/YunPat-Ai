@@ -28,7 +28,7 @@ public struct ReasoningOutput: Sendable {
 }
 
 public struct ReactStrategy: ReasoningStrategy {
-    public let name = "react"
+    public let name: String = "react"
 
     public func execute(context: ReasoningContext) async throws -> ReasoningOutput {
         ReasoningOutput(result: "React 推理完成")
@@ -36,7 +36,7 @@ public struct ReactStrategy: ReasoningStrategy {
 }
 
 public struct SixStepStrategy: ReasoningStrategy {
-    public let name = "six_step"
+    public let name: String = "six_step"
 
     public func execute(context: ReasoningContext) async throws -> ReasoningOutput {
         ReasoningOutput(result: "六步推理完成", metadata: ["steps": "6"])
@@ -44,7 +44,7 @@ public struct SixStepStrategy: ReasoningStrategy {
 }
 
 public struct ChainOfThoughtStrategy: ReasoningStrategy {
-    public let name = "chain_of_thought"
+    public let name: String = "chain_of_thought"
 
     public func execute(context: ReasoningContext) async throws -> ReasoningOutput {
         ReasoningOutput(result: "思维链推理完成")
@@ -52,11 +52,11 @@ public struct ChainOfThoughtStrategy: ReasoningStrategy {
 }
 
 public struct KgReasoningStrategy: ReasoningStrategy {
-    public let name = "kg_reasoning"
+    public let name: String = "kg_reasoning"
 
     public func execute(context: ReasoningContext) async throws -> ReasoningOutput {
-        let chains = context.blackboard.reasoningChains
-        let summary = chains.map { "\($0.from) → \($0.to)" }.joined(separator: "; ")
+        let chains: [ReasoningChain] = context.blackboard.reasoningChains
+        let summary = chains.map { "\($0.from) → \($0.toNode)" }.joined(separator: "; ")
         return ReasoningOutput(result: "KG推理: \(summary)", metadata: ["chains": "\(chains.count)"])
     }
 }

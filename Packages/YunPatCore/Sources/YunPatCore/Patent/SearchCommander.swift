@@ -7,7 +7,7 @@ public enum SearchSource: String, Sendable {
     case espacenet
     case wipo
     case semanticScholar
-    case localKB       // 本地知识库
+    case localKB  // 本地知识库
 }
 
 public struct SearchResult: Sendable {
@@ -16,8 +16,15 @@ public struct SearchResult: Sendable {
     public let title: String
     public let relevanceScore: Double
     public let metadata: [String: String]
-    public init(source: SearchSource, patentNumber: String, title: String, relevanceScore: Double = 0, metadata: [String: String] = [:]) {
-        self.source = source; self.patentNumber = patentNumber; self.title = title; self.relevanceScore = relevanceScore; self.metadata = metadata
+    public init(
+        source: SearchSource, patentNumber: String, title: String, relevanceScore: Double = 0,
+        metadata: [String: String] = [:]
+    ) {
+        self.source = source
+        self.patentNumber = patentNumber
+        self.title = title
+        self.relevanceScore = relevanceScore
+        self.metadata = metadata
     }
 }
 
@@ -28,7 +35,8 @@ public actor SearchCommander {
     public init(wikiAdapter: WikiAdapter) { self.wikiAdapter = wikiAdapter }
 
     /// 按优先级从多个源检索并合并
-    public func search(query: String, sources: [SearchSource] = [.localKB, .googlePatents, .cnipa]) async -> [SearchResult] {
+    public func search(query: String, sources: [SearchSource] = [.localKB, .googlePatents, .cnipa]) async
+        -> [SearchResult] {
         var results: [SearchResult] = []
 
         for source in sources {

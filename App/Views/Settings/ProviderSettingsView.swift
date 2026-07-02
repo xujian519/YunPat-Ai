@@ -2,10 +2,10 @@ import SwiftUI
 import YunPatNetworking
 
 struct ProviderSettingsView: View {
-    @State private var openAIKey = ""
-    @State private var anthropicKey = ""
-    @State private var deepseekKey = ""
-    @State private var glmKey = ""
+    @State private var openAIKey: String = ""
+    @State private var anthropicKey: String = ""
+    @State private var deepseekKey: String = ""
+    @State private var glmKey: String = ""
 
     var body: some View {
         Form {

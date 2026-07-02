@@ -1,20 +1,29 @@
 import SwiftUI
 
 struct MCPSettingsView: View {
-    struct Server: Identifiable { let id = UUID(); let name: String; let command: String; let args: String }
+    struct Server: Identifiable {
+        let id = UUID()
+        let name: String
+        let command: String
+        let args: String
+    }
     @State private var servers: [Server] = [
-        Server(name: "Playwright", command: "npx", args: "@playwright/mcp"),
+        Server(name: "Playwright", command: "npx", args: "@playwright/mcp")
     ]
 
     var body: some View {
         List {
-            ForEach(servers) { s in
+            ForEach(servers) { string in
                 VStack(alignment: .leading) {
-                    Text(s.name).font(.headline)
-                    Text("\(s.command) \(s.args)").font(.caption).foregroundStyle(.secondary)
+                    Text(string.name).font(.headline)
+                    Text("\(string.command) \(string.args)").font(.caption).foregroundStyle(.secondary)
                 }
             }
-            HStack { Spacer(); Button("添加 MCP 服务器…") {}; Spacer() }
+            HStack {
+                Spacer()
+                Button("添加 MCP 服务器…") {}
+                Spacer()
+            }
         }
         .frame(minWidth: 400, minHeight: 200)
     }

@@ -6,12 +6,14 @@ let package = Package(
     platforms: [.macOS(.v15)],
     products: [.library(name: "YunPatPlugins", targets: ["YunPatPlugins"])],
     dependencies: [
-        .package(path: "../YunPatCore"),
+        .package(path: "../YunPatCore")
     ],
     targets: [
-        .target(name: "YunPatPlugins", dependencies: [
-            .product(name: "YunPatCore", package: "YunPatCore"),
-        ]),
-        .testTarget(name: "YunPatPluginsTests", dependencies: ["YunPatPlugins"]),
+        .target(
+            name: "YunPatPlugins",
+            dependencies: [
+                .product(name: "YunPatCore", package: "YunPatCore")
+            ]),
+        .testTarget(name: "YunPatPluginsTests", dependencies: ["YunPatPlugins"])
     ]
 )

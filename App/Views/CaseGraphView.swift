@@ -61,23 +61,23 @@ struct CaseGraphView: View {
                     }
 
                     // 关联案件
-                    ForEach(relatedCases) { rc in
+                    ForEach(relatedCases) { relatedCase in
                         HStack(spacing: 6) {
-                            Image(systemName: relationIcon(rc.relation))
+                            Image(systemName: relationIcon(relatedCase.relation))
                                 .font(.caption)
-                                .foregroundStyle(relationColor(rc.relation))
+                                .foregroundStyle(relationColor(relatedCase.relation))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(rc.relation.rawValue)
+                                Text(relatedCase.relation.rawValue)
                                     .font(.system(size: 9))
                                     .foregroundStyle(.secondary)
-                                Text(rc.title)
+                                Text(relatedCase.title)
                                     .font(.system(size: 11))
                                     .lineLimit(1)
                             }
                             Spacer()
                         }
                         .padding(6)
-                        .background(relationColor(rc.relation).opacity(0.05))
+                        .background(relationColor(relatedCase.relation).opacity(0.05))
                         .cornerRadius(4)
                     }
                 }

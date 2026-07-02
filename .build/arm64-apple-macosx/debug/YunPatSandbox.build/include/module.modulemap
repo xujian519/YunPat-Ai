@@ -1,3 +1,0 @@
-module YunPatSandbox {
-    header "/Users/xujian/projects/YunPat-Ai/.build/arm64-apple-macosx/debug/YunPatSandbox.build/include/YunPatSandbox-Swift.h"
-}

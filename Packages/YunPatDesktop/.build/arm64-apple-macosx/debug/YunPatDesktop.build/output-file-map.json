@@ -9,6 +9,13 @@
     "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swiftdeps",
     "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.dia"
   },
+  "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AppleScriptBridge.swift": {
+    "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.d",
+    "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.swift.o",
+    "swiftmodule": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge~partial.swiftmodule",
+    "swift-dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.swiftdeps",
+    "diagnostics": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.dia"
+  },
   "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift": {
     "dependencies": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.d",
     "object": "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o",

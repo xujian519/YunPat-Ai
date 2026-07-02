@@ -1,0 +1,77 @@
+# SwiftLint 规则 — 遵循 ARCHITECTURE.md 分层命名约定
+included:
+  - Packages
+  - App
+excluded:
+  - Packages/**/.build
+  - Packages/**/Tests
+
+opt_in_rules:
+  - explicit_type_interface
+  - force_unwrapping
+  - implicit_return
+  - sorted_imports
+  - vertical_whitespace_closing_braces
+
+disabled_rules:
+  - todo
+  - cyclomatic_complexity
+  - file_name
+
+# 强制命名后缀
+identifier_name:
+  excluded:
+    - id
+    - url
+    - key
+    - ctx
+    - db
+    - ok
+  validates_start_with_lowercase: warning
+  allowed_symbols: ["_"]
+
+type_name:
+  min_length: 2
+  max_length: 60
+
+# Service/Engine/Manager/Store/Database/View 后缀规则
+custom_rules:
+  service_naming:
+    name: "Service/Engine 后缀"
+    regex: '^.*(Service|Engine)$'
+    match_kinds:
+      - identifier
+    message: "业务逻辑类应以 Service 或 Engine 结尾"
+  manager_naming:
+    name: "Manager 后缀"
+    regex: '^.*Manager$'
+    match_kinds:
+      - identifier
+    message: "UI 状态类应以 Manager 结尾"
+  store_naming:
+    name: "Store 后缀"
+    regex: '^.*Store$'
+    match_kinds:
+      - identifier
+    message: "JSON 持久化类应以 Store 结尾"
+  database_naming:
+    name: "Database 后缀"
+    regex: '^.*Database$'
+    match_kinds:
+      - identifier
+    message: "SQLite 持久化类应以 Database 结尾"
+  view_naming:
+    name: "View 后缀"
+    regex: '^.*View$'
+    match_kinds:
+      - identifier
+    message: "SwiftUI 视图应以 View 结尾"
+
+explicit_type_interface:
+  allow_redundancy: true
+
+baseline: Baseline.json
+
+line_length: 120
+file_length: 500
+function_body_length: 60

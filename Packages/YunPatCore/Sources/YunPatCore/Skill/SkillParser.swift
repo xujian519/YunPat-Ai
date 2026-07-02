@@ -4,7 +4,7 @@ public final class SkillParser {
     public func parse(_ markdown: String) -> SkillContent? {
         let parts = markdown.components(separatedBy: "---\n")
         guard parts.count >= 3 else { return nil }
-        let yamlBlock = parts[1]
+        let yamlBlock: String = parts[1]
         let body = parts[2...].joined(separator: "---\n")
 
         var dict: [String: String] = [:]

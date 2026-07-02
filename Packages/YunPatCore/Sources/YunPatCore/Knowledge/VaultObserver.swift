@@ -9,14 +9,15 @@ public final class VaultObserver: @unchecked Sendable {
     private var stream: FSEventStreamRef?
     private let vaultPath: URL
     private let observer: KnowledgeEventObserver
-    private let queue = DispatchQueue(label: "yunpat.vault-observer")
+    private let queue: DispatchQueue = DispatchQueue(label: "yunpat.vault-observer")
 
     public init(vaultPath: URL, observer: KnowledgeEventObserver) {
-        self.vaultPath = vaultPath; self.observer = observer
+        self.vaultPath = vaultPath
+        self.observer = observer
     }
 
     public func start() {
-        let paths = [vaultPath.path] as CFArray
+        let paths: CFArray = [vaultPath.path] as CFArray
         var context = FSEventStreamContext(
             version: 0,
             info: Unmanaged.passUnretained(self).toOpaque(),
@@ -51,8 +52,8 @@ public final class VaultObserver: @unchecked Sendable {
     private func handleEvents(numEvents: Int, eventPaths: UnsafeMutableRawPointer) {
         let ptr = eventPaths.assumingMemoryBound(to: UnsafePointer<CChar>?.self)
         var paths: [String] = []
-        for i in 0..<numEvents {
-            if let cString = ptr[i] { paths.append(String(cString: cString)) }
+        for index in 0..<numEvents {
+            if let cString = ptr[index] { paths.append(String(cString: cString)) }
         }
         if !paths.isEmpty { observer.vaultChanged(vaultPath) }
     }

@@ -28,7 +28,8 @@ public actor ShellExecutor {
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
         process.arguments = ["-c", command]
         if let cwd { process.currentDirectoryURL = cwd }
-        let outPipe = Pipe(), errPipe = Pipe()
+        let outPipe = Pipe()
+        let errPipe = Pipe()
         process.standardOutput = outPipe
         process.standardError = errPipe
         try process.run()

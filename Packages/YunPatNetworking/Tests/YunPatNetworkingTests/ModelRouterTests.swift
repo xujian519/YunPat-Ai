@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import YunPatNetworking
 
 final class ModelRouterTests: XCTestCase {
@@ -6,14 +7,14 @@ final class ModelRouterTests: XCTestCase {
         let router = ModelRouter()
         let openAIProvider = OpenAIProvider(apiKey: "test-key")
         await router.register(openAIProvider)
-        let result = await router.route(provider: .openai)
+        let result: (any ModelBackend)? = await router.route(provider: .openai)
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.provider, .openai)
     }
 
     func testRoute_toUnregisteredProvider_returnsNil() async {
         let router = ModelRouter()
-        let result = await router.route(provider: .openai)
+        let result: (any ModelBackend)? = await router.route(provider: .openai)
         XCTAssertNil(result)
     }
 }

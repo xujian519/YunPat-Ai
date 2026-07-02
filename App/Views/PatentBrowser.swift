@@ -3,35 +3,42 @@ import WebKit
 
 /// 内嵌专利浏览器 — Google Patents / CNIPA / Espacenet 直达
 struct PatentBrowser: View {
-    @State private var urlString = "https://patents.google.com/"
-    @State private var selectedPreset = 0
+    @State private var urlString: String = "https://patents.google.com/"
+    @State private var selectedPreset: Int = 0
 
-    static let presets: [(String, String, String)] = [
-        ("Google Patents", "https://patents.google.com/", "magnifyingglass"),
-        ("CNIPA 公布公告", "http://epub.cnipa.gov.cn/", "building.columns"),
-        ("Espacenet", "https://worldwide.espacenet.com/", "globe.europe.africa"),
-        ("WIPO Patentscope", "https://patentscope.wipo.int/", "globe"),
-        ("USPTO", "https://portal.uspto.gov/pair/PublicPair", "flag"),
+    struct Preset: Identifiable {
+        let id = UUID()
+        let name: String
+        let url: String
+        let icon: String
+    }
+
+    static let presets: [Preset] = [
+        Preset(name: "Google Patents", url: "https://patents.google.com/", icon: "magnifyingglass"),
+        Preset(name: "CNIPA 公布公告", url: "http://epub.cnipa.gov.cn/", icon: "building.columns"),
+        Preset(name: "Espacenet", url: "https://worldwide.espacenet.com/", icon: "globe.europe.africa"),
+        Preset(name: "WIPO Patentscope", url: "https://patentscope.wipo.int/", icon: "globe"),
+        Preset(name: "USPTO", url: "https://portal.uspto.gov/pair/PublicPair", icon: "flag")
     ]
 
     var body: some View {
         VStack(spacing: 0) {
             // 预设按钮栏
             HStack(spacing: 4) {
-                ForEach(Array(Self.presets.enumerated()), id: \.0) { i, preset in
+                ForEach(Array(Self.presets.enumerated()), id: \.offset) { index, preset in
                     Button(action: {
-                        selectedPreset = i
-                        urlString = preset.1
+                        selectedPreset = index
+                        urlString = preset.url
                     }) {
                         HStack(spacing: 3) {
-                            Image(systemName: preset.2)
+                            Image(systemName: preset.icon)
                                 .font(.system(size: 9))
-                            Text(preset.0)
+                            Text(preset.name)
                                 .font(.system(size: 10))
                         }
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
-                        .background(selectedPreset == i ? Color.accentColor.opacity(0.15) : Color.clear)
+                        .background(selectedPreset == index ? Color.accentColor.opacity(0.15) : Color.clear)
                         .cornerRadius(4)
                     }
                     .buttonStyle(.plain)
@@ -43,25 +50,25 @@ struct PatentBrowser: View {
 
             // URL 导航栏
             HStack(spacing: 4) {
-                Button(action: {}) {
+                Button(action: {}, label: {
                     Image(systemName: "chevron.left")
                         .font(.caption)
-                }
+                })
                 .buttonStyle(.plain)
-                Button(action: {}) {
+                Button(action: {}, label: {
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                }
+                })
                 .buttonStyle(.plain)
 
                 TextField("URL", text: $urlString)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 11))
 
-                Button(action: {}) {
+                Button(action: {}, label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.caption)
-                }
+                })
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 8)
@@ -89,7 +96,7 @@ struct WebViewRepresentable: NSViewRepresentable {
 
     func updateNSView(_ nsView: WKWebView, context: Context) {
         if let url = URL(string: urlString),
-           nsView.url?.absoluteString != urlString {
+            nsView.url?.absoluteString != urlString {
             nsView.load(URLRequest(url: url))
         }
     }

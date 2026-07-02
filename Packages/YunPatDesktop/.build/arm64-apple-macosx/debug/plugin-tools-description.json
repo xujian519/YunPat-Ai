@@ -32,6 +32,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AppleScriptBridge.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift"
         },
         {
@@ -64,6 +68,7 @@
       "moduleOutputPath" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/Modules/YunPatDesktop.swiftmodule",
       "objects" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/DesktopAutomationProvider.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/FileOperator.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/SecurityGate.swift.o",
@@ -96,7 +101,7 @@
         "-plugin-path",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
         "-sdk",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-F",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
         "-I",
@@ -107,7 +112,7 @@
         "-Xcc",
         "-isysroot",
         "-Xcc",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-Xcc",
         "-F",
         "-Xcc",
@@ -124,6 +129,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.swift.o"
         },
         {
           "kind" : "file",
@@ -153,6 +162,7 @@
       "prepareForIndexing" : false,
       "sources" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AppleScriptBridge.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift",
@@ -216,7 +226,7 @@
         "-plugin-path",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
         "-sdk",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-F",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
         "-I",
@@ -227,7 +237,7 @@
         "-Xcc",
         "-isysroot",
         "-Xcc",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-Xcc",
         "-F",
         "-Xcc",
@@ -315,7 +325,7 @@
         "-plugin-path",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
         "-sdk",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-F",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
         "-I",
@@ -326,7 +336,7 @@
         "-Xcc",
         "-isysroot",
         "-Xcc",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-Xcc",
         "-F",
         "-Xcc",
@@ -374,6 +384,7 @@
       "yunpatdesktop",
       "-c",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AXorcistProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AppleScriptBridge.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/FileOperator.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/SecurityGate.swift",
@@ -406,7 +417,7 @@
       "-plugin-path",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
       "-sdk",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-F",
       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
       "-I",
@@ -417,7 +428,7 @@
       "-Xcc",
       "-isysroot",
       "-Xcc",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-Xcc",
       "-F",
       "-Xcc",
@@ -466,7 +477,7 @@
       "-plugin-path",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
       "-sdk",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-F",
       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
       "-I",
@@ -477,7 +488,7 @@
       "-Xcc",
       "-isysroot",
       "-Xcc",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-Xcc",
       "-F",
       "-Xcc",
@@ -526,7 +537,7 @@
       "-plugin-path",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
       "-sdk",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-F",
       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
       "-I",
@@ -537,7 +548,7 @@
       "-Xcc",
       "-isysroot",
       "-Xcc",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-Xcc",
       "-F",
       "-Xcc",
@@ -599,6 +610,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/AppleScriptBridge.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/Sources/YunPatDesktop/DesktopAutomationProvider.swift"
         },
         {
@@ -644,6 +659,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AXorcistProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatDesktop/.build/arm64-apple-macosx/debug/YunPatDesktop.build/AppleScriptBridge.swift.o"
         },
         {
           "kind" : "file",

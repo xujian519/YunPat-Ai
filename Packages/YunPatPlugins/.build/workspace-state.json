@@ -7,6 +7,37 @@
       {
         "basedOn" : null,
         "packageRef" : {
+          "identity" : "patentclient",
+          "kind" : "fileSystem",
+          "location" : "/Users/xujian/projects/YunPat-Ai/Packages/PatentClient",
+          "name" : "PatentClient"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xujian/projects/YunPat-Ai/Packages/PatentClient"
+        },
+        "subpath" : "patentclient"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swiftsoup",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/scinfu/SwiftSoup.git",
+          "name" : "SwiftSoup"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "49dcadd93161f4a44b4994d3a3e8de9f085aface",
+            "version" : "2.13.5"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "SwiftSoup"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
           "identity" : "yunpatcore",
           "kind" : "fileSystem",
           "location" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore",

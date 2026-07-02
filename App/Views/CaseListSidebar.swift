@@ -33,12 +33,16 @@ struct CaseListSidebar: View {
                 Spacer()
                 Menu {
                     Button {
-                        Task { @MainActor in tabManager.addTab(title: "新案件", type: TabType.patent, flow: AgentFlow.fullAgent) }
+                        Task { @MainActor in
+                            tabManager.addTab(title: "新案件", type: TabType.patent, flow: AgentFlow.fullAgent)
+                        }
                     } label: {
                         Label("新建案件", systemImage: "doc.badge.plus")
                     }
                     Button {
-                        Task { @MainActor in tabManager.addTab(title: "新对话", type: TabType.general, flow: AgentFlow.copilot) }
+                        Task { @MainActor in
+                            tabManager.addTab(title: "新对话", type: TabType.general, flow: AgentFlow.copilot)
+                        }
                     } label: {
                         Label("新建对话", systemImage: "bubble.left")
                     }
@@ -52,8 +56,8 @@ struct CaseListSidebar: View {
 
             // 分类筛选
             Picker("", selection: $filterCategory) {
-                ForEach(CaseFilter.allCases, id: \.self) { f in
-                    Text(f.rawValue).tag(f)
+                ForEach(CaseFilter.allCases, id: \.self) { flag in
+                    Text(flag.rawValue).tag(flag)
                 }
             }
             .pickerStyle(.segmented)

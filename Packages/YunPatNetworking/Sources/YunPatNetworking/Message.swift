@@ -12,6 +12,9 @@ public struct Message: Codable, Sendable, Equatable {
     public let toolCallID: String?
     public let name: String?
     public init(role: Role, content: String, toolCallID: String? = nil, name: String? = nil) {
-        self.role = role; self.content = content; self.toolCallID = toolCallID; self.name = name
+        self.role = role
+        self.content = content
+        self.toolCallID = toolCallID
+        self.name = name
     }
 }

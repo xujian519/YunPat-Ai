@@ -7,6 +7,6 @@ let package = Package(
     products: [.library(name: "YunPatDesktop", targets: ["YunPatDesktop"])],
     targets: [
         .target(name: "YunPatDesktop"),
-        .testTarget(name: "YunPatDesktopTests", dependencies: ["YunPatDesktop"]),
+        .testTarget(name: "YunPatDesktopTests", dependencies: ["YunPatDesktop"])
     ]
 )

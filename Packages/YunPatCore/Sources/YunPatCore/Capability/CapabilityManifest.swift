@@ -22,27 +22,29 @@ public struct CapabilityManifest: Sendable {
         for cap in await registry.listCapabilities() {
             // 收集该 capability 下的工具
             let tools = await cap.toolNames
-            entries.append(ManifestEntry(
-                name: cap.name,
-                displayName: cap.displayName,
-                description: cap.description,
-                kind: .tool,
-                costLevel: cap.metadata.costLevel,
-                requiresNetwork: cap.metadata.requiresNetwork,
-                subItems: tools
-            ))
+            entries.append(
+                ManifestEntry(
+                    name: cap.name,
+                    displayName: cap.displayName,
+                    description: cap.description,
+                    kind: .tool,
+                    costLevel: cap.metadata.costLevel,
+                    requiresNetwork: cap.metadata.requiresNetwork,
+                    subItems: tools
+                ))
         }
 
         for skill in skills {
-            entries.append(ManifestEntry(
-                name: skill.manifest.name,
-                displayName: skill.manifest.displayName,
-                description: skill.manifest.description,
-                kind: .skill,
-                costLevel: .low,
-                requiresNetwork: false,
-                subItems: []
-            ))
+            entries.append(
+                ManifestEntry(
+                    name: skill.manifest.name,
+                    displayName: skill.manifest.displayName,
+                    description: skill.manifest.description,
+                    kind: .skill,
+                    costLevel: .low,
+                    requiresNetwork: false,
+                    subItems: []
+                ))
         }
 
         return CapabilityManifest(entries: entries)
@@ -55,16 +57,16 @@ public struct CapabilityManifest: Sendable {
         lines.append("先浏览能力列表，然后选择对应工具。使用 capabilities_discover 搜索具体能力。")
         lines.append("")
 
-        for e in entries {
-            let cost = e.costLevel.rawValue
-            let net = e.requiresNetwork ? "🌐" : ""
-            let kindIcon = e.kind == .skill ? "📚" : "🔧"
-            lines.append("## \(kindIcon) \(e.displayName)")
-            lines.append("- ID: `\(e.name)` | 成本: \(cost)\(net)")
-            lines.append("- 描述: \(e.description)")
+        for error in entries {
+            let cost = error.costLevel.rawValue
+            let net = error.requiresNetwork ? "🌐" : ""
+            let kindIcon = error.kind == .skill ? "📚" : "🔧"
+            lines.append("## \(kindIcon) \(error.displayName)")
+            lines.append("- ID: `\(error.name)` | 成本: \(cost)\(net)")
+            lines.append("- 描述: \(error.description)")
 
-            if !e.subItems.isEmpty {
-                lines.append("- 可用工具: \(e.subItems.map { "`\($0)`" }.joined(separator: ", "))")
+            if !error.subItems.isEmpty {
+                lines.append("- 可用工具: \(error.subItems.map { "`\($0)`" }.joined(separator: ", "))")
             }
             lines.append("")
         }
@@ -80,9 +82,16 @@ public struct ManifestEntry: Sendable, Equatable {
     public let costLevel: CostLevel
     public let requiresNetwork: Bool
     public let subItems: [String]
-    public init(name: String, displayName: String, description: String, kind: CapabilityKind, costLevel: CostLevel, requiresNetwork: Bool, subItems: [String] = []) {
-        self.name = name; self.displayName = displayName; self.description = description
-        self.kind = kind; self.costLevel = costLevel; self.requiresNetwork = requiresNetwork
+    public init(
+        name: String, displayName: String, description: String, kind: CapabilityKind, costLevel: CostLevel,
+        requiresNetwork: Bool, subItems: [String] = []
+    ) {
+        self.name = name
+        self.displayName = displayName
+        self.description = description
+        self.kind = kind
+        self.costLevel = costLevel
+        self.requiresNetwork = requiresNetwork
         self.subItems = subItems
     }
 }
@@ -92,4 +101,3 @@ public enum CapabilityKind: String, Sendable {
     case skill
     case method
 }
-

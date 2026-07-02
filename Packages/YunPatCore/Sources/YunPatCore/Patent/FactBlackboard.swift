@@ -2,11 +2,11 @@ import Foundation
 
 public struct ReasoningChain: Sendable {
     public let from: String
-    public let to: String
+    public let toNode: String
     public let evidence: String
-    public init(from: String, to: String, evidence: String) {
+    public init(from: String, toNode: String, evidence: String) {
         self.from = from
-        self.to = to
+        self.toNode = toNode
         self.evidence = evidence
     }
 }
@@ -17,7 +17,10 @@ public struct RuleConstraint: Sendable {
     public let requirement: ConstraintLevel
     public let description: String
     public let applicableStages: [String]
-    public init(articleId: String, articleName: String, requirement: ConstraintLevel, description: String, applicableStages: [String]) {
+    public init(
+        articleId: String, articleName: String, requirement: ConstraintLevel, description: String,
+        applicableStages: [String]
+    ) {
         self.articleId = articleId
         self.articleName = articleName
         self.requirement = requirement
@@ -48,17 +51,17 @@ public struct ArticleJudgment: Sendable {
 public final class FactBlackboard: @unchecked Sendable {
     private let lock = NSLock()
 
-    private var _technicalField = ""
-    private var _problem = ""
+    private var _technicalField: String = ""
+    private var _problem: String = ""
     private var _inventionPoints: [String] = []
     private var _missingInfo: [String] = []
 
     private var _reasoningChains: [ReasoningChain] = []
     private var _ruleConstraints: [RuleConstraint] = []
     private var _articleJudgments: [ArticleJudgment] = []
-    private var _executionPlan: ExecutionPlan? = nil
+    private var _executionPlan: ExecutionPlan?
 
-    private var _factsLocked = false
+    private var _factsLocked: Bool = false
 
     public init() {}
 
@@ -72,7 +75,9 @@ public final class FactBlackboard: @unchecked Sendable {
     public var executionPlan: ExecutionPlan? { lock.withLock { _executionPlan } }
     public var isFactsLocked: Bool { lock.withLock { _factsLocked } }
 
-    public func writeFacts(technicalField: String, problem: String, inventionPoints: [String], missingInfo: [String] = []) {
+    public func writeFacts(
+        technicalField: String, problem: String, inventionPoints: [String], missingInfo: [String] = []
+    ) {
         lock.withLock {
             _technicalField = technicalField
             _problem = problem

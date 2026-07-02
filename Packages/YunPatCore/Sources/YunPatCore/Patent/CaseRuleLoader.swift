@@ -26,17 +26,22 @@ public actor CaseRuleLoader {
             for file in files where file.pathExtension == "md" {
                 guard let content = try? String(contentsOf: file, encoding: .utf8) else { continue }
                 let fileName = file.deletingPathExtension().lastPathComponent
-                let priority: Int = fileName.hasPrefix("01") ? 1
-                    : fileName.hasPrefix("02") ? 2
-                    : fileName.hasPrefix("03") ? 3
-                    : fileName.hasPrefix("04") ? 4 : 5
+                let priority: Int =
+                    fileName.hasPrefix("01")
+                    ? 1
+                    : fileName.hasPrefix("02")
+                        ? 2
+                        : fileName.hasPrefix("03")
+                            ? 3
+                            : fileName.hasPrefix("04") ? 4 : 5
 
-                rules.append(CaseRule(
-                    name: fileName,
-                    content: content,
-                    priority: priority,
-                    source: file
-                ))
+                rules.append(
+                    CaseRule(
+                        name: fileName,
+                        content: content,
+                        priority: priority,
+                        source: file
+                    ))
             }
         } catch {}
 
@@ -51,10 +56,10 @@ public actor CaseRuleLoader {
         guard !rules.isEmpty else { return "" }
 
         var parts: [String] = ["【案件级规则】"]
-        var tokenCount = 0
+        var tokenCount: Int = 0
 
         for rule in rules {
-            let text = "## \(rule.name)\n\(rule.content.prefix(500))"
+            let text: String = "## \(rule.name)\n\(rule.content.prefix(500))"
             let estimated = text.count / 2  // CJK approx
             if tokenCount + estimated > maxTokens {
                 parts.append("…（\(rules.count - parts.count + 1) 条规则已折叠）")
@@ -78,6 +83,9 @@ public struct CaseRule: Sendable {
     public let priority: Int
     public let source: URL
     public init(name: String, content: String, priority: Int, source: URL) {
-        self.name = name; self.content = content; self.priority = priority; self.source = source
+        self.name = name
+        self.content = content
+        self.priority = priority
+        self.source = source
     }
 }

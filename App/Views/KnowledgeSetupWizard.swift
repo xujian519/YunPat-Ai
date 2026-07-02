@@ -3,7 +3,7 @@ import SwiftUI
 /// 首次启动知识库配置引导向导
 struct KnowledgeSetupWizard: View {
     @Binding var isPresented: Bool
-    @State private var vaultPath = ""
+    @State private var vaultPath: String = ""
     @State private var step: WizardStep = .welcome
 
     enum WizardStep {
@@ -110,17 +110,15 @@ struct KnowledgeSetupWizard: View {
     private func detectVaults() {
         step = .detect
         // 检测常见 iCloud Obsidian 路径
-        let home = NSHomeDirectory()
-        let candidates = [
+        let home: String = NSHomeDirectory()
+        let candidates: [String] = [
             "\(home)/Library/Mobile Documents/iCloud~md~obsidian/Documents",
             "\(home)/Documents/Obsidian",
-            "\(home)/Obsidian",
+            "\(home)/Obsidian"
         ]
-        for c in candidates {
-            if FileManager.default.fileExists(atPath: c) {
-                vaultPath = c
-                break
-            }
+        for candidate in candidates where FileManager.default.fileExists(atPath: candidate) {
+            vaultPath = candidate
+            break
         }
     }
 

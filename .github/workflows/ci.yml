@@ -1,0 +1,90 @@
+name: CI — YunPat-Ai Tiered Test & Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── T0: 纯本地工具测试（秒级，每次 PR 都跑）──
+  test-t0:
+    name: T0 — Local Tools
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Swift 6.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
+      - name: T0 Tests (pure local, no network)
+        run: swift scripts/run-tiered-tests.swift t0
+
+  # ── T0+T1: 本地 + 软依赖（基线）──
+  test-t0t1:
+    name: T0+T1 — Local + Soft Deps
+    runs-on: macos-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Swift 6.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
+      - name: T0+T1 Tests
+        run: swift scripts/run-tiered-tests.swift t0t1
+
+  # ── 全量: 含网络 API（仅 main 分支 push）──
+  test-all:
+    name: T0+T1+T2 — Full Suite
+    runs-on: macos-latest
+    timeout-minutes: 30
+    if: github.ref == 'refs/heads/main'
+    env:
+      PSS_USERNAME: ${{ secrets.PSS_USERNAME }}
+      PSS_PASSWORD: ${{ secrets.PSS_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Swift 6.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
+      - name: Full Test Suite
+        run: swift scripts/run-tiered-tests.swift all
+
+  # ── 代码质量 ──
+  lint:
+    name: SwiftLint
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SwiftLint
+        run: brew install swiftlint
+      - name: Cache SwiftLint Baseline
+        uses: actions/cache@v4
+        with:
+          path: Baseline.json
+          key: swiftlint-baseline-${{ hashFiles('Baseline.json') }}
+      - name: Run SwiftLint
+        run: swiftlint --strict

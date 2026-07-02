@@ -24,7 +24,8 @@ public struct DocumentProcessorPlugin {
                 description: "提取 PDF 文本、图片、表格，支持 OCR 识别",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .low, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["专利PDF提取", "文档解析"])
+                metadata: CapabilityMetadata(
+                    costLevel: .low, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["专利PDF提取", "文档解析"])
             ),
             CapabilityDefinition(
                 name: "document.parse.word",
@@ -32,7 +33,8 @@ public struct DocumentProcessorPlugin {
                 description: "提取 .doc/.docx 文本内容，保留基础格式",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .low, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["Word文档读取"])
+                metadata: CapabilityMetadata(
+                    costLevel: .low, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["Word文档读取"])
             ),
             CapabilityDefinition(
                 name: "document.convert.markdown",
@@ -40,8 +42,10 @@ public struct DocumentProcessorPlugin {
                 description: "将任意文档转换为 Markdown 格式供 AI 分析",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .low, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["格式转换", "Markdown导出"])
-            ),
+                metadata: CapabilityMetadata(
+                    costLevel: .low, requiresNetwork: false, isIdempotent: true,
+                    typicalUseCases: ["格式转换", "Markdown导出"])
+            )
         ]
     }
 }

@@ -24,7 +24,8 @@ public struct PatentTranslatePlugin {
                 description: "将中国专利文本翻译为英文，使用专利标准术语",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["PCT申请", "海外布局"])
+                metadata: CapabilityMetadata(
+                    costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["PCT申请", "海外布局"])
             ),
             CapabilityDefinition(
                 name: "patent.translate.en2cn",
@@ -32,7 +33,9 @@ public struct PatentTranslatePlugin {
                 description: "将英文专利文本翻译为中文，保留技术术语准确性",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["外国专利阅读", "对比文件分析"])
+                metadata: CapabilityMetadata(
+                    costLevel: .medium, requiresNetwork: true, isIdempotent: false,
+                    typicalUseCases: ["外国专利阅读", "对比文件分析"])
             ),
             CapabilityDefinition(
                 name: "patent.translate.terms",
@@ -40,8 +43,9 @@ public struct PatentTranslatePlugin {
                 description: "查询专利术语的标准翻译（中英双向）",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .free, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["术语确认"])
-            ),
+                metadata: CapabilityMetadata(
+                    costLevel: .free, requiresNetwork: false, isIdempotent: true, typicalUseCases: ["术语确认"])
+            )
         ]
     }
 }

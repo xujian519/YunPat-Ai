@@ -28,16 +28,21 @@ public protocol SandboxProvider: Sendable {
 // MARK: - Sandbox VM
 
 public struct SandboxVM: Sendable, Identifiable {
-    public let id: String          // = agentID
+    public let id: String  // = agentID
     public let state: VMState
     public let linuxUser: String
     public let homeDirectory: String
     public let workspaceMount: String  // VirtioFS 挂载点路径
 
-    public init(id: String, state: VMState = .stopped, linuxUser: String = "",
-                homeDirectory: String = "", workspaceMount: String = "") {
-        self.id = id; self.state = state; self.linuxUser = linuxUser
-        self.homeDirectory = homeDirectory; self.workspaceMount = workspaceMount
+    public init(
+        id: String, state: VMState = .stopped, linuxUser: String = "",
+        homeDirectory: String = "", workspaceMount: String = ""
+    ) {
+        self.id = id
+        self.state = state
+        self.linuxUser = linuxUser
+        self.homeDirectory = homeDirectory
+        self.workspaceMount = workspaceMount
     }
 }
 
@@ -75,7 +80,9 @@ public actor SandboxManager: SandboxProvider {
         if #available(macOS 26.0, *) {
             return .available
         } else {
-            return .unsupported(reason: "Apple Containerization requires macOS 26.0+ (Tahoe). Current OS does not support this feature.")
+            return .unsupported(
+                reason: "Apple Containerization requires macOS 26.0+ (Tahoe). Current OS does not support this feature."
+            )
         }
     }
 
@@ -90,15 +97,15 @@ public actor SandboxManager: SandboxProvider {
         // 3. 配置 vsock 桥接到主机 API
         // 4. 为 agentID 创建独立 Linux 用户
 
-        let vm = SandboxVM(
+        let sandboxVM = SandboxVM(
             id: agentID,
             state: .stopped,
             linuxUser: "agent-\(agentID)",
             homeDirectory: "/home/agent-\(agentID)",
             workspaceMount: "/workspace"
         )
-        vms[agentID] = vm
-        return vm
+        vms[agentID] = sandboxVM
+        return sandboxVM
     }
 
     public func listVMs() -> [SandboxVM] {

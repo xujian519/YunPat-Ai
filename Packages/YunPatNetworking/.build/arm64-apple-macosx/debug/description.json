@@ -40,6 +40,22 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FallbackChainService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureFormat.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/LLMServices.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift"
         },
         {
@@ -52,7 +68,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/NetworkPolicy.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OMLXBackend.swift"
         },
         {
           "kind" : "file",
@@ -65,6 +89,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/SecureCredentialStore.swift"
         },
         {
           "kind" : "file",
@@ -90,13 +118,20 @@
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatChunk.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ChatRequest.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/CredentialStore.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FallbackChainService.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureFormat.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureRecorder.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/LLMServices.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Message.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelBackend.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/ModelRouter.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/NetworkPolicy.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/AnthropicProvider.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OMLXBackend.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAICompatProvider.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAIProvider.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/RateLimiter.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/SecureCredentialStore.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Usage.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/YunPatNetworking.swift.o"
       ],
@@ -165,6 +200,22 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FallbackChainService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureFormat.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/LLMServices.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Message.swift.o"
         },
         {
@@ -177,7 +228,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/NetworkPolicy.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/AnthropicProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OMLXBackend.swift.o"
         },
         {
           "kind" : "file",
@@ -190,6 +249,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/RateLimiter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/SecureCredentialStore.swift.o"
         },
         {
           "kind" : "file",
@@ -209,13 +272,20 @@
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FallbackChainService.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureFormat.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureRecorder.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/LLMServices.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/NetworkPolicy.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OMLXBackend.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/SecureCredentialStore.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift"
       ],
@@ -332,6 +402,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/FixtureRecorderTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift"
         },
         {
@@ -361,6 +435,7 @@
       "objects" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/AnthropicProviderTests.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swift.o",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/FixtureRecorderTests.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/ModelRouterTests.swift.o",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/OpenAIProviderTests.swift.o"
@@ -425,6 +500,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/FixtureRecorderTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/MockModelBackend.swift.o"
         },
         {
@@ -444,6 +523,7 @@
       "sources" : [
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/AnthropicProviderTests.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift",
+        "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/FixtureRecorderTests.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift",
         "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/OpenAIProviderTests.swift"
@@ -466,13 +546,20 @@
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ChatRequest.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/CredentialStore.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FallbackChainService.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureFormat.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureRecorder.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/LLMServices.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelBackend.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/ModelRouter.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/NetworkPolicy.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OMLXBackend.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/SecureCredentialStore.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/YunPatNetworking.swift",
       "-I",
@@ -596,6 +683,7 @@
       "-c",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/AnthropicProviderTests.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift",
+      "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/FixtureRecorderTests.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/MockModelBackend.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/ModelRouterTests.swift",
       "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/OpenAIProviderTests.swift",
@@ -706,6 +794,22 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FallbackChainService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureFormat.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/LLMServices.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Message.swift"
         },
         {
@@ -718,7 +822,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/NetworkPolicy.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OMLXBackend.swift"
         },
         {
           "kind" : "file",
@@ -731,6 +843,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/RateLimiter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Sources/YunPatNetworking/SecureCredentialStore.swift"
         },
         {
           "kind" : "file",
@@ -782,6 +898,22 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FallbackChainService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureFormat.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/FixtureRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/LLMServices.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/Message.swift.o"
         },
         {
@@ -794,6 +926,14 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/NetworkPolicy.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OMLXBackend.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/OpenAICompatProvider.swift.o"
         },
         {
@@ -803,6 +943,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/RateLimiter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworking.build/SecureCredentialStore.swift.o"
         },
         {
           "kind" : "file",
@@ -823,6 +967,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/DeepSeekProviderTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/.build/arm64-apple-macosx/debug/YunPatNetworkingTests.build/FixtureRecorderTests.swift.o"
         },
         {
           "kind" : "file",
@@ -853,6 +1001,10 @@
         {
           "kind" : "file",
           "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/DeepSeekProviderTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/xujian/projects/YunPat-Ai/Packages/YunPatNetworking/Tests/YunPatNetworkingTests/FixtureRecorderTests.swift"
         },
         {
           "kind" : "file",

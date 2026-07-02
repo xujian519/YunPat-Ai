@@ -54,7 +54,8 @@ public actor MemoryStore {
 
     public func loadGlobalMemory() -> GlobalMemory {
         guard let raw = defaults.data(forKey: "yunpat.memory.global"),
-              let decoded = try? decoder.decode(GlobalMemory.self, from: raw) else {
+            let decoded = try? decoder.decode(GlobalMemory.self, from: raw)
+        else {
             return GlobalMemory()
         }
         return decoded

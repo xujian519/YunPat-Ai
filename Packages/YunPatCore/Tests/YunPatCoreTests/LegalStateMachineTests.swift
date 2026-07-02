@@ -1,26 +1,36 @@
 import XCTest
+
 @testable import YunPatCore
 
 final class LegalStateMachineTests: XCTestCase {
     func testValidTransition() {
-        let sm = LegalStateMachine()
-        let r = sm.transition(to: .factFinding)
-        guard case .success = r else { XCTFail(); return }
-        XCTAssertEqual(sm.currentState, .factFinding)
+        let stateMachine: LegalStateMachine = LegalStateMachine()
+        let result: Result<Void, StateError> = stateMachine.transition(to: .factFinding)
+        guard case .success = result else {
+            XCTFail("预期成功转换到 factFinding")
+            return
+        }
+        XCTAssertEqual(stateMachine.currentState, .factFinding)
     }
 
     func testInvalidTransition() {
-        let sm = LegalStateMachine()
-        let r = sm.transition(to: .executing)
-        guard case .failure = r else { XCTFail("应拒绝"); return }
+        let stateMachine: LegalStateMachine = LegalStateMachine()
+        let result: Result<Void, StateError> = stateMachine.transition(to: .executing)
+        guard case .failure = result else {
+            XCTFail("应拒绝从 idle 到 executing")
+            return
+        }
     }
 
     func testRollback() {
-        let sm = LegalStateMachine()
-        _ = sm.transition(to: .factFinding)
-        _ = sm.transition(to: .legalBasis)
-        let r = sm.rollback(to: .factFinding, reason: "新事实")
-        guard case .success = r else { XCTFail(); return }
-        XCTAssertEqual(sm.currentState, .factFinding)
+        let stateMachine: LegalStateMachine = LegalStateMachine()
+        _ = stateMachine.transition(to: .factFinding)
+        _ = stateMachine.transition(to: .legalBasis)
+        let result: Result<Void, StateError> = stateMachine.rollback(to: .factFinding, reason: "新事实")
+        guard case .success = result else {
+            XCTFail("预期回滚成功")
+            return
+        }
+        XCTAssertEqual(stateMachine.currentState, .factFinding)
     }
 }

@@ -44,7 +44,7 @@ public struct PatentSearchPlugin {
                     isIdempotent: true,
                     typicalUseCases: ["中国专利检索", "法律状态查询"]
                 )
-            ),
+            )
         ]
     }
 }

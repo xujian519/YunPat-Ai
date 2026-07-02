@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import YunPatCore
 
 final class FactBlackboardTests: XCTestCase {

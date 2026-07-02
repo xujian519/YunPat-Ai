@@ -1,19 +1,19 @@
 import SwiftUI
-import YunPatNetworking
 import YunPatCore
+import YunPatNetworking
 
 struct ContentView: View {
-    @StateObject private var tabManager = TabManager()
+    @StateObject private var tabManager: TabManager = TabManager()
     @StateObject private var chatManager: ChatManager
-    @State private var sidebarCollapsed = false
-    @State private var collaborationVisible = false
-    @State private var documentSplitVisible = false
-    @State private var browserVisible = false
-    @State private var folderTreeVisible = false
-    @State private var caseGraphMode = false
-    @State private var filePickerOpen = false
-    @State private var settingsOpen = false
-    @State private var showWizard = false
+    @State private var sidebarCollapsed: Bool = false
+    @State private var collaborationVisible: Bool = false
+    @State private var documentSplitVisible: Bool = false
+    @State private var browserVisible: Bool = false
+    @State private var folderTreeVisible: Bool = false
+    @State private var caseGraphMode: Bool = false
+    @State private var filePickerOpen: Bool = false
+    @State private var settingsOpen: Bool = false
+    @State private var showWizard: Bool = false
 
     init(router: ModelRouter) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -85,13 +85,19 @@ struct ContentView: View {
                 showWizard = true
             }
         }
-        .fileImporter(isPresented: $filePickerOpen, allowedContentTypes: [.plainText, .pdf, .data], allowsMultipleSelection: true) { result in
+        .fileImporter(
+            isPresented: $filePickerOpen,
+            allowedContentTypes: [.plainText, .pdf, .data],
+            allowsMultipleSelection: true
+        ) { result in
             if case .success(let urls) = result {
                 for url in urls {
                     guard url.startAccessingSecurityScopedResource() else { continue }
                     defer { url.stopAccessingSecurityScopedResource() }
-                    let content = (try? String(contentsOf: url, encoding: .utf8)) ?? "[二进制文件: \(url.lastPathComponent)]"
-                    let msg = "📎 已打开: \(url.lastPathComponent)\n\n\(String(content.prefix(2000)))"
+                    let content: String =
+                        (try? String(contentsOf: url, encoding: .utf8))
+                        ?? "[二进制文件: \(url.lastPathComponent)]"
+                    let msg: String = "📎 已打开: \(url.lastPathComponent)\n\n\(String(content.prefix(2000)))"
                     Task { @MainActor in
                         if let activeID = tabManager.activeTabID {
                             tabManager.appendMessage(to: activeID, ChatMessage(role: .user, content: msg))
@@ -113,17 +119,17 @@ struct ContentView: View {
 
     private var toolbar: some View {
         HStack(spacing: 8) {
-            Button(action: { withAnimation { sidebarCollapsed.toggle() } }) {
-                Image(systemName: "sidebar.left")
-                    .font(.system(size: 12))
-            }
+            Button(
+                action: { withAnimation { sidebarCollapsed.toggle() } },
+                label: { Image(systemName: "sidebar.left").font(.system(size: 12)) }
+            )
             .buttonStyle(.plain)
             .help("显示/隐藏侧栏")
 
-            Button(action: { withAnimation { settingsOpen.toggle() } }) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 12))
-            }
+            Button(
+                action: { withAnimation { settingsOpen.toggle() } },
+                label: { Image(systemName: "gearshape").font(.system(size: 12)) }
+            )
             .buttonStyle(.plain)
             .help("标签设置")
 
@@ -133,18 +139,21 @@ struct ContentView: View {
 
             flowModePicker
 
-            Button(action: { withAnimation { collaborationVisible.toggle() } }) {
-                Image(systemName: "checklist")
-                    .font(.system(size: 12))
-            }
+            Button(
+                action: { withAnimation { collaborationVisible.toggle() } },
+                label: { Image(systemName: "checklist").font(.system(size: 12)) }
+            )
             .buttonStyle(.plain)
             .help("协作面板")
 
             if collaborationVisible {
-                Button(action: { withAnimation { caseGraphMode.toggle() } }) {
-                    Image(systemName: caseGraphMode ? "list.bullet" : "point.3.connected.trianglepath.dotted")
-                        .font(.system(size: 12))
-                }
+                Button(
+                    action: { withAnimation { caseGraphMode.toggle() } },
+                    label: {
+                        Image(systemName: caseGraphMode ? "list.bullet" : "point.3.connected.trianglepath.dotted")
+                            .font(.system(size: 12))
+                    }
+                )
                 .buttonStyle(.plain)
                 .help(caseGraphMode ? "待确认列表" : "案件关系图")
             }
@@ -154,12 +163,15 @@ struct ContentView: View {
     }
 
     private var flowModePicker: some View {
-        Picker("模式", selection: Binding(
-            get: { activeTab?.loopPreference ?? .copilot },
-            set: { newFlow in
-                chatManager.setFlow(newFlow, in: tabManager)
-            }
-        )) {
+        Picker(
+            "模式",
+            selection: Binding(
+                get: { activeTab?.loopPreference ?? .copilot },
+                set: { newFlow in
+                    chatManager.setFlow(newFlow, in: tabManager)
+                }
+            )
+        ) {
             Label("Copilot", systemImage: "circle").tag(AgentFlow.copilot)
             Label("Guided", systemImage: "circle.dotted").tag(AgentFlow.guided)
             Label("FullAgent", systemImage: "circle.circle").tag(AgentFlow.fullAgent)
@@ -191,7 +203,7 @@ struct ContentView: View {
         return [
             .init(id: "CN202310000001", title: "在先申请", relation: .priority),
             .init(id: "CN202310000002", title: "分案申请", relation: .divisional),
-            .init(id: "US2024/012345", title: "对比文件 D1", relation: .reference),
+            .init(id: "US2024/012345", title: "对比文件 D1", relation: .reference)
         ]
     }
 
@@ -233,7 +245,9 @@ struct ContentView: View {
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { Task { await chatManager.sendMessage(in: tabManager) } }
                 Button("发送") { Task { await chatManager.sendMessage(in: tabManager) } }
-                    .disabled(chatManager.isStreaming || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(
+                        chatManager.isStreaming
+                            || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .padding()
         }
@@ -274,14 +288,16 @@ struct CollaborationPanel: View {
 
     private var pendingApprovals: [ApprovalItem] {
         guard let activeID = tabManager.activeTabID,
-              let tab = tabManager.tabs.first(where: { $0.id == activeID }) else { return [] }
+            let tab = tabManager.tabs.first(where: { $0.id == activeID })
+        else { return [] }
         var items: [ApprovalItem] = []
         if case .waitingApproval(let req) = tab.loopState {
-            items.append(ApprovalItem(
-                title: "等待确认",
-                detail: req.detail,
-                checkpoint: tab.loopStateDescription
-            ))
+            items.append(
+                ApprovalItem(
+                    title: "等待确认",
+                    detail: req.detail,
+                    checkpoint: tab.loopStateDescription
+                ))
         }
         for msg in tab.messages {
             if msg.content.contains("需要确认") || msg.content.contains("⚠️") {
@@ -338,7 +354,7 @@ struct CollaborationPanel: View {
 }
 
 struct ApprovalItem: Identifiable, Sendable {
-    let id = UUID()
+    let id: UUID = UUID()
     let title: String
     let detail: String
     let checkpoint: String?

@@ -46,7 +46,7 @@ public actor TabooDetector {
         TabooRule(pattern: "约", reason: "数值前不应使用约数", severity: .error, suggestion: "使用精确数值"),
         TabooRule(pattern: "例如", reason: "应列出具体实施方式而非举例", suggestion: "使用包括替代例如"),
         TabooRule(pattern: "优选", reason: "权利要求中不应出现优选表述", suggestion: "说明书中描述"),
-        TabooRule(pattern: "尤其是", reason: "权利要求中避免主观强调", suggestion: "删除"),
+        TabooRule(pattern: "尤其是", reason: "权利要求中避免主观强调", suggestion: "删除")
     ]
 
     private let rules: [TabooRule]
@@ -59,11 +59,12 @@ public actor TabooDetector {
         var matches: [TabooMatch] = []
         for (i, line) in text.components(separatedBy: .newlines).enumerated() {
             for rule in rules where line.contains(rule.pattern) {
-                matches.append(TabooMatch(
-                    rule: rule,
-                    line: i + 1,
-                    matchedText: line.trimmingCharacters(in: .whitespaces)
-                ))
+                matches.append(
+                    TabooMatch(
+                        rule: rule,
+                        line: i + 1,
+                        matchedText: line.trimmingCharacters(in: .whitespaces)
+                    ))
             }
         }
         return matches

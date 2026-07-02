@@ -6,25 +6,25 @@ import YunPatNetworking
 /// 设计 §7：摘要→廉价模型，撰写→强推理模型，检索→长上下文模型
 public struct SmartModelRouter: Sendable {
     public enum TaskCategory: String, Sendable {
-        case summary       // 摘要/压缩
-        case drafting      // 撰写/起草
-        case retrieval     // 检索/查询
-        case analysis      // 分析/推理
-        case general       // 通用对话
+        case summary  // 摘要/压缩
+        case drafting  // 撰写/起草
+        case retrieval  // 检索/查询
+        case analysis  // 分析/推理
+        case general  // 通用对话
     }
 
     /// 根据请求内容推断任务类别
     public static func classify(_ request: UserRequest) -> TaskCategory {
-        let content = request.content.lowercased()
+        let content: String = request.content.lowercased()
 
         // 撰写类关键词
-        let draftingKeywords = ["撰写", "权利要求", "说明书", "起草", "独立权利要求", "从属权利要求"]
+        let draftingKeywords: [String] = ["撰写", "权利要求", "说明书", "起草", "独立权利要求", "从属权利要求"]
         if draftingKeywords.contains(where: { content.contains($0) }) {
             return .drafting
         }
 
         // 检索类关键词
-        let retrievalKeywords = ["检索", "搜索", "查找", "查询", "法律状态", "专利号"]
+        let retrievalKeywords: [String] = ["检索", "搜索", "查找", "查询", "法律状态", "专利号"]
         if retrievalKeywords.contains(where: { content.contains($0) }) {
             return .retrieval
         }
@@ -48,38 +48,38 @@ public struct SmartModelRouter: Sendable {
         switch preferred {
         case .deepseek:
             switch category {
-            case .summary:     return "deepseek-chat"
-            case .drafting:    return "deepseek-reasoner"
-            case .retrieval:   return "deepseek-chat"
-            case .analysis:    return "deepseek-reasoner"
-            case .general:     return "deepseek-chat"
+            case .summary: return "deepseek-chat"
+            case .drafting: return "deepseek-reasoner"
+            case .retrieval: return "deepseek-chat"
+            case .analysis: return "deepseek-reasoner"
+            case .general: return "deepseek-chat"
             }
 
         case .openai:
             switch category {
-            case .summary:     return "gpt-4o-mini"
-            case .drafting:    return "gpt-4o"
-            case .retrieval:   return "gpt-4o"
-            case .analysis:    return "gpt-4o"
-            case .general:     return "gpt-4o"
+            case .summary: return "gpt-4o-mini"
+            case .drafting: return "gpt-4o"
+            case .retrieval: return "gpt-4o"
+            case .analysis: return "gpt-4o"
+            case .general: return "gpt-4o"
             }
 
         case .anthropic:
             switch category {
-            case .summary:     return "claude-sonnet-4-20250514"
-            case .drafting:    return "claude-sonnet-4-20250514"
-            case .retrieval:   return "claude-sonnet-4-20250514"  // 200K context
-            case .analysis:    return "claude-sonnet-4-20250514"
-            case .general:     return "claude-sonnet-4-20250514"
+            case .summary: return "claude-sonnet-4-20250514"
+            case .drafting: return "claude-sonnet-4-20250514"
+            case .retrieval: return "claude-sonnet-4-20250514"  // 200K context
+            case .analysis: return "claude-sonnet-4-20250514"
+            case .general: return "claude-sonnet-4-20250514"
             }
 
         case .glm:
             switch category {
-            case .summary:     return "glm-4-flash"
-            case .drafting:    return "glm-4"
-            case .retrieval:   return "glm-4"
-            case .analysis:    return "glm-4"
-            case .general:     return "glm-4"
+            case .summary: return "glm-4-flash"
+            case .drafting: return "glm-4"
+            case .retrieval: return "glm-4"
+            case .analysis: return "glm-4"
+            case .general: return "glm-4"
             }
 
         case .ollama, .mlx:

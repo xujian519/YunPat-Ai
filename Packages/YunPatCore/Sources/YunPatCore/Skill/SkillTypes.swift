@@ -9,7 +9,10 @@ public struct SkillManifest: Sendable, Codable {
     public let tags: [String]
     public let triggers: [String]
 
-    public init(name: String, displayName: String, version: String = "1.0.0", description: String = "", author: String = "", tags: [String] = [], triggers: [String] = []) {
+    public init(
+        name: String, displayName: String, version: String = "1.0.0", description: String = "", author: String = "",
+        tags: [String] = [], triggers: [String] = []
+    ) {
         self.name = name
         self.displayName = displayName
         self.version = version
@@ -33,9 +36,11 @@ public struct SkillContent: Sendable {
 public struct SkillMatch: Sendable {
     public let skill: SkillContent
     public let score: Double
+    public let manifest: SkillManifest
 
     public init(skill: SkillContent, score: Double) {
         self.skill = skill
         self.score = score
+        self.manifest = skill.manifest
     }
 }

@@ -5,6 +5,29 @@ public enum ModelProvider: String, Codable, Sendable {
     case anthropic
     case deepseek
     case glm
+    case mlx
+    case ollama
+
+    public var defaultModel: String {
+        switch self {
+        case .openai: return "gpt-4o"
+        case .anthropic: return "claude-sonnet-4-20250514"
+        case .deepseek: return "deepseek-chat"
+        case .glm: return "glm-4-plus"
+        case .mlx: return "mlx-community/Qwen2.5-7B-Instruct-4bit"
+        case .ollama: return "llama3"
+        }
+    }
+
+    public var isLocal: Bool { self == .mlx || self == .ollama }
+
+    public var defaultCapabilities: ModelCapabilities {
+        switch self {
+        case .mlx: return ModelCapabilities(supportsStreaming: true, maxContextTokens: 32_000)
+        case .ollama: return ModelCapabilities(supportsStreaming: true, maxContextTokens: 8_000)
+        default: return ModelCapabilities()
+        }
+    }
 }
 
 public struct ModelInfo: Codable, Sendable {
@@ -12,7 +35,9 @@ public struct ModelInfo: Codable, Sendable {
     public let provider: ModelProvider
     public let displayName: String
     public init(id: String, provider: ModelProvider, displayName: String) {
-        self.id = id; self.provider = provider; self.displayName = displayName
+        self.id = id
+        self.provider = provider
+        self.displayName = displayName
     }
 }
 
@@ -21,8 +46,14 @@ public struct ModelCapabilities: Sendable {
     public let supportsToolCalling: Bool
     public let maxContextTokens: Int
     public let supportsVision: Bool
-    public init(supportsStreaming: Bool = true, supportsToolCalling: Bool = false, maxContextTokens: Int = 128_000, supportsVision: Bool = false) {
-        self.supportsStreaming = supportsStreaming; self.supportsToolCalling = supportsToolCalling; self.maxContextTokens = maxContextTokens; self.supportsVision = supportsVision
+    public init(
+        supportsStreaming: Bool = true, supportsToolCalling: Bool = false, maxContextTokens: Int = 128_000,
+        supportsVision: Bool = false
+    ) {
+        self.supportsStreaming = supportsStreaming
+        self.supportsToolCalling = supportsToolCalling
+        self.maxContextTokens = maxContextTokens
+        self.supportsVision = supportsVision
     }
 }
 
@@ -31,7 +62,9 @@ public struct RateLimitInfo: Sendable {
     public let remainingTokens: Int
     public let resetAt: Date
     public init(remainingRequests: Int, remainingTokens: Int, resetAt: Date) {
-        self.remainingRequests = remainingRequests; self.remainingTokens = remainingTokens; self.resetAt = resetAt
+        self.remainingRequests = remainingRequests
+        self.remainingTokens = remainingTokens
+        self.resetAt = resetAt
     }
 }
 
@@ -39,7 +72,8 @@ public struct RateLimitError: Error, Sendable {
     public let retryAfter: TimeInterval?
     public let message: String
     public init(retryAfter: TimeInterval? = nil, message: String = "Rate limit exceeded") {
-        self.retryAfter = retryAfter; self.message = message
+        self.retryAfter = retryAfter
+        self.message = message
     }
 }
 

@@ -6,7 +6,10 @@ public actor CapabilityStats {
 
     public func recordLatency(_ capability: String, _ duration: TimeInterval) {
         latencyHistory[capability, default: []].append(duration)
-        if latencyHistory[capability]!.count > 100 { latencyHistory[capability]!.removeFirst() }
+        if var history = latencyHistory[capability], history.count > 100 {
+            history.removeFirst()
+            latencyHistory[capability] = history
+        }
     }
 
     public func averageLatency(for capability: String) -> TimeInterval? {

@@ -73,7 +73,7 @@ public actor ChecklistEngine {
                 requirement: .note,
                 description: "修改不应超出原始范围",
                 applicableStages: ["全面检查"]
-            ),
+            )
         ],
         "invalidation": [
             RuleConstraint(
@@ -89,7 +89,7 @@ public actor ChecklistEngine {
                 requirement: .must,
                 description: "目标专利不具备创造性",
                 applicableStages: ["分析"]
-            ),
+            )
         ],
         "infringement": [
             RuleConstraint(
@@ -98,8 +98,8 @@ public actor ChecklistEngine {
                 requirement: .must,
                 description: "被控产品覆盖全部技术特征",
                 applicableStages: ["特征对比"]
-            ),
-        ],
+            )
+        ]
     ]
 
     public func loadConstraints(for caseType: String) -> [RuleConstraint] {

@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/Users/xujian/projects/YunPat-Ai/Packages/YunPatCore/.build/arm64-apple-macosx/debug/YunPatCorePackageTests.xctest/Contents/MacOS/YunPatCorePackageTests'
-relocations:     []
-...

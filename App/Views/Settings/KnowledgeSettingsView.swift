@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct KnowledgeSettingsView: View {
-    @State private var vaultPath = ""
-    @State private var vaultStatus = "未配置"
+    @State private var vaultPath: String = ""
+    @State private var vaultStatus: String = "未配置"
 
     var body: some View {
         Form {
@@ -11,7 +11,8 @@ struct KnowledgeSettingsView: View {
                     TextField("Obsidian Vault 路径", text: $vaultPath)
                     Button("浏览") {
                         let panel = NSOpenPanel()
-                        panel.canChooseDirectories = true; panel.canChooseFiles = false
+                        panel.canChooseDirectories = true
+                        panel.canChooseFiles = false
                         if panel.runModal() == .OK { vaultPath = panel.url?.path ?? "" }
                     }
                 }
@@ -19,10 +20,12 @@ struct KnowledgeSettingsView: View {
                 Button("验证") {
                     let url = URL(filePath: vaultPath)
                     if FileManager.default.fileExists(atPath: url.appendingPathComponent("AGENTS.md").path),
-                       FileManager.default.fileExists(atPath: url.appendingPathComponent("Wiki/专利实务").path) {
+                        FileManager.default.fileExists(atPath: url.appendingPathComponent("Wiki/专利实务").path) {
                         vaultStatus = "✅ 有效"
                         UserDefaults.standard.set(vaultPath, forKey: "yunpat.vaultPath")
-                    } else { vaultStatus = "❌ 无效" }
+                    } else {
+                        vaultStatus = "❌ 无效"
+                    }
                 }
             }
         }
@@ -31,6 +34,8 @@ struct KnowledgeSettingsView: View {
     }
 
     private func defaultVaultPath() -> String {
-        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Mobile Documents/iCloud~md~obsidian/Documents/宝宸知识库").path
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(
+            "Library/Mobile Documents/iCloud~md~obsidian/Documents/宝宸知识库"
+        ).path
     }
 }

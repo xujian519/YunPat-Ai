@@ -8,11 +8,11 @@ struct TabSettingsView: View {
     @ObservedObject var chatManager: ChatManager
     @Binding var isPresented: Bool
 
-    @State private var workspacePath = ""
-    @State private var selectedModel = ""
+    @State private var workspacePath: String = ""
+    @State private var selectedModel: String = ""
     @State private var enabledTools: Set<String> = ["read_file", "write_file", "execute_shell"]
     @State private var memoryMode: MemoryMode = .session
-    @State private var maxTokenBudget = 3000
+    @State private var maxTokenBudget: Int = 3000
 
     enum MemoryMode: String, CaseIterable {
         case session = "仅会话"
@@ -25,23 +25,23 @@ struct TabSettingsView: View {
         return tabManager.tabs.first(where: { $0.id == id })
     }
 
-    private let availableModels = [
-        ("deepseek-chat", "DeepSeek V3", "经济实惠，综合能力强"),
-        ("deepseek-reasoner", "DeepSeek R1", "强推理，适合复杂法律分析"),
-        ("gpt-4o", "GPT-4o", "OpenAI 旗舰，多模态"),
-        ("claude-sonnet-4-20250514", "Claude Sonnet 4", "长上下文，200K tokens"),
-        ("glm-4", "GLM-4", "智谱，中英双语"),
+    private let availableModels: [ModelOption] = [
+        ModelOption(id: "deepseek-chat", name: "DeepSeek V3", note: "经济实惠，综合能力强"),
+        ModelOption(id: "deepseek-reasoner", name: "DeepSeek R1", note: "强推理，适合复杂法律分析"),
+        ModelOption(id: "gpt-4o", name: "GPT-4o", note: "OpenAI 旗舰，多模态"),
+        ModelOption(id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4", note: "长上下文，200K tokens"),
+        ModelOption(id: "glm-4", name: "GLM-4", note: "智谱，中英双语")
     ]
 
-    private let availableTools: [(String, String, String)] = [
-        ("read_file", "读取文件", "doc.text"),
-        ("write_file", "写入文件", "doc.badge.plus"),
-        ("execute_shell", "Shell 执行", "terminal"),
-        ("patent_search", "专利检索", "magnifyingglass"),
-        ("legal_status_query", "法律状态查询", "building.columns"),
-        ("knowledge_search", "知识库检索", "books.vertical"),
-        ("list_files", "列出文件", "folder"),
-        ("search_files", "搜索文件", "doc.text.magnifyingglass"),
+    private let availableTools: [ToolOption] = [
+        ToolOption(id: "read_file", name: "读取文件", icon: "doc.text"),
+        ToolOption(id: "write_file", name: "写入文件", icon: "doc.badge.plus"),
+        ToolOption(id: "execute_shell", name: "Shell 执行", icon: "terminal"),
+        ToolOption(id: "patent_search", name: "专利检索", icon: "magnifyingglass"),
+        ToolOption(id: "legal_status_query", name: "法律状态查询", icon: "building.columns"),
+        ToolOption(id: "knowledge_search", name: "知识库检索", icon: "books.vertical"),
+        ToolOption(id: "list_files", name: "列出文件", icon: "folder"),
+        ToolOption(id: "search_files", name: "搜索文件", icon: "doc.text.magnifyingglass")
     ]
 
     var body: some View {
@@ -50,7 +50,9 @@ struct TabSettingsView: View {
                 Text("标签设置")
                     .font(.headline)
                 Spacer()
-                Button(action: { isPresented = false }) {
+                Button {
+                    isPresented = false
+                } label: {
                     Image(systemName: "xmark")
                 }
                 .buttonStyle(.plain)
@@ -84,12 +86,12 @@ struct TabSettingsView: View {
                     Group {
                         Text("🧠 模型选择").font(.subheadline).bold()
                         Picker("模型", selection: $selectedModel) {
-                            ForEach(availableModels, id: \.0) { m in
+                            ForEach(availableModels, id: \.id) { model in
                                 VStack(alignment: .leading) {
-                                    Text(m.1).font(.caption)
-                                    Text(m.2).font(.caption2).foregroundStyle(.secondary)
+                                    Text(model.name).font(.caption)
+                                    Text(model.note).font(.caption2).foregroundStyle(.secondary)
                                 }
-                                .tag(m.0)
+                                .tag(model.id)
                             }
                         }
                         .pickerStyle(.radioGroup)
@@ -108,20 +110,21 @@ struct TabSettingsView: View {
                     // 工具管理
                     Group {
                         Text("🔧 工具管理").font(.subheadline).bold()
-                        ForEach(availableTools, id: \.0) { tool in
-                            Toggle(isOn: Binding(
-                                get: { enabledTools.contains(tool.0) },
-                                set: { enabled in
-                                    if enabled { enabledTools.insert(tool.0) }
-                                    else { enabledTools.remove(tool.0) }
-                                }
-                            )) {
+                        ForEach(availableTools, id: \.id) { tool in
+                            Toggle(
+                                isOn: Binding(
+                                    get: { enabledTools.contains(tool.id) },
+                                    set: { enabled in
+                                        if enabled { enabledTools.insert(tool.id) } else { enabledTools.remove(tool.id) }
+                                    }
+                                )
+                            ) {
                                 HStack {
-                                    Image(systemName: tool.2)
+                                    Image(systemName: tool.icon)
                                         .font(.caption)
                                         .foregroundStyle(.blue)
                                     VStack(alignment: .leading) {
-                                        Text(tool.1).font(.caption)
+                                        Text(tool.name).font(.caption)
                                     }
                                 }
                             }
@@ -134,8 +137,8 @@ struct TabSettingsView: View {
                     Group {
                         Text("💾 记忆管理").font(.subheadline).bold()
                         Picker("记忆模式", selection: $memoryMode) {
-                            ForEach(MemoryMode.allCases, id: \.self) { m in
-                                Text(m.rawValue).tag(m)
+                            ForEach(MemoryMode.allCases, id: \.self) { model in
+                                Text(model.rawValue).tag(model)
                             }
                         }
                         .pickerStyle(.radioGroup)
@@ -165,6 +168,18 @@ struct TabSettingsView: View {
             .padding()
         }
         .frame(width: 380, height: 560)
+    }
+
+    private struct ModelOption {
+        let id: String
+        let name: String
+        let note: String
+    }
+
+    private struct ToolOption {
+        let id: String
+        let name: String
+        let icon: String
     }
 
     private func applySettings() {

@@ -143,7 +143,8 @@ public actor MemoryEngine {
     public func consolidate() async throws -> CaseContext {
         let techField = sessionFacts(ofCategory: .technicalFeature).first?.fact ?? ""
         let inventionPoints = sessionFacts(ofCategory: .technicalFeature).map(\.fact)
-        let keyRefs = sessionFacts
+        let keyRefs =
+            sessionFacts
             .filter { $0.category == .legalRule || $0.category == .decision }
             .map(\.fact)
 
@@ -163,7 +164,8 @@ public actor MemoryEngine {
     public func consolidateDeep() async throws -> (CaseContext, LongTermMemory) {
         let techField = sessionFacts(ofCategory: .technicalFeature).first?.fact ?? ""
         let inventionPoints = sessionFacts(ofCategory: .technicalFeature).map(\.fact)
-        let keyRefs = sessionFacts
+        let keyRefs =
+            sessionFacts
             .filter { $0.category == .legalRule || $0.category == .decision }
             .map(\.fact)
         let strategies = sessionFacts(ofCategory: .strategy).map(\.fact)
@@ -178,8 +180,8 @@ public actor MemoryEngine {
         sessionFacts.removeAll()
 
         var ltm = await store.loadLongTermMemory()
-        for s in strategies where !ltm.successfulStrategies.contains(s) {
-            ltm.successfulStrategies.append(s)
+        for string in strategies where !ltm.successfulStrategies.contains(string) {
+            ltm.successfulStrategies.append(string)
         }
         ltm.lastConsolidated = Date()
         try await store.saveLongTermMemory(ltm)

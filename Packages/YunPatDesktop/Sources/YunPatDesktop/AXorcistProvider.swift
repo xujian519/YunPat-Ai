@@ -34,7 +34,7 @@ public final class AppKitAXorcist: AXorcistProvider, @unchecked Sendable {
             throw AXorcistError.elementNotFound(app: app, element: element)
         }
         var value: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(axEl, kAXValueAttribute as CFString, &value)
+        let result: CFString = AXUIElementCopyAttributeValue(axEl, kAXValueAttribute as CFString, &value)
         guard result == .success, let string = value as? String else {
             throw AXorcistError.readFailed(element: element)
         }
@@ -48,12 +48,18 @@ public final class AppKitAXorcist: AXorcistProvider, @unchecked Sendable {
             var size: CFTypeRef?
             AXUIElementCopyAttributeValue(appElement, kAXSizeAttribute as CFString, &size)
             // Simplified: screenshot via CGWindowList
-            guard let listImage = CGWindowListCreateImage(.null, .optionOnScreenOnly, CGWindowID(pid), .boundsIgnoreFraming) else {
+            guard
+                let listImage = CGWindowListCreateImage(
+                    .null, .optionOnScreenOnly, CGWindowID(pid), .boundsIgnoreFraming)
+            else {
                 throw AXorcistError.screenshotFailed
             }
             image = listImage
         } else {
-            guard let screenImage = CGWindowListCreateImage(.null, .optionOnScreenOnly, kCGNullWindowID, .boundsIgnoreFraming) else {
+            guard
+                let screenImage = CGWindowListCreateImage(
+                    .null, .optionOnScreenOnly, kCGNullWindowID, .boundsIgnoreFraming)
+            else {
                 throw AXorcistError.screenshotFailed
             }
             image = screenImage
@@ -72,15 +78,16 @@ public final class AppKitAXorcist: AXorcistProvider, @unchecked Sendable {
 
     private func findElement(in axApp: AXUIElement, label: String) -> AXUIElement? {
         var query: CFTypeRef?
-        let criteria = [kAXTitleAttribute: label] as CFDictionary
+        let criteria: CFDictionary = [kAXTitleAttribute: label] as CFDictionary
         AXUIElementCopyAttributeValue(axApp, kAXChildrenAttribute as CFString, &query)
         // Simplified: recursive search
-        return nil // Stub — full implementation requires AX tree traversal
+        return nil  // Stub — full implementation requires AX tree traversal
     }
 
     private func pidOfApp(_ name: String) -> pid_t? {
-        let running = NSWorkspace.shared.runningApplications
-        return running.first(where: { $0.localizedName?.localizedCaseInsensitiveContains(name) == true })?.processIdentifier
+        let running: [NSRunningApplication] = NSWorkspace.shared.runningApplications
+        return running.first(where: { $0.localizedName?.localizedCaseInsensitiveContains(name) == true })?
+            .processIdentifier
     }
 }
 
@@ -92,10 +99,10 @@ public enum AXorcistError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .elementNotFound(let app, let el): "未找到 \(app) 中的 \(el)"
-        case .readFailed(let el): "读取 \(el) 失败"
+        case .elementNotFound(let app, let element): "未找到 \(app) 中的 \(element)"
+        case .readFailed(let element): "读取 \(element) 失败"
         case .screenshotFailed: "截图失败"
-        case .appNotAllowed(let n): "\(n) 不在白名单中"
+        case .appNotAllowed(let name): "\(name) 不在白名单中"
         }
     }
 }

@@ -36,7 +36,10 @@ public struct ApprovalRequest: Sendable {
     public let detail: String
     public let options: [String]
     public init(id: UUID = UUID(), summary: String, detail: String, options: [String] = ["确认", "取消"]) {
-        self.id = id; self.summary = summary; self.detail = detail; self.options = options
+        self.id = id
+        self.summary = summary
+        self.detail = detail
+        self.options = options
     }
 }
 
@@ -44,7 +47,8 @@ public struct ConflictResolutionRequest: Sendable {
     public let document: String
     public let message: String
     public init(document: String, message: String = "AI 正在写入此文档，是否暂停 AI 先让你编辑？") {
-        self.document = document; self.message = message
+        self.document = document
+        self.message = message
     }
 }
 
@@ -65,7 +69,8 @@ public struct Issue: Sendable {
     public let severity: IssueSeverity
     public let description: String
     public init(severity: IssueSeverity = .error, description: String) {
-        self.severity = severity; self.description = description
+        self.severity = severity
+        self.description = description
     }
 }
 
@@ -75,30 +80,60 @@ public enum IssueSeverity: Sendable {
 }
 
 public struct ExecutionPlan: Sendable {
-    public let strategy: String; public let steps: [PlanStep]
-    public init(strategy: String = "", steps: [PlanStep] = []) { self.strategy = strategy; self.steps = steps }
+    public let strategy: String
+    public let steps: [PlanStep]
+    public init(strategy: String = "", steps: [PlanStep] = []) {
+        self.strategy = strategy
+        self.steps = steps
+    }
 }
 
 public struct PlanStep: Sendable {
-    public let name: String; public let description: String; public let boundRule: String?
-    public init(name: String, description: String, boundRule: String? = nil) { self.name = name; self.description = description; self.boundRule = boundRule }
+    public let name: String
+    public let description: String
+    public let boundRule: String?
+    public init(name: String, description: String, boundRule: String? = nil) {
+        self.name = name
+        self.description = description
+        self.boundRule = boundRule
+    }
 }
 
 public struct StepResult: Sendable {
-    public let stepName: String; public let output: String; public let success: Bool
-    public init(stepName: String, output: String, success: Bool = true) { self.stepName = stepName; self.output = output; self.success = success }
+    public let stepName: String
+    public let output: String
+    public let success: Bool
+    public init(stepName: String, output: String, success: Bool = true) {
+        self.stepName = stepName
+        self.output = output
+        self.success = success
+    }
 }
 
 public struct ExecutionResult: Sendable {
-    public let stepResults: [StepResult]; public let artifacts: [String]
-    public init(stepResults: [StepResult] = [], artifacts: [String] = []) { self.stepResults = stepResults; self.artifacts = artifacts }
+    public let stepResults: [StepResult]
+    public let artifacts: [String]
+    public init(stepResults: [StepResult] = [], artifacts: [String] = []) {
+        self.stepResults = stepResults
+        self.artifacts = artifacts
+    }
 }
 
 public struct ReviewResult: Sendable {
-    public let verdict: Bool; public let issues: [Issue]; public let evidence: [String]
-    public let rubric: PatentRubric?; public let rubricVerdict: RubricVerdict?
-    public init(verdict: Bool = true, issues: [Issue] = [], evidence: [String] = [], rubric: PatentRubric? = nil, rubricVerdict: RubricVerdict? = nil) {
-        self.verdict = verdict; self.issues = issues; self.evidence = evidence; self.rubric = rubric; self.rubricVerdict = rubricVerdict
+    public let verdict: Bool
+    public let issues: [Issue]
+    public let evidence: [String]
+    public let rubric: PatentRubric?
+    public let rubricVerdict: RubricVerdict?
+    public init(
+        verdict: Bool = true, issues: [Issue] = [], evidence: [String] = [], rubric: PatentRubric? = nil,
+        rubricVerdict: RubricVerdict? = nil
+    ) {
+        self.verdict = verdict
+        self.issues = issues
+        self.evidence = evidence
+        self.rubric = rubric
+        self.rubricVerdict = rubricVerdict
     }
 
     /// 生成面向用户的审查报告
@@ -111,7 +146,7 @@ public struct ReviewResult: Sendable {
         if !issues.isEmpty {
             lines.append("## 发现问题")
             for issue in issues {
-                let icon = issue.severity == .error ? "❌" : "⚠️"
+                let icon: String = issue.severity == .error ? "❌" : "⚠️"
                 lines.append("- \(icon) \(issue.description)")
             }
         }

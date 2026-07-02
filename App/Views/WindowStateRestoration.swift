@@ -4,8 +4,8 @@ import SwiftUI
 ///
 /// 设计 §13 HIG 要求：退出重启无缝
 struct WindowStateRestoration: ViewModifier {
-    @AppStorage("yunpat.sidebarCollapsed") private var sidebarCollapsed = false
-    @AppStorage("yunpat.lastActiveTab") private var lastActiveTab = ""
+    @AppStorage("yunpat.sidebarCollapsed") private var sidebarCollapsed: Bool = false
+    @AppStorage("yunpat.lastActiveTab") private var lastActiveTab: String = ""
     @AppStorage("yunpat.windowFrame") private var windowFrameData = Data()
 
     func body(content: Content) -> some View {
@@ -25,7 +25,8 @@ struct WindowStateRestoration: ViewModifier {
 
     static func restoreWindowState(for window: NSWindow) {
         guard let data = UserDefaults.standard.data(forKey: "yunpat.windowFrame"),
-              let frameStr = String(data: data, encoding: .utf8) else { return }
+            let frameStr = String(data: data, encoding: .utf8)
+        else { return }
         let frame = NSRectFromString(frameStr)
         if !frame.isEmpty {
             window.setFrame(frame, display: true)

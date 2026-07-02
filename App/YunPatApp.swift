@@ -1,11 +1,11 @@
-import SwiftUI
 import AppKit
-import YunPatNetworking
+import SwiftUI
 import YunPatCore
+import YunPatNetworking
 
 @main
 struct YunPatApp: App {
-    @StateObject private var appState = AppState()
+    @StateObject private var appState: AppState = AppState()
 
     var body: some Scene {
         WindowGroup {
@@ -86,8 +86,8 @@ final class AppState: ObservableObject {
     let modelRouter: ModelRouter
 
     init() {
-        let router = ModelRouter()
-        let store = CredentialStore.shared
+        let router: ModelRouter = ModelRouter()
+        let store: CredentialStore = CredentialStore.shared
         if let key = store.apiKey(for: .openai), !key.isEmpty {
             Task { await router.register(OpenAIProvider(apiKey: key)) }
         }
@@ -95,18 +95,22 @@ final class AppState: ObservableObject {
             Task { await router.register(AnthropicProvider(apiKey: key)) }
         }
         if let key = store.apiKey(for: .deepseek), !key.isEmpty {
-            Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: URL(string: "https://api.deepseek.com/v1")!, provider: .deepseek)) }
+            guard let deepseekURL = URL(string: "https://api.deepseek.com/v1") else { return }
+            Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: deepseekURL, provider: .deepseek)) }
         }
         if let key = store.apiKey(for: .glm), !key.isEmpty {
-            Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: URL(string: "https://open.bigmodel.cn/api/paas/v4")!, provider: .glm)) }
+            guard let glmURL = URL(string: "https://open.bigmodel.cn/api/paas/v4") else { return }
+            Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: glmURL, provider: .glm)) }
         }
 
-        let filter = PrivacyFilter.shared
+        let filter: PrivacyFilter = PrivacyFilter.shared
         Task {
             await router.setScrubHandler { request, provider, caseId in
-                let (scrubbedReq, result) = try await filter.scrub(request: request, provider: provider, caseId: caseId)
+                let (scrubbedReq, result): (ChatRequest, ScrubResult) =
+                    try await filter
+                    .scrub(request: request, provider: provider, caseId: caseId)
                 if result.blocked {
-                    let kinds = Set(result.detections.filter { $0.source == .regex }.map(\.kind.rawValue))
+                    let kinds: Set<String> = Set(result.detections.filter { $0.source == .regex }.map(\.kind.rawValue))
                     throw ModelRouter.ScrubBlockedError(detections: Array(kinds))
                 }
                 return (scrubbedReq, result.placeholderMap)
@@ -114,13 +118,13 @@ final class AppState: ObservableObject {
         }
 
         Task {
-            var converger = StorageConverger.shared
-            let fvEnabled = await converger.checkFileVaultStatus()
+            var converger: StorageConverger = StorageConverger.shared
+            let fvEnabled: Bool = await converger.checkFileVaultStatus()
             if !fvEnabled { print("[Storage] FileVault is OFF") }
         }
 
         Task {
-            let consolidator = MemoryConsolidator.shared
+            let consolidator: MemoryConsolidator = MemoryConsolidator.shared
             while true {
                 if await consolidator.shouldRun { await consolidator.run() }
                 try? await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
@@ -132,15 +136,15 @@ final class AppState: ObservableObject {
 }
 
 extension Notification.Name {
-    static let menuNewTab = Notification.Name("menuNewTab")
-    static let menuNewCase = Notification.Name("menuNewCase")
-    static let menuOpenFile = Notification.Name("menuOpenFile")
-    static let menuSave = Notification.Name("menuSave")
-    static let menuUndo = Notification.Name("menuUndo")
-    static let menuRedo = Notification.Name("menuRedo")
-    static let menuToggleSidebar = Notification.Name("menuToggleSidebar")
-    static let menuToggleCollaboration = Notification.Name("menuToggleCollaboration")
-    static let menuToggleBrowser = Notification.Name("menuToggleBrowser")
-    static let menuToggleSplitScreen = Notification.Name("menuToggleSplitScreen")
-    static let dropFile = Notification.Name("dropFile")
+    static let menuNewTab: Notification.Name = Notification.Name("menuNewTab")
+    static let menuNewCase: Notification.Name = Notification.Name("menuNewCase")
+    static let menuOpenFile: Notification.Name = Notification.Name("menuOpenFile")
+    static let menuSave: Notification.Name = Notification.Name("menuSave")
+    static let menuUndo: Notification.Name = Notification.Name("menuUndo")
+    static let menuRedo: Notification.Name = Notification.Name("menuRedo")
+    static let menuToggleSidebar: Notification.Name = Notification.Name("menuToggleSidebar")
+    static let menuToggleCollaboration: Notification.Name = Notification.Name("menuToggleCollaboration")
+    static let menuToggleBrowser: Notification.Name = Notification.Name("menuToggleBrowser")
+    static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
+    static let dropFile: Notification.Name = Notification.Name("dropFile")
 }

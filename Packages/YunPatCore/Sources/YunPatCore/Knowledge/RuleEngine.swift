@@ -13,13 +13,15 @@ public actor RuleEngine {
         var candidates: [RuleCandidate] = []
 
         // Step 1: Concept Index lookup (exact match, 0 latency)
-        let conceptIndex = try await adapter.readConceptIndex()
-        var matchedLinks = Set<String>()
+        let conceptIndex: String = try await adapter.readConceptIndex()
+        var matchedLinks: Set<String> = Set<String>()
         if !conceptIndex.isEmpty {
             let links = findMatchingLinks(in: conceptIndex, for: facts)
             matchedLinks.formUnion(links)
             for link in links {
-                if let c = try? await readCandidate(wikilink: link) { candidates.append(c) }
+                if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
+                    candidates.append(candidate)
+                }
             }
         }
 
@@ -27,15 +29,16 @@ public actor RuleEngine {
         let allKeywords = (facts.inventionPoints + [facts.technicalField, facts.problem])
             .filter { !$0.isEmpty }
         if candidates.count < 3 && !allKeywords.isEmpty {
-            let query = allKeywords.joined(separator: " ")
-            let wikiTexts = try await collectAllWikiSummaries()
+            let query: String = allKeywords.joined(separator: " ")
+            let wikiTexts: [String] = try await collectAllWikiSummaries()
             if !wikiTexts.isEmpty {
-                let topIndices = await vectorSearch.search(query: query, candidates: wikiTexts, topK: 5, minScore: 0.25)
+                let topIndices: [(Int, Float)] = await vectorSearch.search(
+                    query: query, candidates: wikiTexts, topK: 5, minScore: 0.25)
                 for (idx, _) in topIndices {
-                    let link = wikiTexts[idx]
+                    let link: String = wikiTexts[idx]
                     if !matchedLinks.contains(link) {
-                        if let c = try? await readCandidate(wikilink: link) {
-                            candidates.append(c)
+                        if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
+                            candidates.append(candidate)
                             matchedLinks.insert(link)
                         }
                     }
@@ -48,14 +51,17 @@ public actor RuleEngine {
             for module in [WikiModule.patentPractice, .examinationGuide, .laws] {
                 if let index = try? await adapter.readModuleIndex(module) {
                     for link in adapter.parseWikilinks(from: index).prefix(10) {
-                        if let c = try? await readCandidate(wikilink: link) { candidates.append(c) }
+                        if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
+                            candidates.append(candidate)
+                        }
                     }
                 }
             }
         }
 
-        let resolved = resolveConflicts(candidates)
-        return ApplicableRules(candidates: resolved, constraintSummary: resolved.prefix(3).map(\.title).joined(separator: "、"))
+        let resolved: [RuleCandidate] = resolveConflicts(candidates)
+        return ApplicableRules(
+            candidates: resolved, constraintSummary: resolved.prefix(3).map(\.title).joined(separator: "、"))
     }
 
     public func resolveConflicts(_ candidates: [RuleCandidate]) -> [RuleCandidate] {
@@ -64,11 +70,13 @@ public actor RuleEngine {
 
     private func findMatchingLinks(in index: String, for facts: StructuredFacts) -> [String] {
         var links: [String] = []
-        let keywords = facts.inventionPoints + [facts.technicalField, facts.problem]
+        let keywords: [String] = facts.inventionPoints + [facts.technicalField, facts.problem]
         for line in index.components(separatedBy: .newlines) where line.hasPrefix("- [[") {
-            for kw in keywords where !kw.isEmpty && line.localizedCaseInsensitiveContains(kw) {
-                let pattern = #"\[\[([^\]]+)\]\]"#
-                if let regex = try? NSRegularExpression(pattern: pattern), let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)), let range = Range(match.range(at: 1), in: line) {
+            for keyword in keywords where !keyword.isEmpty && line.localizedCaseInsensitiveContains(keyword) {
+                let pattern: String = #"\[\[([^\]]+)\]\]"#
+                if let regex = try? NSRegularExpression(pattern: pattern),
+                    let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+                    let range = Range(match.range(at: 1), in: line) {
                     links.append(String(line[range]))
                 }
             }
@@ -77,10 +85,12 @@ public actor RuleEngine {
     }
 
     private func readCandidate(wikilink: String) async throws -> RuleCandidate? {
-        let content = try await adapter.readPage(wikilink)
+        let content: String = try await adapter.readPage(wikilink)
         guard !content.isEmpty else { return nil }
-        let title = content.components(separatedBy: .newlines).first?.replacingOccurrences(of: "# ", with: "") ?? wikilink
-        return RuleCandidate(wikilink: wikilink, title: title, content: content, source: .doctrine, sourceLevel: 3, score: 0.5)
+        let title: String =
+            content.components(separatedBy: .newlines).first?.replacingOccurrences(of: "# ", with: "") ?? wikilink
+        return RuleCandidate(
+            wikilink: wikilink, title: title, content: content, source: .doctrine, sourceLevel: 3, score: 0.5)
     }
 
     /// 收集所有 wiki 页面标题作为语义搜索候选集

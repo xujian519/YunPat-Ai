@@ -29,7 +29,9 @@ public actor ContextSummarizer {
         guard let router = modelRouter else { return nil }
 
         let context = messages.map { "\($0.role.rawValue): \($0.content.prefix(300))" }.joined(separator: "\n")
-        let prompt = "请用1-2句中文简要总结以下对话的核心内容：\n\n\(context)"
+        let prompt: String = "请用1-2句中文简要总结以下对话的核心内容：\n\n\(context)"
+
+
 
         let request = ChatRequest(
             model: provider.defaultModel,
@@ -39,9 +41,9 @@ public actor ContextSummarizer {
 
         do {
             let stream = try await router.chat(request, provider: provider)
-            var summary = ""
+            var summary: String = ""
             for try await chunk in stream {
-                if case .text(let t) = chunk { summary += t }
+                if case .text(let textFragment) = chunk { summary += textFragment }
             }
             return summary.isEmpty ? nil : summary.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
@@ -53,6 +55,6 @@ public actor ContextSummarizer {
     private func localSummary(messages: [Message]) async -> String? {
         // Apple FoundationModels MLSummarizer 占位
         // 需要 import FoundationModels (macOS 26+)
-        return nil
+        nil
     }
 }

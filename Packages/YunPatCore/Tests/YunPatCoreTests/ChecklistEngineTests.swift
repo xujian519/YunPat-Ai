@@ -1,17 +1,18 @@
 import XCTest
+
 @testable import YunPatCore
 
 final class ChecklistEngineTests: XCTestCase {
     func testLoadDraftingConstraints() async {
-        let e = ChecklistEngine()
-        let c = await e.loadConstraints(for: "drafting")
-        XCTAssertEqual(c.count, 6)
-        XCTAssertEqual(c.first?.articleId, "A22.2")
+        let engine: ChecklistEngine = ChecklistEngine()
+        let constraints: [CheckConstraint] = await engine.loadConstraints(for: "drafting")
+        XCTAssertEqual(constraints.count, 6)
+        XCTAssertEqual(constraints.first?.articleId, "A22.2")
     }
 
     func testSummary() async {
-        let e = ChecklistEngine()
-        let r = [
+        let engine: ChecklistEngine = ChecklistEngine()
+        let results: [CheckResult] = [
             CheckResult(
                 constraintId: "A22.2",
                 passed: true,
@@ -23,9 +24,9 @@ final class ChecklistEngineTests: XCTestCase {
                 passed: false,
                 severity: .error,
                 message: "缺乏创造性"
-            ),
+            )
         ]
-        let s = await e.summary(r)
-        XCTAssertTrue(s.contains("通过: 1"))
+        let summaryText: String = await engine.summary(results)
+        XCTAssertTrue(summaryText.contains("通过: 1"))
     }
 }

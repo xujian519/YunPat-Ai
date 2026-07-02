@@ -24,7 +24,8 @@ public struct ClaimDraftingPlugin {
                 description: "根据技术交底书自动起草独立和从属权利要求，支持其特征在于划界",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["权利要求撰写", "布局设计"])
+                metadata: CapabilityMetadata(
+                    costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["权利要求撰写", "布局设计"])
             ),
             CapabilityDefinition(
                 name: "patent.drafting.description",
@@ -32,8 +33,9 @@ public struct ClaimDraftingPlugin {
                 description: "起草专利说明书五部分：技术领域、背景技术、发明内容、附图说明、具体实施方式",
                 source: .plugin,
                 permission: .always,
-                metadata: CapabilityMetadata(costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["说明书撰写"])
-            ),
+                metadata: CapabilityMetadata(
+                    costLevel: .medium, requiresNetwork: true, isIdempotent: false, typicalUseCases: ["说明书撰写"])
+            )
         ]
     }
 }

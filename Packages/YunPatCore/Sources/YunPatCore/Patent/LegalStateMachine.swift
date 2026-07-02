@@ -36,12 +36,12 @@ public enum TransitionResult: Sendable {
 public final class LegalStateMachine: @unchecked Sendable {
     private var _state: LegalState = .idle
     private var _checkpoints: [Checkpoint] = []
-    private var _history: [(from: LegalState, to: LegalState, reason: String)] = []
+    private var _history: [TransitionRecord] = []
     private let lock = NSLock()
 
     public var currentState: LegalState { lock.withLock { _state } }
     public var checkpoints: [Checkpoint] { lock.withLock { _checkpoints } }
-    public var history: [(from: LegalState, to: LegalState, reason: String)] { lock.withLock { _history } }
+    public var history: [TransitionRecord] { lock.withLock { _history } }
 
     private let validTransitions: [LegalState: [LegalState]] = [
         .idle: [.factFinding, .factAnalysis],
@@ -56,7 +56,7 @@ public final class LegalStateMachine: @unchecked Sendable {
         .executing: [.reviewing, .planning],
         .reviewing: [.completed, .factFinding, .legalBasis, .planning],
         .completed: [],
-        .abandoned: [],
+        .abandoned: []
     ]
 
     public func transition(to target: LegalState, reason: String = "") -> TransitionResult {
@@ -65,7 +65,7 @@ public final class LegalStateMachine: @unchecked Sendable {
         guard let allowed = validTransitions[_state], allowed.contains(target) else {
             return .failure("非法转移: \(_state) → \(target)")
         }
-        _history.append((_state, target, reason))
+        _history.append(TransitionRecord(from: _state, to: target, reason: reason))
         _state = target
         _checkpoints.append(Checkpoint(state: target, description: reason))
         return .success
@@ -79,7 +79,7 @@ public final class LegalStateMachine: @unchecked Sendable {
         }
         _checkpoints = Array(_checkpoints[0...index])
         _state = targetState
-        _history.append((_state, targetState, "rollback: \(reason)"))
+        _history.append(TransitionRecord(from: _state, to: targetState, reason: "rollback: \(reason)"))
         return .success
     }
 
@@ -89,8 +89,19 @@ public final class LegalStateMachine: @unchecked Sendable {
 
     public func abandon(reason: String) {
         lock.withLock {
-            _history.append((_state, .abandoned, reason))
+            _history.append(TransitionRecord(from: _state, to: .abandoned, reason: reason))
             _state = .abandoned
         }
+    }
+}
+
+public struct TransitionRecord: Sendable {
+    public let from: LegalState
+    public let to: LegalState
+    public let reason: String
+    public init(from: LegalState, to: LegalState, reason: String) {
+        self.from = from
+        self.to = to
+        self.reason = reason
     }
 }

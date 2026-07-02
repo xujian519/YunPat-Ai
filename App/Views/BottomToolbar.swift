@@ -47,7 +47,7 @@ struct ToolbarButton: View {
     let help: String
     var action: () -> Void
 
-    @State private var isHovered = false
+    @State private var isHovered: Bool = false
 
     var body: some View {
         Button(action: action) {

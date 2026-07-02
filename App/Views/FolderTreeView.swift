@@ -7,14 +7,16 @@ struct FolderTreeView: View {
     @State private var entries: [FileEntry] = []
 
     struct FileEntry: Identifiable {
-        let id: String // path
+        let id: String  // path
         let name: String
         let isDirectory: Bool
         let children: [FileEntry]?
     }
 
     init(rootPath: URL? = nil) {
-        self.rootPath = rootPath ?? FileManager.default.homeDirectoryForCurrentUser
+        self.rootPath =
+            rootPath
+            ?? FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("YunPat/workspaces")
     }
 
@@ -26,10 +28,10 @@ struct FolderTreeView: View {
                 Text("工作目录")
                     .font(.headline)
                 Spacer()
-                Button(action: refreshEntries) {
+                    Button { refreshEntries() } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.caption)
-                }
+                    }
                 .buttonStyle(.plain)
             }
             .padding(.horizontal)
@@ -93,11 +95,13 @@ struct FolderTreeView: View {
     }
 
     private func scanDirectory(_ url: URL) -> [FileEntry] {
-        guard let contents = try? FileManager.default.contentsOfDirectory(
-            at: url,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        ) else { return [] }
+        guard
+            let contents = try? FileManager.default.contentsOfDirectory(
+                at: url,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsHiddenFiles]
+            )
+        else { return [] }
 
         return contents.sorted { $0.lastPathComponent < $1.lastPathComponent }.compactMap { itemURL in
             var isDir: ObjCBool = false
@@ -140,12 +144,12 @@ struct FileEntryRow: View {
                 }
 
                 if entry.isDirectory {
-                    Button(action: {
+                    Button {
                         onToggle(entry.id)
                         if children.isEmpty {
                             children = scanDir(URL(fileURLWithPath: entry.id))
                         }
-                    }) {
+                    } label: {
                         Image(systemName: expanded.contains(entry.id) ? "chevron.down" : "chevron.right")
                             .font(.system(size: 8, weight: .bold))
                             .frame(width: 12)
@@ -155,11 +159,13 @@ struct FileEntryRow: View {
                     Spacer().frame(width: 12)
                 }
 
-                Image(systemName: entry.isDirectory
-                    ? (expanded.contains(entry.id) ? "folder" : "folder")
-                    : fileIcon(entry.name))
-                    .font(.system(size: 10))
-                    .foregroundStyle(entry.isDirectory ? .blue : .secondary)
+                Image(
+                    systemName: entry.isDirectory
+                        ? (expanded.contains(entry.id) ? "folder" : "folder")
+                        : fileIcon(entry.name)
+                )
+                .font(.system(size: 10))
+                .foregroundStyle(entry.isDirectory ? .blue : .secondary)
 
                 Text(entry.name)
                     .font(.system(size: 11))
@@ -187,11 +193,13 @@ struct FileEntryRow: View {
     }
 
     private func scanDir(_ url: URL) -> [FolderTreeView.FileEntry] {
-        guard let contents = try? FileManager.default.contentsOfDirectory(
-            at: url,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        ) else { return [] }
+        guard
+            let contents = try? FileManager.default.contentsOfDirectory(
+                at: url,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsHiddenFiles]
+            )
+        else { return [] }
         return contents.sorted { $0.lastPathComponent < $1.lastPathComponent }.compactMap { itemURL in
             var isDir: ObjCBool = false
             guard FileManager.default.fileExists(atPath: itemURL.path, isDirectory: &isDir) else { return nil }

@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct DocumentWorkspace: View {
-    @State private var documentText = ""
+    @State private var documentText: String = ""
     @State private var annotations: [DocumentAnnotation] = []
-    @State private var editCount = 0
-    @State private var lastSavedText = ""
+    @State private var editCount: Int = 0
+    @State private var lastSavedText: String = ""
     @State private var syncMode: DocumentSyncMode = .explicit
     private let parser = AnnotationParser()
     private let changeDetector = DocumentChangeDetector()
@@ -38,8 +38,8 @@ struct DocumentWorkspace: View {
             // 同步模式
             HStack(spacing: 8) {
                 Picker("", selection: $syncMode) {
-                    ForEach(DocumentSyncMode.allCases, id: \.self) { m in
-                        Text(m.rawValue).tag(m)
+                    ForEach(DocumentSyncMode.allCases, id: \.self) { model in
+                        Text(model.rawValue).tag(model)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -87,15 +87,20 @@ struct DocumentWorkspace: View {
                     HStack(spacing: 8) {
                         ForEach(annotations, id: \.line) { ann in
                             HStack(spacing: 4) {
-                                Image(systemName: ann.type == .deletion ? "trash" :
-                                    ann.type == .insertion ? "plus.circle" :
-                                    ann.type == .question ? "questionmark.circle" : "text.bubble")
+                                Image(
+                                    systemName: ann.type == .deletion
+                                        ? "trash"
+                                        : ann.type == .insertion
+                                            ? "plus.circle"
+                                            : ann.type == .question ? "questionmark.circle" : "text.bubble")
                                 Text("L\(ann.line)").font(.caption2)
                             }
                             .padding(.horizontal, 8).padding(.vertical, 4)
-                            .background(ann.type == .deletion ? Color.red.opacity(0.15) :
-                                ann.type == .insertion ? Color.green.opacity(0.15) :
-                                Color.orange.opacity(0.15))
+                            .background(
+                                ann.type == .deletion
+                                    ? Color.red.opacity(0.15)
+                                    : ann.type == .insertion ? Color.green.opacity(0.15) : Color.orange.opacity(0.15)
+                            )
                             .cornerRadius(12)
                         }
                     }.padding(8)
@@ -140,4 +145,3 @@ struct DocumentChangeNotification {
 extension Notification.Name {
     static let documentChangedNotification = Notification.Name("YunPatDocumentChanged")
 }
-

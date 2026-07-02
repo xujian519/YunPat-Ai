@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import YunPatNetworking
 
 final class AnthropicProviderTests: XCTestCase {
@@ -6,7 +7,7 @@ final class AnthropicProviderTests: XCTestCase {
         let provider = AnthropicProvider(apiKey: "")
         let request = ChatRequest(model: "claude-sonnet-4-20250514", messages: [Message(role: .user, content: "Hello")])
         var caughtError: Error?
-        do { for try await _ in provider.chat(request) { } } catch { caughtError = error }
+        do { for try await _ in provider.chat(request) {} } catch { caughtError = error }
         XCTAssertNotNil(caughtError)
     }
 

@@ -5,16 +5,16 @@ let package = Package(
     name: "YunPatCore",
     platforms: [.macOS(.v15)],
     products: [
-        .library(name: "YunPatCore", targets: ["YunPatCore"]),
+        .library(name: "YunPatCore", targets: ["YunPatCore"])
     ],
     dependencies: [
-        .package(path: "../YunPatNetworking"),
+        .package(path: "../YunPatNetworking")
     ],
     targets: [
         .target(
             name: "YunPatCore",
             dependencies: [.product(name: "YunPatNetworking", package: "YunPatNetworking")]
         ),
-        .testTarget(name: "YunPatCoreTests", dependencies: ["YunPatCore"]),
+        .testTarget(name: "YunPatCoreTests", dependencies: ["YunPatCore"])
     ]
 )

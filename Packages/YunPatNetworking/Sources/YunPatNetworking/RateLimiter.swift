@@ -1,4 +1,4 @@
-import Foundation
+import Foundation // swiftlint:disable:this file_name
 
 public enum RequestPriority: Sendable, Comparable {
     case low
@@ -15,7 +15,7 @@ public enum RequestPriority: Sendable, Comparable {
 
 public actor GlobalRequestQueue {
     public var maxConcurrentRequests: Int
-    private var activeCount = 0
+    private var activeCount: Int = 0
 
     public init(maxConcurrentRequests: Int = 3) {
         self.maxConcurrentRequests = maxConcurrentRequests
