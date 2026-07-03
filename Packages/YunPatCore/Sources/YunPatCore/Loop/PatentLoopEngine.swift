@@ -24,6 +24,7 @@ public actor PatentLoopEngine: LoopEngine {
     private let evaluator: EvaluationEngine
     private let config: RuntimeConfig
     private let memory: MemoryEngine
+    private let caseRuleLoader: CaseRuleLoader
 
     private let loopGuard: LoopGuard
     private var stuckGuard: StuckGuard
@@ -31,13 +32,15 @@ public actor PatentLoopEngine: LoopEngine {
     private var consecutiveReads: Int = 0
     public var planMode: PlanMode = .auto
     public var loopModel: String
+    public var workspaceURL: URL?
 
     public init(
         modelRouter: ModelRouter,
         wikiAdapter: WikiAdapter,
         provider: ModelProvider = .deepseek,
         config: RuntimeConfig = RuntimeConfig(),
-        memory: MemoryEngine = MemoryEngine()
+        memory: MemoryEngine = MemoryEngine(),
+        workspaceURL: URL? = nil
     ) {
         self.modelRouter = modelRouter
         self.wikiAdapter = wikiAdapter
@@ -50,6 +53,8 @@ public actor PatentLoopEngine: LoopEngine {
         self.evaluator = EvaluationEngine()
         self.config = config
         self.memory = memory
+        self.caseRuleLoader = .shared
+        self.workspaceURL = workspaceURL
         self.loopGuard = LoopGuard(maxIterations: config.maxIterations)
         self.stuckGuard = StuckGuard(
             nudgeThreshold: config.stuckNudgeThreshold,
@@ -88,6 +93,17 @@ public actor PatentLoopEngine: LoopEngine {
         for point in facts.inventionPoints {
             await memory.addSessionFact(point, category: .technicalFeature)
         }
+
+        // 加载已有 CaseContext（如果存在）注入到上下文
+        if let workspaceURL, let caseId = workspaceURL.lastPathComponent as String? {
+            if let existingContext = await memory.loadCaseContext(caseId) {
+                await memory.noteToScratchpad(
+                    "已有案件上下文: \(existingContext.technicalField)"
+                    + " | 发明点: \(existingContext.inventionPoints.joined(separator: ", "))"
+                )
+            }
+        }
+
         if !facts.missingInfo.isEmpty, flow == .guided {
             return .needsClarification(facts.missingInfo)
         }
@@ -125,15 +141,38 @@ public actor PatentLoopEngine: LoopEngine {
 
         // Step 3: 规划 — 生成策略并注入执行
         state = .running(step: "planning")
-        let plan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
+        var plan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
 
-        // Step 4: 执行（将策略注入执行请求）
+        // 注入案件级规则
+        if let workspaceURL {
+            let caseRules: String = await caseRuleLoader.injectableRules(for: workspaceURL, maxTokens: 5000)
+            if !caseRules.isEmpty { plan = caseRules + "\n\n" + plan }
+        }
+
+        // Step 4+5: 执行 → 评估 → 迭代修订
         while revisionCount < config.maxIterations {
             let execReq: UserRequest = UserRequest(content: plan.isEmpty ? facts.technicalField : plan)
             let loopResult: LoopResult = await runExecution(execReq: execReq)
             switch loopResult {
             case .completed(let text) where !text.isEmpty:
-                // Step 5: 评估 — TODO: EvaluationEngine 集成
+                // ── [协作点 ④] 中途干预（Guided 模式，首轮执行后）──
+                if flow == .guided && revisionCount == 0 {
+                    state = .waitingApproval(
+                        ApprovalRequest(
+                            summary: "执行结果审查",
+                            detail: "Agent 已完成首轮执行，是否继续进行质量评估？\n\n\(text.prefix(500))",
+                            options: ["继续评估", "直接采纳", "需要修改"]
+                        ))
+                    return .needsClarification(["请审查执行结果并确认是否继续"])
+                }
+
+                // Step 5: EvaluationEngine 质量评估
+                state = .running(step: "evaluating")
+                let execResult: ExecutionResult = ExecutionResult(artifacts: [text])
+                let review: ReviewResult = await evaluator.evaluate(
+                    execution: execResult, rules: rules, facts: facts
+                )
+
                 try? await TraceCollector().finishTrace(
                     traceID,
                     summary: TraceSummary(
@@ -141,16 +180,64 @@ public actor PatentLoopEngine: LoopEngine {
                         toolCount: toolCount, llmCallCount: llmCallCount
                     )
                 )
-                state = .idle
-                return loopResult
+
+                if review.verdict {
+                    let reportSuffix: String = review.rubric.map { "\n\n---\n\($0.report())" } ?? ""
+                    // 蒸馏会话记忆到 CaseContext（持久化）
+                    if let workspaceURL {
+                        let caseId: String = workspaceURL.lastPathComponent
+                        let context: CaseContext = CaseContext(
+                            caseId: caseId,
+                            technicalField: facts.technicalField,
+                            inventionPoints: facts.inventionPoints,
+                            keyReferences: rules.candidates.prefix(5).map(\.title)
+                        )
+                        try? await memory.saveCaseContext(context)
+                    }
+                    state = .idle
+                    return .completed(text + reportSuffix)
+                }
+
+                // ── [协作点 ⑤] 最终审核（Guided 模式，评估未通过时）──
+                if flow == .guided && !review.issues.isEmpty {
+                    let issueList: String = review.issues.enumerated().map { idx, issue in
+                        "\(idx + 1). \(issue.severity == .error ? "❌" : "⚠️") \(issue.description)"
+                    }.joined(separator: "\n")
+                    state = .waitingApproval(
+                        ApprovalRequest(
+                            summary: "质量审查未通过",
+                            detail: "以下问题需要处理：\n\n\(issueList)",
+                            options: ["自动修订", "我手动修改", "忽略问题并采纳"]
+                        ))
+                    return .needsRevision(review.issues)
+                }
+
+                // 未通过 — 检查是否还有修订机会
+                if revisionCount >= config.maxIterations - 1 {
+                    state = .idle
+                    return .exceededRevisionLimit(review.issues)
+                }
+
+                // 注入修订建议，进入下一轮迭代
+                revisionCount += 1
+                state = .running(step: "revision-\(revisionCount)")
+                let issueSummary: String = review.issues.map { "· \($0.description)" }
+                    .joined(separator: "\n")
+                plan = """
+                    上一版结果未通过质量审查（第\(revisionCount)轮修订），请根据以下问题修订：
+
+                    \(issueSummary)
+
+                    原始结果（节选）：
+                    \(text.prefix(2000))
+                    """
+
             case .cancelled:
                 state = .idle
                 return loopResult
             default:
                 break
             }
-            revisionCount += 1
-            state = .running(step: "revision-\(revisionCount)")
         }
 
         return .exceededRevisionLimit([Issue(description: "超过最大修订次数 \(config.maxIterations)")])

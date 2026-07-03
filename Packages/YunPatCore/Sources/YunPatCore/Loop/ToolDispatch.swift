@@ -192,6 +192,7 @@ extension ToolDispatch {
     private func buildDispatchTable() {
         registerLoopTools()
         registerFileTools()
+        registerAXorcistTools()
         registerPatentTools()
         registerDocTools()
     }

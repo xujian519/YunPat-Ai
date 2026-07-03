@@ -112,6 +112,8 @@ final class AppState: ObservableObject {
             if !fvEnabled { print("[Storage] FileVault is OFF") }
         }
 
+        AXorcistBridge.register()
+
         Task {
             let consolidator: MemoryConsolidator = MemoryConsolidator.shared
             while true {

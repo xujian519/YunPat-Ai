@@ -1,22 +1,10 @@
 import SwiftUI
+import YunPatCore
 
 /// 案件关系图 — 在协作面板中以 🗂 切换
 struct CaseGraphView: View {
     let caseId: String?
-    let relatedCases: [RelatedCase]
-
-    struct RelatedCase: Identifiable, Sendable {
-        let id: String
-        let title: String
-        let relation: RelationType
-    }
-
-    enum RelationType: String, Sendable {
-        case priority = "优先权"
-        case divisional = "分案"
-        case reference = "对比文件"
-        case family = "同族"
-    }
+    @State private var relations: [CaseRelation] = []
 
     var body: some View {
         VStack(spacing: 12) {
@@ -26,13 +14,21 @@ struct CaseGraphView: View {
                 Text("案件关系")
                     .font(.headline)
                 Spacer()
+                if !relations.isEmpty {
+                    Button {
+                        Task { await loadRelations() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.borderless)
+                }
             }
             .padding(.horizontal)
 
             if let caseId = caseId {
                 // 当前案件节点
                 VStack(spacing: 8) {
-                    // 中心节点
                     HStack {
                         Image(systemName: "doc.text.magnifyingglass")
                             .font(.title3)
@@ -53,34 +49,45 @@ struct CaseGraphView: View {
                     .background(Color.blue.opacity(0.05))
                     .cornerRadius(6)
 
-                    // 连接线
-                    if !relatedCases.isEmpty {
+                    if !relations.isEmpty {
                         Rectangle()
                             .fill(Color.secondary.opacity(0.2))
                             .frame(width: 1, height: 16)
                     }
 
-                    // 关联案件
-                    ForEach(relatedCases) { relatedCase in
+                    ForEach(relations) { relation in
                         HStack(spacing: 6) {
-                            Image(systemName: relationIcon(relatedCase.relation))
+                            Image(systemName: relationIcon(relation.relationType))
                                 .font(.caption)
-                                .foregroundStyle(relationColor(relatedCase.relation))
+                                .foregroundStyle(relationColor(relation.relationType))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(relatedCase.relation.rawValue)
+                                Text(relation.relationType.rawValue)
                                     .font(.system(size: 9))
                                     .foregroundStyle(.secondary)
-                                Text(relatedCase.title)
+                                Text(relation.toCaseTitle)
                                     .font(.system(size: 11))
                                     .lineLimit(1)
+                                if let appNo = relation.applicationNumber {
+                                    Text(appNo)
+                                        .font(.system(size: 9, design: .monospaced))
+                                        .foregroundStyle(.tertiary)
+                                }
                             }
                             Spacer()
                         }
                         .padding(6)
-                        .background(relationColor(relatedCase.relation).opacity(0.05))
+                        .background(relationColor(relation.relationType).opacity(0.05))
                         .cornerRadius(4)
                     }
+
+                    if relations.isEmpty {
+                        Text("暂无关联案件记录")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 4)
+                    }
                 }
+                .onAppear { Task { await loadRelations() } }
             } else {
                 VStack(spacing: 8) {
                     Image(systemName: "point.3.connected.trianglepath.dotted")
@@ -102,21 +109,28 @@ struct CaseGraphView: View {
         .background(Color.windowBackgroundColor)
     }
 
-    private func relationIcon(_ type: RelationType) -> String {
+    private func loadRelations() async {
+        guard let caseId else { return }
+        relations = await CaseRelationStore.shared.relations(for: caseId)
+    }
+
+    private func relationIcon(_ type: CaseRelationType) -> String {
         switch type {
         case .priority: return "arrow.up.doc"
         case .divisional: return "arrow.down.doc"
         case .reference: return "doc.text"
         case .family: return "rectangle.stack"
+        case .continuation: return "arrow.triangle.branch"
         }
     }
 
-    private func relationColor(_ type: RelationType) -> Color {
+    private func relationColor(_ type: CaseRelationType) -> Color {
         switch type {
         case .priority: return .orange
         case .divisional: return .purple
         case .reference: return .gray
         case .family: return .green
+        case .continuation: return .teal
         }
     }
 }

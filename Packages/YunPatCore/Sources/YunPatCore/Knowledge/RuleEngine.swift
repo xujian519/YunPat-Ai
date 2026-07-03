@@ -34,16 +34,32 @@ public actor RuleEngine {
             .filter { !$0.isEmpty }
         if candidates.count < 3 && !allKeywords.isEmpty {
             let query: String = allKeywords.joined(separator: " ")
-            let wikiTexts: [String] = try await collectAllWikiSummaries()
-            if !wikiTexts.isEmpty {
-                let topIndices: [(Int, Float)] = await vectorSearch.search(
-                    query: query, candidates: wikiTexts, topK: 5, minScore: 0.25)
-                for (idx, _) in topIndices {
-                    let link: String = wikiTexts[idx]
+            // 优先使用 WikiAdapter 的语义搜索（走 EmbeddingProvider + SemanticIndex）
+            let semanticResults: [SearchResultItem] =
+                (try? await adapter.semanticSearchAsync(query: query, topK: 5)) ?? []
+            if !semanticResults.isEmpty {
+                for hit in semanticResults {
+                    let link: String = hit.title
                     if !matchedLinks.contains(link) {
                         if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
                             candidates.append(candidate)
                             matchedLinks.insert(link)
+                        }
+                    }
+                }
+            } else {
+                // 回退到 VectorSearch.shared（可能已配置 embedHandler）
+                let wikiTexts: [String] = try await collectAllWikiSummaries()
+                if !wikiTexts.isEmpty {
+                    let topIndices: [(Int, Float)] = await vectorSearch.search(
+                        query: query, candidates: wikiTexts, topK: 5, minScore: 0.25)
+                    for (idx, _) in topIndices {
+                        let link: String = wikiTexts[idx]
+                        if !matchedLinks.contains(link) {
+                            if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
+                                candidates.append(candidate)
+                                matchedLinks.insert(link)
+                            }
                         }
                     }
                 }

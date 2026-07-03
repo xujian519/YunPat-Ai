@@ -1,7 +1,14 @@
 import Foundation
 public final class WikiAdapter: @unchecked Sendable {
     public let vaultPath: URL
-    public init(vaultPath: URL) { self.vaultPath = vaultPath }
+    public var embeddingProvider: EmbeddingProvider?
+    public var semanticIndex: SemanticIndex?
+
+    public init(vaultPath: URL, embeddingProvider: EmbeddingProvider? = nil, semanticIndex: SemanticIndex? = nil) {
+        self.vaultPath = vaultPath
+        self.embeddingProvider = embeddingProvider
+        self.semanticIndex = semanticIndex
+    }
     public func readSchema() async throws -> String {
         try String(contentsOf: vaultPath.appendingPathComponent("AGENTS.md"), encoding: .utf8)
     }
@@ -53,6 +60,30 @@ public final class WikiAdapter: @unchecked Sendable {
         try FileManager.default.moveItem(at: original, to: deprecated)
     }
     public func semanticSearch(query: String) throws -> [SearchResultItem] {
+        try keywordFallbackSearch(query: query)
+    }
+
+    /// 异步语义搜索 — 优先使用 EmbeddingProvider + SemanticIndex，回退到关键词
+    public func semanticSearchAsync(query: String, topK: Int = 10) async throws -> [SearchResultItem] {
+        if let provider = embeddingProvider, let index = semanticIndex {
+            let ready: Bool = await provider.isReady
+            let available: Bool = await index.isAvailable
+            if ready && available {
+                let embeddings: [[Float]] = try await provider.embed([query])
+                if let queryEmbedding: [Float] = embeddings.first {
+                    let hits: [IndexHit] = try await index.search(
+                        queryEmbedding: queryEmbedding, topK: topK, minScore: 0.3
+                    )
+                    return hits.map { hit in
+                        SearchResultItem(title: hit.title, score: hit.score, content: hit.chunkText)
+                    }
+                }
+            }
+        }
+        return try keywordFallbackSearch(query: query)
+    }
+
+    private func keywordFallbackSearch(query: String) -> [SearchResultItem] {
         let wikiDir = vaultPath.appendingPathComponent("Wiki")
         guard FileManager.default.fileExists(atPath: wikiDir.path) else { return [] }
         let files: [URL] = (try? FileManager.default.contentsOfDirectory(at: wikiDir, includingPropertiesForKeys: nil)

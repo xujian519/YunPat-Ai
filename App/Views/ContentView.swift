@@ -59,8 +59,7 @@ struct ContentView: View {
             if collaborationVisible {
                 if caseGraphMode {
                     CaseGraphView(
-                        caseId: activeTab?.caseId,
-                        relatedCases: sampleRelatedCases()
+                        caseId: activeTab?.caseId
                     )
                     .frame(minWidth: 240, idealWidth: 280, maxWidth: 360)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -230,17 +229,6 @@ struct ContentView: View {
 
     private var activeTabClarify: ClarifyRequest? {
         activeTab?.clarifyRequest
-    }
-
-    // MARK: - Sample data
-
-    private func sampleRelatedCases() -> [CaseGraphView.RelatedCase] {
-        guard activeTab?.type == .patent else { return [] }
-        return [
-            .init(id: "CN202310000001", title: "在先申请", relation: .priority),
-            .init(id: "CN202310000002", title: "分案申请", relation: .divisional),
-            .init(id: "US2024/012345", title: "对比文件 D1", relation: .reference)
-        ]
     }
 
     private func saveCurrentDocument() {

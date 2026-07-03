@@ -122,7 +122,7 @@ final class ChatManager: ObservableObject {
         onChunk: @escaping PatentLoopHooks.OnStreamChunk,
         tabManager: TabManager
     ) async throws {
-        let flow: AgentFlow = tab.loopPreference
+        let flow: AgentFlow = tab.resolvedFlow(for: sentText)
         let model: String = tab.loopModel
         switch flow {
         case .copilot, .guided:

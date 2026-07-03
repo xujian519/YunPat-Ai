@@ -60,7 +60,11 @@ extension CapabilityRegistry {
                 description: "操控 Mac 应用（AXorcist Accessibility API）", source: .builtin, permission: .perCall,
                 metadata: CapabilityMetadata(
                     costLevel: .low, requiresNetwork: false, isIdempotent: false, typicalUseCases: ["应用操控", "UI 读取"]),
-                toolNames: []))
+                toolNames: [
+                    "ax_click", "ax_type", "ax_read", "ax_screenshot",
+                    "ax_list_windows", "ax_get_properties", "ax_find_element",
+                    "ax_get_focused_element", "ax_read_focused"
+                ]))
         register(
             capability: CapabilityDefinition(
                 name: "meta.discovery", displayName: "能力发现",

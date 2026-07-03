@@ -14,6 +14,7 @@ struct ChatTab: Identifiable, Equatable {
     var messages: [ChatMessage]
     var loopState: LoopState
     var loopPreference: AgentFlow
+    var autoFlowEnabled: Bool
     var loopModel: String
     var sessionMemory: SessionMemory
     var caseId: String?  // 案件编号（patent 类型）
@@ -32,8 +33,17 @@ struct ChatTab: Identifiable, Equatable {
         self.messages = []
         self.loopState = .idle
         self.loopPreference = flow
+        self.autoFlowEnabled = (type == .general)
         self.loopModel = ModelProvider.deepseek.defaultModel
         self.sessionMemory = SessionMemory(tabId: tabId)
+    }
+
+    /// 根据用户请求内容解析实际 Flow（autoFlow 开启时自动分类）
+    func resolvedFlow(for userMessage: String) -> AgentFlow {
+        if autoFlowEnabled {
+            return FlowClassifier().classify(userMessage)
+        }
+        return loopPreference
     }
 
     var flowLabel: String {
