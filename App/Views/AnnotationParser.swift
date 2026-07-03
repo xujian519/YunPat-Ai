@@ -41,38 +41,75 @@ public struct ParsedAnnotationResult: Sendable {
 }
 
 public final class AnnotationParser {
+
+    public init() {}
+
     public func parse(_ text: String) -> ParsedAnnotationResult {
-        var cleanText: String = text
+        var cleanLines: [String] = []
         var annotations: [DocumentAnnotation] = []
-        let edits: [TextEdit] = []
+        var edits: [TextEdit] = []
         let lines: [String] = text.components(separatedBy: .newlines)
+
         for (index, line) in lines.enumerated() {
-            if let match = parsePattern("{del:", "}", in: line) {
-                annotations.append(DocumentAnnotation(line: index + 1, type: .deletion, content: match))
-                cleanText = cleanText.replacingOccurrences(of: "{del:\(match)}", with: match)
+            let lineNumber: Int = index + 1
+            var cleanLine: String = line
+
+            // {del:text} — 删除标注
+            if let match: String = parsePattern("{del:", "}", in: line) {
+                annotations.append(DocumentAnnotation(line: lineNumber, type: .deletion, content: match))
+                let originalLine: String = line
+                cleanLine = cleanLine.replacingOccurrences(of: "{del:\(match)}", with: match)
+                edits.append(TextEdit(line: lineNumber, oldText: originalLine, newText: cleanLine))
             }
-            if let match = parsePattern("{ins:", "}", in: line) {
-                annotations.append(DocumentAnnotation(line: index + 1, type: .insertion, content: match))
-                cleanText = cleanText.replacingOccurrences(of: "{ins:\(match)}", with: match)
+
+            // {ins:text} — 插入标注
+            if let match: String = parsePattern("{ins:", "}", in: line) {
+                annotations.append(DocumentAnnotation(line: lineNumber, type: .insertion, content: match))
+                let beforeInsertion: String = cleanLine
+                let insertionText: String = match
+                cleanLine = cleanLine.replacingOccurrences(of: "{ins:\(match)}", with: insertionText)
+                edits.append(TextEdit(line: lineNumber, oldText: beforeInsertion, newText: cleanLine))
             }
+
+            // {???} — 疑问标注
             if line.contains("{???}") {
-                let content = line.replacingOccurrences(of: "{???}", with: "").trimmingCharacters(in: .whitespaces)
-                annotations.append(DocumentAnnotation(line: index + 1, type: .question, content: content))
+                let questionContent: String = line
+                    .replacingOccurrences(of: "{???}", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                annotations.append(
+                    DocumentAnnotation(line: lineNumber, type: .question, content: questionContent)
+                )
+                cleanLine = cleanLine.replacingOccurrences(of: "{???}", with: "")
             }
+
+            // 💬 — 评论标注
             if line.contains("💬") {
-                let parts = line.components(separatedBy: "💬")
+                let parts: [String] = line.components(separatedBy: "💬")
                 if parts.count > 1 {
-                    let comment = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
-                    annotations.append(DocumentAnnotation(line: index + 1, type: .comment, content: comment))
+                    let comment: String = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
+                    annotations.append(
+                        DocumentAnnotation(line: lineNumber, type: .comment, content: comment)
+                    )
                 }
+                cleanLine = cleanLine.components(separatedBy: "💬").first ?? cleanLine
+                cleanLine = cleanLine.trimmingCharacters(in: .whitespaces)
             }
+
+            cleanLines.append(cleanLine)
         }
-        return ParsedAnnotationResult(cleanText: cleanText, annotations: annotations, edits: edits)
+
+        let cleanText: String = cleanLines.joined(separator: "\n")
+        return ParsedAnnotationResult(
+            cleanText: cleanText,
+            annotations: annotations,
+            edits: edits
+        )
     }
+
     private func parsePattern(_ open: String, _ close: String, in line: String) -> String? {
-        guard let start = line.range(of: open)?.upperBound, let end = line[start...].range(of: close)?.lowerBound else {
-            return nil
-        }
+        guard let start: String.Index = line.range(of: open)?.upperBound,
+              let end: String.Index = line[start...].range(of: close)?.lowerBound
+        else { return nil }
         return String(line[start..<end])
     }
 }

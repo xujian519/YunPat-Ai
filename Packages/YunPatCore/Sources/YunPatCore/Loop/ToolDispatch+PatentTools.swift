@@ -152,7 +152,9 @@ extension ToolDispatch {
 
         // 降级路径 1：SearchCommander
         if let commander = ToolDispatch.shared.searchCommander {
-            let results: [SearchResult] = await commander.search(query: query)
+            let results: [SearchResult] = await commander.search(
+                query: query, sources: [.localKB]
+            )
             let limited: [SearchResult] = Array(results.prefix(limit))
             guard !limited.isEmpty else {
                 return .handled(

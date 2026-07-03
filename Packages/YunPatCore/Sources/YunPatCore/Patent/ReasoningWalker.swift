@@ -87,16 +87,6 @@ public struct ReasoningWalkResult: Sendable {
     }
 }
 
-// MARK: - Knowledge Graph (stub)
-
-private struct KGNode: Sendable {
-    let id: String
-    let type: String
-    let name: String
-    let relations: [(targetId: String, relation: String)]
-    let excerpt: String
-}
-
 // MARK: - Reasoning Walker
 
 public actor ReasoningWalker {
@@ -106,72 +96,14 @@ public actor ReasoningWalker {
     // MARK: - Walk
 
     public func walk(input: ReasoningWalkInput) async -> ReasoningWalkResult {
-        let knowledgeGraph: [String: [KGNode]] = buildStubKnowledgeGraph(caseType: input.caseType)
         let chains: [WalkChain] = buildChains(
-            facts: input.facts, knowledgeGraph: knowledgeGraph,
-            maxDepth: input.maxDepth, maxChains: input.maxChains
+            facts: input.facts,
+            maxDepth: input.maxDepth,
+            maxChains: input.maxChains
         )
         let (coverage, gaps): (Double, [String]) = evaluate(chains: chains, facts: input.facts)
 
         return ReasoningWalkResult(chains: chains, coverage: coverage, gaps: gaps)
-    }
-
-    // MARK: - Stub Knowledge Graph
-
-    private func buildStubKnowledgeGraph(caseType: CaseType) -> [String: [KGNode]] {
-        let topic: String = caseType.rawValue
-
-        // Create a minimal stub graph — in production this would query a real KG store.
-        let nodes: [KGNode] = [
-            KGNode(
-                id: "kg-\(topic)-1",
-                type: "legal_requirement",
-                name: "Article 22.3 Inventive Step",
-                relations: [("kg-\(topic)-2", "defined_by"), ("kg-\(topic)-3", "applied_to")],
-                excerpt: "An invention possesses inventive step if it is not obvious to a person skilled in the art."
-            ),
-            KGNode(
-                id: "kg-\(topic)-2",
-                type: "legal_standard",
-                name: "Three-Step Test",
-                relations: [("kg-\(topic)-3", "requires"), ("kg-\(topic)-4", "guides")],
-                excerpt: "Determine the closest prior art, identify distinguishing features, and assess obviousness."
-            ),
-            KGNode(
-                id: "kg-\(topic)-3",
-                type: "fact_pattern",
-                name: "Distinguishing Features",
-                relations: [("kg-\(topic)-4", "evaluated_against")],
-                excerpt: "Technical features that differentiate the claimed invention from the closest prior art."
-            ),
-            KGNode(
-                id: "kg-\(topic)-4",
-                type: "precedent",
-                name: "Typical Obviousness Assessment",
-                relations: [],
-                excerpt:
-                    "Whether the distinguishing features would have been obvious to a person skilled in the art at the filing date."  // swiftlint:disable:this line_length
-            )
-        ]
-
-        // Group by topic keyword for lookup
-        var graph: [String: [KGNode]] = [:]
-        for node in nodes {
-            let key: String = extractKeyword(from: node.name)
-            graph[key, default: []].append(node)
-        }
-        // Also index by topic
-        graph[topic] = nodes
-        return graph
-    }
-
-    private func extractKeyword(from name: String) -> String {
-        let normalized: String = name.lowercased()
-        if normalized.contains("inventive") { return "inventive" }
-        if normalized.contains("obvious") { return "obvious" }
-        if normalized.contains("prior art") { return "prior_art" }
-        if normalized.contains("distinguish") { return "distinguish" }
-        return "general"
     }
 
     // MARK: - Chain Building
@@ -179,22 +111,30 @@ public actor ReasoningWalker {
     // swiftlint:disable:next function_body_length
     private func buildChains(
         facts: [String],
-        knowledgeGraph: [String: [KGNode]],
         maxDepth: Int,
         maxChains: Int
     ) -> [WalkChain] {
         var chains: [WalkChain] = []
-        for (idx, fact) in facts.prefix(maxChains).enumerated() {
-            let lowercased: String = fact.lowercased()
-            var matched: [KGNode] = []
-            for (keyword, nodes) in knowledgeGraph where lowercased.contains(keyword) {
-                matched.append(contentsOf: nodes)
-            }
 
-            if matched.isEmpty { matched = knowledgeGraph.values.first ?? [] }
+        for (idx, fact) in facts.prefix(maxChains).enumerated() {
+            let entryNodes: [KGNode] = findEntryNodes(for: fact)
             var visited: Set<String> = Set<String>()
             var walkNodes: [ReasoningChainNode] = []
-            guard let firstMatch = matched.first else { continue }
+
+            guard let firstMatch: KGNode = entryNodes.first else {
+                chains.append(
+                    WalkChain(
+                        id: "chain-\(idx)-no-match",
+                        factRef: fact,
+                        nodes: [],
+                        legalBasis: LegalBasis(),
+                        confidence: 0.1,
+                        gaps: ["知识图谱中无匹配节点: \(fact.prefix(50))"]
+                    )
+                )
+                continue
+            }
+
             var queue: [(node: KGNode, depth: Int)] = [(firstMatch, 0)]
 
             while let (current, depth) = queue.first, depth < maxDepth {
@@ -215,7 +155,8 @@ public actor ReasoningWalker {
                 )
 
                 for (targetId, rel) in current.relations {
-                    if let target = findNode(id: targetId, in: knowledgeGraph) {
+                    if let target: KGNode = PatentLawKG.nodeMap[targetId],
+                       !visited.contains(target.id) {
                         queue.append((target, depth + 1))
                     }
                     walkNodes.append(
@@ -224,25 +165,19 @@ public actor ReasoningWalker {
                             nodeType: "relation",
                             name: rel,
                             relation: rel,
-                            excerpt: "Edge from \(current.id) to \(targetId)"
+                            excerpt: "\(current.name) → \(targetId)"
                         )
                     )
                 }
             }
+
             let gaps: [String] = detectGaps(in: walkNodes, fact: fact)
             chains.append(
                 WalkChain(
                     id: "chain-\(idx)-\(UUID().uuidString.prefix(8))",
                     factRef: fact,
                     nodes: walkNodes,
-                    legalBasis: LegalBasis(
-                        lawArticle: walkNodes.contains(where: { $0.name.contains("Article") })
-                            ? "Patent Law Art. 22.3" : nil,
-                        guidelineRule: walkNodes.contains(where: { $0.nodeType == "legal_standard" })
-                            ? "Examination Guidelines Part II Ch. 4" : nil,
-                        precedentCase: walkNodes.contains(where: { $0.nodeType == "precedent" })
-                            ? "Typical inventive step assessment" : nil
-                    ),
+                    legalBasis: extractLegalBasis(from: walkNodes),
                     confidence: computeConfidence(nodes: walkNodes, fact: fact),
                     gaps: gaps
                 )
@@ -252,13 +187,57 @@ public actor ReasoningWalker {
         return chains
     }
 
-    private func findNode(id: String, in knowledgeGraph: [String: [KGNode]]) -> KGNode? {
-        for nodes in knowledgeGraph.values {
-            if let node = nodes.first(where: { $0.id == id }) {
-                return node
+    // MARK: - Entry Node Matching
+
+    private func findEntryNodes(for fact: String) -> [KGNode] {
+        let lowered: String = fact.lowercased()
+        var matched: [KGNode] = []
+        var matchedIds: Set<String> = Set<String>()
+
+        for (keyword, nodeIds) in PatentLawKG.keywordIndex
+        where lowered.contains(keyword.lowercased()) {
+            for nodeId in nodeIds where !matchedIds.contains(nodeId) {
+                matchedIds.insert(nodeId)
+                if let node: KGNode = PatentLawKG.nodeMap[nodeId] {
+                    matched.append(node)
+                }
             }
         }
-        return nil
+
+        if matched.isEmpty, let defaultNode: KGNode = PatentLawKG.nodeMap["art-22-3"] {
+            matched.append(defaultNode)
+        }
+
+        return matched
+    }
+
+    // MARK: - Legal Basis Extraction
+
+    private func extractLegalBasis(from nodes: [ReasoningChainNode]) -> LegalBasis {
+        var lawArticle: String?
+        var guidelineRule: String?
+        var precedentCase: String?
+
+        for node in nodes {
+            if node.nodeType == "legal_requirement" {
+                lawArticle = node.name
+            }
+            if node.nodeType == "guideline" {
+                guidelineRule = node.name
+            }
+            if node.nodeType == "legal_standard" {
+                if guidelineRule == nil { guidelineRule = node.name }
+            }
+            if node.nodeType == "fact_pattern" {
+                if precedentCase == nil { precedentCase = node.excerpt }
+            }
+        }
+
+        return LegalBasis(
+            lawArticle: lawArticle,
+            guidelineRule: guidelineRule,
+            precedentCase: precedentCase
+        )
     }
 
     // MARK: - Evaluation
@@ -269,21 +248,18 @@ public actor ReasoningWalker {
 
         var allGaps: [String] = []
 
-        // Facts without any chain
         let uncovered: [String] = facts.filter { !coveredFacts.contains($0) }
         if !uncovered.isEmpty {
-            allGaps.append("Uncovered facts (\(uncovered.count)): \(uncovered.joined(separator: "; "))")
+            allGaps.append("未覆盖的事实 (\(uncovered.count)): \(uncovered.joined(separator: "; "))")
         }
 
-        // Low-confidence chains
         let lowConfidence: [WalkChain] = chains.filter { $0.confidence < 0.5 }
         if !lowConfidence.isEmpty {
             allGaps.append(
-                "Low-confidence chains (\(lowConfidence.count)): \(lowConfidence.map(\.id).joined(separator: ", "))"
+                "低置信度推理链 (\(lowConfidence.count)): \(lowConfidence.map(\.id).joined(separator: ", "))"
             )
         }
 
-        // Collect per-chain gaps
         for chain in chains where !chain.gaps.isEmpty {
             allGaps.append(contentsOf: chain.gaps.map { "[\(chain.id)] \($0)" })
         }
@@ -299,8 +275,8 @@ public actor ReasoningWalker {
         let typeWeights: [String: Double] = [
             "legal_requirement": 1.0,
             "legal_standard": 0.9,
+            "guideline": 0.8,
             "fact_pattern": 0.7,
-            "precedent": 0.8,
             "relation": 0.3
         ]
 
@@ -310,12 +286,9 @@ public actor ReasoningWalker {
         }
 
         let avgWeight: Double = totalWeight / Double(nodes.count)
-
-        // Penalize if the fact doesn't overlap with node names
+        let factWords: [String] = fact.lowercased().split(separator: " ").map(String.init)
         let keywordOverlap: Int = nodes.filter { node in
-            fact.lowercased().split(separator: " ").contains { word in
-                node.name.lowercased().contains(word)
-            }
+            factWords.contains { word in node.name.lowercased().contains(word) }
         }.count
 
         let overlapRatio: Double = nodes.isEmpty ? 0.0 : Double(keywordOverlap) / Double(nodes.count)
@@ -331,16 +304,16 @@ public actor ReasoningWalker {
             $0.nodeType == "legal_requirement" || $0.nodeType == "legal_standard"
         }
         if legalNodes.isEmpty {
-            gaps.append("No legal requirement or standard node found for fact: \(fact.prefix(50))...")
+            gaps.append("未找到法律依据节点: \(fact.prefix(50))")
         }
 
-        let hasPrecedent: Bool = nodes.contains { $0.nodeType == "precedent" }
-        if !hasPrecedent && nodes.count > 2 {
-            gaps.append("Missing precedent reference in chain for fact: \(fact.prefix(50))...")
+        let hasGuideline: Bool = nodes.contains { $0.nodeType == "guideline" }
+        if !hasGuideline && nodes.count > 2 {
+            gaps.append("缺少审查指南引用: \(fact.prefix(50))")
         }
 
         if nodes.isEmpty {
-            gaps.append("Empty chain — no KG nodes matched for fact: \(fact.prefix(50))...")
+            gaps.append("空推理链 — 无知识图谱节点匹配: \(fact.prefix(50))")
         }
 
         return gaps

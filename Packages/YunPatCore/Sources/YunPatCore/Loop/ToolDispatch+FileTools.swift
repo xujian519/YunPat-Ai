@@ -5,7 +5,7 @@ import Foundation
 extension ToolDispatch {
 
     func registerFileTools() {
-        // TODO: 迁移到 TypedTool —— TypedReadFileTool 已存在，名称不匹配 (typed_read_file vs read_file)
+        // 文件工具 — 同时提供 read_file/write_file（兼容旧调用方）和 TypedTool 版本
         handlers["read_file"] = { name, input, context in
             await Self.handleReadFile(name: name, input: input, ctx: context)
         }
