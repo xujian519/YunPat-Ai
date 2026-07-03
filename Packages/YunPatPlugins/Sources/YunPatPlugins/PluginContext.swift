@@ -50,11 +50,11 @@ public actor PluginContext {
         let qualified: String = "\(pluginID):\(name)"
         let capturedSecrets: [String: String] = secrets
         let injectingHandler: ToolHandler = { _, rawInput, ctx in
-            var augmented: [String: Any] = rawInput
+            var augmented: [String: JSONValue] = rawInput
             if !capturedSecrets.isEmpty {
-                augmented["_secrets"] = capturedSecrets
+                augmented["_secrets"] = .object(capturedSecrets.mapValues { .string($0) })
             }
-            augmented["_context_folder"] = ctx.projectFolder
+            augmented["_context_folder"] = .string(ctx.projectFolder)
             return await handler(qualified, augmented, ctx)
         }
         tools[qualified] = injectingHandler
@@ -100,7 +100,7 @@ public actor PluginContext {
 
     /// 检查插件所需的 must 级别 secret 是否都已配置
     public var hasRequiredSecrets: Bool {
-        for secret in manifest.secrets ?? [] where secret.required {
+        for secret in manifest.secrets where secret.required {
             guard secrets[secret.id] != nil, !(secrets[secret.id]?.isEmpty ?? true) else {
                 return false
             }

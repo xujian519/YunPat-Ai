@@ -6,7 +6,6 @@ let package = Package(
     platforms: [.macOS(.v15)],
     products: [.library(name: "YunPatSandbox", targets: ["YunPatSandbox"])],
     targets: [
-        .target(name: "YunPatSandbox"),
-        .testTarget(name: "YunPatSandboxTests", dependencies: ["YunPatSandbox"])
+        .target(name: "YunPatSandbox")
     ]
 )

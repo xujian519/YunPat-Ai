@@ -108,7 +108,12 @@ public actor CaseRelationStore {
 
     private func loadAll() -> [CaseRelation] {
         guard let data = defaults.data(forKey: key) else { return [] }
-        return (try? decoder.decode([CaseRelation].self, from: data)) ?? []
+        do {
+            return try decoder.decode([CaseRelation].self, from: data)
+        } catch {
+            print("[CaseRelationStore] Failed to decode relations: \(error)")
+            return []
+        }
     }
 
     private func save(_ relations: [CaseRelation]) throws {

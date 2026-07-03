@@ -40,10 +40,14 @@ private struct GetPDFInfoTool: TypedTool {
             )
             let encoder: JSONEncoder = JSONEncoder()
             encoder.outputFormatting = [.sortedKeys]
-            guard let data: Data = try? encoder.encode(info),
-                let dict: [String: Any] = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-            else {
-                return ToolResponse.errResp(code: .internalError, message: "JSON 编码失败")
+            let data: Data
+            do {
+                data = try encoder.encode(info)
+            } catch {
+                return ToolResponse.errResp(code: .internalError, message: "JSON 编码失败: \(error.localizedDescription)")
+            }
+            guard let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                return ToolResponse.errResp(code: .internalError, message: "JSON 序列化失败")
             }
             let jsonData: Data = try JSONSerialization.data(withJSONObject: dict)
             let jsonValue: JSONValue = try JSONDecoder().decode(JSONValue.self, from: jsonData)

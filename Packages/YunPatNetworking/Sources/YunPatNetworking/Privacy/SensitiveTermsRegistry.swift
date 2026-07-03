@@ -24,9 +24,11 @@ public actor SensitiveTermsRegistry {
         /// ~/.yunpat/templates/sensitive/firm.txt
         case firmLevel
 
-        public static func < (l: Scope, r: Scope) -> Bool {
+        public static func < (lhs: Scope, rhs: Scope) -> Bool {
             let order: [Scope] = [.caseLevel, .clientLevel, .firmLevel]
-            return order.firstIndex(of: l)! < order.firstIndex(of: r)!
+            guard let lhsIdx = order.firstIndex(of: lhs),
+                  let rhsIdx = order.firstIndex(of: rhs) else { return false }
+            return lhsIdx < rhsIdx
         }
     }
 

@@ -1,5 +1,4 @@
 import Foundation
-import YunPatNetworking
 
 /// PII 脱敏过滤器 — 云端发送前对请求文本进行正则 + 客户自定义词表脱敏
 ///
@@ -85,7 +84,8 @@ public actor PrivacyFilter { // swiftlint:disable:this type_body_length
     }
 
     /// 流式 unscrub：用 placeholderMap 将占位符替换回原文
-    public func unscrub(
+    /// nonisolated 因为不访问 actor 可变状态（replacePlaceholders 也是 nonisolated）
+    nonisolated public func unscrub(
         stream: AsyncThrowingStream<ChatChunk, Error>,
         map: [String: String]
     ) -> AsyncThrowingStream<ChatChunk, Error> {
@@ -264,7 +264,11 @@ public actor PrivacyFilter { // swiftlint:disable:this type_body_length
         [
             PatternEntry(kind: .email, pattern: #"[\w.+-]+@[\w.-]+\.\w{2,}"#, source: .regex),
             PatternEntry(kind: .custom, pattern: #"https?://[^\s<>"']+"#, source: .regex),  // swiftlint:disable:this line_length
-            PatternEntry(kind: .unifiedSocialCreditCode, pattern: #"(?<!\d)(?!\d{18})[0-9A-HJ-NPQRTUWXY]{18}(?!\d)"#, source: .regex),
+            PatternEntry(
+                kind: .unifiedSocialCreditCode,
+                pattern: #"(?<!\d)(?!\d{18})[0-9A-HJ-NPQRTUWXY]{18}(?!\d)"#,
+                source: .regex
+            ),
             PatternEntry(kind: .idNumber, pattern: #"(?<!\d)\d{17}[\dXx](?!\d)"#, source: .regex),
             PatternEntry(kind: .bankCard, pattern: #"(?<!\d)\d{16,19}(?!\d)"#, source: .regex),
             PatternEntry(kind: .phone, pattern: #"(?<!\d)1[3-9]\d{9}(?!\d)"#, source: .regex),

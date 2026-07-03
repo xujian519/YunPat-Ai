@@ -101,7 +101,9 @@ public actor EventBus {
                             try? await Task.sleep(nanoseconds: UInt64(30 * 1_000_000_000))
                             return .timedOut
                         }
-                        return await inner.next() ?? .completed
+                        let result: HandlerResult = await inner.next() ?? .completed
+                        inner.cancelAll()
+                        return result
                     }
                 }
             }

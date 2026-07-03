@@ -232,7 +232,12 @@ extension ToolDispatch {
         process.arguments = ["-c", args.joined(separator: " ")]
         let pipe: Pipe = Pipe()
         process.standardOutput = pipe
-        try? process.run()
+        do {
+            try process.run()
+        } catch {
+            print("[execute_shell] Failed to run process: \(error)")
+            return "Error: \(error.localizedDescription)"
+        }
         process.waitUntilExit()
         return String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
     }

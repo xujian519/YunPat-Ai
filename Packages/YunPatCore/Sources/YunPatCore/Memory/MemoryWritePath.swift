@@ -20,7 +20,11 @@ public actor MemoryWritePath {
     private static let persistenceURL: URL = {
         let home: URL = FileManager.default.homeDirectoryForCurrentUser
         let dir = home.appendingPathComponent(".yunpat/memory")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            print("[MemoryWritePath] Failed to create persistence directory: \(error)")
+        }
         return dir.appendingPathComponent("pending_signals.json")
     }()
 
@@ -113,9 +117,20 @@ public actor MemoryWritePath {
 
     /// 启动时从 JSON 文件恢复未处理的信号
     public func recoverOrphanedSignals() async {
-        guard let data = try? Data(contentsOf: Self.persistenceURL),
-              let decoded = try? JSONDecoder().decode([PendingSignal].self, from: data),
-              !decoded.isEmpty else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: Self.persistenceURL)
+        } catch {
+            return
+        }
+        let decoded: [PendingSignal]
+        do {
+            decoded = try JSONDecoder().decode([PendingSignal].self, from: data)
+        } catch {
+            print("[MemoryWritePath] Failed to decode pending signals: \(error)")
+            return
+        }
+        guard !decoded.isEmpty else { return }
         pendingSignals.append(contentsOf: decoded)
         persistPendingSignals()
         if let caseId = decoded.last?.caseId {
@@ -136,14 +151,34 @@ public actor MemoryWritePath {
     // MARK: - Persistence
 
     private func persistPendingSignals() {
-        guard let data = try? JSONEncoder().encode(pendingSignals) else { return }
-        try? data.write(to: Self.persistenceURL, options: .atomic)
+        let data: Data
+        do {
+            data = try JSONEncoder().encode(pendingSignals)
+        } catch {
+            print("[MemoryWritePath] Failed to encode pending signals: \(error)")
+            return
+        }
+        do {
+            try data.write(to: Self.persistenceURL, options: .atomic)
+        } catch {
+            print("[MemoryWritePath] Failed to write pending signals: \(error)")
+        }
     }
 
     private func clearPersistedSignals() {
         let empty: [PendingSignal] = []
-        guard let data = try? JSONEncoder().encode(empty) else { return }
-        try? data.write(to: Self.persistenceURL, options: .atomic)
+        let data: Data
+        do {
+            data = try JSONEncoder().encode(empty)
+        } catch {
+            print("[MemoryWritePath] Failed to encode empty signal list: \(error)")
+            return
+        }
+        do {
+            try data.write(to: Self.persistenceURL, options: .atomic)
+        } catch {
+            print("[MemoryWritePath] Failed to clear persisted signals: \(error)")
+        }
     }
 }
 

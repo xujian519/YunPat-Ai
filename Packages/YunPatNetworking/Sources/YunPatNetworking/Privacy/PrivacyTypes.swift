@@ -1,5 +1,4 @@
 import Foundation
-import YunPatNetworking
 
 /// 隐私相关类型的命名空间
 public enum PrivacyTypes {}

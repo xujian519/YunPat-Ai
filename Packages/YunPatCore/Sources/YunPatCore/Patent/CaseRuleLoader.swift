@@ -24,7 +24,13 @@ public actor CaseRuleLoader {
         do {
             let files = try FileManager.default.contentsOfDirectory(at: rulesDir, includingPropertiesForKeys: nil)
             for file in files where file.pathExtension == "md" {
-                guard let content = try? String(contentsOf: file, encoding: .utf8) else { continue }
+                let content: String
+                do {
+                    content = try String(contentsOf: file, encoding: .utf8)
+                } catch {
+                    print("[CaseRuleLoader] Failed to read \(file.lastPathComponent): \(error)")
+                    continue
+                }
                 let fileName = file.deletingPathExtension().lastPathComponent
                 let priority: Int =
                     fileName.hasPrefix("01")

@@ -15,7 +15,7 @@ final class PluginContextTests: XCTestCase {
             .handled("Hello!")
         }
 
-        let handler: PluginToolHandler? = await ctx.handler(for: "test.plugin:hello")
+        let handler: ToolHandler? = await ctx.handler(for: "test.plugin:hello")
         XCTAssertNotNil(handler)
     }
 
@@ -27,7 +27,7 @@ final class PluginContextTests: XCTestCase {
             .handled("Hi from \(name)")
         }
 
-        let specs: [PluginToolSpec] = await ctx.allSpecs
+        let specs: [ToolSpec] = await ctx.allSpecs
         XCTAssertEqual(specs.first?.name, "my.plugin:greet")
     }
 
@@ -43,13 +43,18 @@ final class PluginContextTests: XCTestCase {
         let ctx = PluginContext(pluginID: "secret.plugin", manifest: manifest, secrets: ["api_key": "sk-12345"])
 
         await ctx.register(name: "call_api", description: "calls external API") { _, input, _ in
-            let secret: [String: String]? = input["_secrets"] as? [String: String]
-            let key: String = secret?["api_key"] ?? "none"
+            let secretsValue: JSONValue? = input["_secrets"]
+            let key: String
+            if case .object(let dict) = secretsValue, case .string(let val) = dict["api_key"] {
+                key = val
+            } else {
+                key = "none"
+            }
             return .handled("key=\(key)")
         }
 
         guard let handler = await ctx.handler(for: "secret.plugin:call_api") else { return XCTFail("No handler") }
-        let result: PluginToolResult = await handler(
+        let result: ToolHandlerResult = await handler(
             "secret.plugin:call_api", [:],
             ToolContext(
                 toolId: "", projectFolder: "/tmp", selectedProvider: .deepseek
@@ -91,12 +96,17 @@ final class PluginContextTests: XCTestCase {
         let ctx = PluginContext(pluginID: "ctx.plugin", manifest: manifest)
 
         await ctx.register(name: "check_ctx", description: "checks context folder") { _, input, _ in
-            let folder: String = input["_context_folder"] as? String ?? "none"
+            let folder: String
+            if case .string(let val) = input["_context_folder"] {
+                folder = val
+            } else {
+                folder = "none"
+            }
             return .handled("folder=\(folder)")
         }
 
         guard let handler2 = await ctx.handler(for: "ctx.plugin:check_ctx") else { return XCTFail("No handler") }
-        let result: PluginToolResult = await handler2(
+        let result: ToolHandlerResult = await handler2(
             "ctx.plugin:check_ctx", [:],
             ToolContext(
                 toolId: "", projectFolder: "/Users/test/work", selectedProvider: .deepseek

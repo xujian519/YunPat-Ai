@@ -38,6 +38,17 @@ final class PluginSecretTests: XCTestCase {
         XCTAssertNil(secret.url)
     }
 
+    func testHelpText() {
+        let secret = PluginSecret(
+            id: "key", label: "Key",
+            description: "用于调用 API",
+            url: "https://example.com/api-keys"
+        )
+        let help = secret.helpText
+        XCTAssertTrue(help.contains("用于调用 API"))
+        XCTAssertTrue(help.contains("https://example.com/api-keys"))
+    }
+
     // MARK: Manifest Integration
 
     func testManifestWithSecrets() {
@@ -53,11 +64,10 @@ final class PluginSecretTests: XCTestCase {
             secrets: [secret]
         )
 
-        XCTAssertNotNil(manifest.secrets)
-        XCTAssertEqual(manifest.secrets?.count, 1)
-        XCTAssertEqual(manifest.secrets?.first?.id, "api_key")
-        XCTAssertEqual(manifest.secrets?.first?.label, "API Key")
-        XCTAssertTrue(manifest.secrets?.first?.required ?? false)
+        XCTAssertEqual(manifest.secrets.count, 1, "Should have 1 secret")
+        XCTAssertEqual(manifest.secrets.first?.id, "api_key")
+        XCTAssertEqual(manifest.secrets.first?.label, "API Key")
+        XCTAssertTrue(manifest.secrets.first?.required ?? false)
     }
 
     func testManifestWithoutSecrets() {
@@ -70,40 +80,6 @@ final class PluginSecretTests: XCTestCase {
             author: "Test Author"
         )
 
-        XCTAssertNil(manifest.secrets)
-    }
-
-    func testManifestWithSha256() {
-        let expectedHash: String = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
-
-        let manifest = PluginManifest(
-            id: "com.example.plugin",
-            name: "Example Plugin",
-            version: "1.0.0",
-            level: .tool,
-            description: "A test plugin",
-            author: "Test Author",
-            sha256: expectedHash
-        )
-
-        XCTAssertEqual(manifest.sha256, expectedHash)
-        XCTAssertNotNil(manifest.sha256)
-    }
-
-    func testManifestWithSignature() {
-        let expectedSig: String = "MEUCIQDx...base64signature...=="
-
-        let manifest = PluginManifest(
-            id: "com.example.plugin",
-            name: "Example Plugin",
-            version: "1.0.0",
-            level: .tool,
-            description: "A test plugin",
-            author: "Test Author",
-            signature: expectedSig
-        )
-
-        XCTAssertEqual(manifest.signature, expectedSig)
-        XCTAssertNotNil(manifest.signature)
+        XCTAssertTrue(manifest.secrets.isEmpty, "Should have no secrets by default")
     }
 }

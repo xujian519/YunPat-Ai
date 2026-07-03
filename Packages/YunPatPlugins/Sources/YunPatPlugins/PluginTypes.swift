@@ -16,9 +16,12 @@ public struct PluginManifest: Codable, Sendable {
     public let description: String
     public let author: String
     public let permissions: [PluginPermission]
+    /// 插件声明的必需/可选 secret 配置，Settings UI 自动生成配置表单
+    public let secrets: [PluginSecret]
     public init(
         id: String, name: String, version: String, minAppVersion: String = "1.0.0", level: PluginLevel = .tool,
-        description: String = "", author: String = "", permissions: [PluginPermission] = []
+        description: String = "", author: String = "", permissions: [PluginPermission] = [],
+        secrets: [PluginSecret] = []
     ) {
         self.id = id
         self.name = name
@@ -28,6 +31,7 @@ public struct PluginManifest: Codable, Sendable {
         self.description = description
         self.author = author
         self.permissions = permissions
+        self.secrets = secrets
     }
 }
 

@@ -1,7 +1,6 @@
 import Foundation
 import Testing
 
-@testable import YunPatCore
 @testable import YunPatNetworking
 
 struct PrivacyFilterTests {

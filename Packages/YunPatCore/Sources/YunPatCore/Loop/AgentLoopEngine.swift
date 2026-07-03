@@ -21,9 +21,6 @@ public actor AgentLoopEngine: LoopEngine {
     /// manifest 是否就绪
     private var manifestReady: Bool = false
 
-    /// 上下文压缩水位线，跨迭代保持摘要状态
-    private var compactionWatermark = CompactionWatermark()
-
     /// 初始化 AgentLoopEngine
     /// - Parameters:
     ///   - modelRouter: 模型路由
@@ -132,7 +129,6 @@ public actor AgentLoopEngine: LoopEngine {
 
     // MARK: - Chat Hooks
 
-    // swiftlint:disable:next function_body_length
     private func makeHooks(
         systemPrompt: String, request: UserRequest, model: String,
         history: [Message] = [],
@@ -146,12 +142,7 @@ public actor AgentLoopEngine: LoopEngine {
                 return all
             },
             modelStream: { [modelRouter, provider, model] messages, _ in
-                let backend: ModelBackend? = await modelRouter.route(provider: provider)
-                let maxTokens: Int = backend?.capabilities().maxContextTokens
-                    ?? Self.defaultMaxContextFor(provider)
-                let compacted: [Message] = Self.compactMessagesForBudget(
-                    messages: messages, maxContextTokens: maxTokens)
-                let chatReq: ChatRequest = ChatRequest(model: model, messages: compacted)
+                let chatReq: ChatRequest = ChatRequest(model: model, messages: messages)
                 let rawStream: AsyncThrowingStream<ChatChunk, Error> =
                     try await modelRouter
                     .chat(chatReq, provider: provider)
@@ -206,54 +197,6 @@ public actor AgentLoopEngine: LoopEngine {
     }
 }
 
-// MARK: - Token Budget Compaction
-
-extension AgentLoopEngine {
-    /// 检查消息列表是否超出上下文窗口预算，超出时裁剪历史消息
-    /// - Parameters:
-    ///   - messages: 完整消息列表 (system + history + current request)
-    ///   - maxContextTokens: 模型最大上下文窗口 token 数
-    /// - Returns: 裁剪后的消息列表（如果未超预算则返回原列表）
-    private static func compactMessagesForBudget(
-        messages: [Message], maxContextTokens: Int
-    ) -> [Message] {
-        let budget: ContextBudget = ContextBudget(window: maxContextTokens)
-        let estimated: Int = TokenEstimator.estimate(messages: messages, provider: .deepseek)
-
-        guard estimated > budget.availableForHistory else { return messages }
-
-        let result: [Message] = messages
-        let systemMsgs = result.filter { $0.role == .system }
-        let nonSystemMsgs = result.filter { $0.role != .system }
-
-        let keepRecent = min(nonSystemMsgs.count, 40)
-
-        var compacted: [Message] = systemMsgs
-        compacted.append(contentsOf: nonSystemMsgs.suffix(keepRecent))
-
-        if compacted.count < messages.count {
-            if let sysIdx: Array<Message>.Index = compacted.firstIndex(where: { $0.role == .system }) {
-                let original: String = compacted[sysIdx].content
-                compacted[sysIdx] = Message(
-                    role: .system,
-                    content: original + "\n[早期对话已压缩以控制上下文预算]"
-                )
-            }
-        }
-
-        return compacted
-    }
-
-    fileprivate static func defaultMaxContextFor(_ provider: ModelProvider) -> Int {
-        switch provider {
-        case .openai: return 128_000
-        case .anthropic: return 200_000
-        case .deepseek: return 128_000
-        case .glm: return 128_000
-        case .mlx, .ollama: return 32_000
-        }
-    }
-}
 // MARK: - LoopResult → LoopExit 转换
 
 extension LoopResult {

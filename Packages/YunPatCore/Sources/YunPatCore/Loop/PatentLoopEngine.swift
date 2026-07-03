@@ -1,7 +1,7 @@
 import Foundation
 import YunPatNetworking
 
-// swiftlint:disable type_body_length
+// swiftlint:disable file_length type_body_length
 /// 专利五步流程引擎 — 封装 PatentToolLoop 实现专利分析全流程
 ///
 /// 步骤：
@@ -204,13 +204,17 @@ public actor PatentLoopEngine: LoopEngine {
                     execution: execResult, rules: rules, facts: facts
                 )
 
-                try? await TraceCollector().finishTrace(
-                    traceID,
-                    summary: TraceSummary(
-                        totalCost: 0, totalLatency: Date().timeIntervalSince(startTime),
-                        toolCount: toolCount, llmCallCount: llmCallCount
+                do {
+                    try await TraceCollector().finishTrace(
+                        traceID,
+                        summary: TraceSummary(
+                            totalCost: 0, totalLatency: Date().timeIntervalSince(startTime),
+                            toolCount: toolCount, llmCallCount: llmCallCount
+                        )
                     )
-                )
+                } catch {
+                    print("[PatentLoopEngine] Failed to finish trace: \(error)")
+                }
 
                 if review.verdict {
                     let reportSuffix: String = review.rubric.map { "\n\n---\n\($0.report())" } ?? ""
@@ -223,7 +227,11 @@ public actor PatentLoopEngine: LoopEngine {
                             inventionPoints: facts.inventionPoints,
                             keyReferences: rules.candidates.prefix(5).map(\.title)
                         )
-                        try? await memory.saveCaseContext(context)
+                        do {
+                            try await memory.saveCaseContext(context)
+                        } catch {
+                            print("[PatentLoopEngine] Failed to save case context: \(error)")
+                        }
                     }
                     state = .idle
                     return .completed(text + reportSuffix)
@@ -380,8 +388,17 @@ public actor PatentLoopEngine: LoopEngine {
                 content: facts.problem.isEmpty ? facts.technicalField : facts.problem),
             blackboard: blackboard, rules: rules
         )
-        guard let output: ReasoningOutput = try? await strategy.execute(context: context)
-        else { return "" }
+        let output: ReasoningOutput?
+        do {
+            output = try await strategy.execute(context: context)
+        } catch {
+            print("[PatentLoopEngine] Reasoning strategy execution failed: \(error)")
+            return ""
+        }
+        guard let output else {
+            print("[PatentLoopEngine] Reasoning strategy returned nil")
+            return ""
+        }
         return String(output.result.prefix(1500))
     }
 

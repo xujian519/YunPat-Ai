@@ -36,7 +36,11 @@ public final class LLMMemoryStore: @unchecked Sendable {
         let fileManager: FileManager = FileManager.default
         for type in MemoryEntryType.allCases {
             let dir = Self.memoryDir.appendingPathComponent(type.rawValue)
-            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+            do {
+                try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+            } catch {
+                print("[LLMMemoryStore] Failed to create directory \(dir.path): \(error)")
+            }
         }
     }
 
@@ -157,7 +161,11 @@ public final class LLMMemoryStore: @unchecked Sendable {
         for entry in entries {
             lines.append("| \(entry.type.rawValue) | \(entry.id) | \(entry.name) | \(entry.description) |")
         }
-        try? lines.joined(separator: "\n").write(to: Self.indexPath, atomically: true, encoding: .utf8)
+        do {
+            try lines.joined(separator: "\n").write(to: Self.indexPath, atomically: true, encoding: .utf8)
+        } catch {
+            print("[LLMMemoryStore] Failed to rebuild index: \(error)")
+        }
     }
 
     static func url(for id: String, type: MemoryEntryType) -> URL {

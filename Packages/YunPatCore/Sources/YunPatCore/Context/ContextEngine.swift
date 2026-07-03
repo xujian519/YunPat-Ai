@@ -10,11 +10,9 @@ import YunPatNetworking
 /// - CompactionWatermark：KV 稳定的历史消息压缩
 public actor ContextEngine {
     private let skillManager: SkillManager?
-    private var compactionWatermark: CompactionWatermark = CompactionWatermark()
 
     public init(skillManager: SkillManager? = nil) {
         self.skillManager = skillManager
-        self.compactionWatermark = CompactionWatermark()
     }
 
     /// 构建 system prompt
@@ -62,33 +60,5 @@ public actor ContextEngine {
             return String(full.prefix(maxChars))
         }
         return full
-    }
-
-    /// 压缩历史消息（KV 稳定，保护 paged-attention prefix cache）
-    ///
-    /// - Parameters:
-    ///   - messages: 历史消息列表
-    ///   - request: 当前请求（含 system prompt 和 tools）
-    ///   - provider: 模型提供商
-    ///   - window: 上下文窗口大小
-    /// - Returns: 压缩后的消息列表 + 是否超预算
-    public func compactHistory(
-        messages: [Message],
-        request: ChatRequest,
-        provider: ModelProvider,
-        window: Int = 128_000
-    ) -> CompactResult {
-        let budget = ContextBudget(window: window)
-        return compactionWatermark.compact(
-            messages: messages,
-            request: request,
-            budget: budget,
-            provider: provider
-        )
-    }
-
-    /// 重置压缩状态（新会话开始时调用）
-    public func resetCompaction() {
-        compactionWatermark = CompactionWatermark()
     }
 }

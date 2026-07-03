@@ -93,11 +93,19 @@ public actor HooksService {
     private init() {
         let home: URL = FileManager.default.homeDirectoryForCurrentUser
         let dir = home.appendingPathComponent("Documents/YunPat")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            print("[HooksService] Failed to create hooks directory: \(error)")
+        }
         self.fileURL = dir.appendingPathComponent("hooks.json")
-        // init 不能调用 actor-isolated 方法，直接内联加载逻辑
         if let data = try? Data(contentsOf: fileURL) {
-            self.rules = (try? JSONDecoder().decode([HookRule].self, from: data)) ?? []
+            do {
+                self.rules = try JSONDecoder().decode([HookRule].self, from: data)
+            } catch {
+                print("[HooksService] Failed to decode hooks.json: \(error)")
+                self.rules = []
+            }
         }
     }
 
@@ -235,7 +243,13 @@ public actor HooksService {
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(rules) else { return }
+        let data: Data
+        do {
+            data = try JSONEncoder().encode(rules)
+        } catch {
+            print("[HooksService] Failed to encode rules: \(error)")
+            return
+        }
         do {
             try data.write(to: fileURL, options: .atomic)
         } catch {

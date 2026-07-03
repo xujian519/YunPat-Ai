@@ -6,6 +6,31 @@ public actor MCPServer {
 
     public func registerTool(_ tool: MCPToolDefinition, handler: @escaping (([String: String]) async throws -> String)) { toolRegistry[tool.name] = (tool, handler) }
 
+    /// 处理单个 JSON-RPC 请求，返回编码后的响应 Data
+    public func handleRequest(_ payload: Data) async throws -> Data {
+        let request = try JSONDecoder().decode(MCPRequest.self, from: payload)
+        let response: MCPResponse
+        switch request.method {
+        case "tools/list":
+            let tools = Array(toolRegistry.values).map { $0.0 }
+            response = MCPResponse(
+                id: request.id, result: String(data: (try? JSONEncoder().encode(tools)) ?? Data(), encoding: .utf8))
+        case "tools/call":
+            if let toolName = request.params?["name"], let (_, handler) = toolRegistry[toolName] {
+                do {
+                    let result: String = try await handler(request.params ?? [:])
+                    response = MCPResponse(id: request.id, result: result)
+                } catch {
+                    response = MCPResponse(id: request.id, error: MCPError(message: String(describing: error)))
+                }
+            } else {
+                response = MCPResponse(id: request.id, error: MCPError(message: "Tool not found"))
+            }
+        default: response = MCPResponse(id: request.id, error: MCPError(code: -32601, message: "Method not found"))
+        }
+        return try JSONEncoder().encode(response)
+    }
+
     public func start() async throws {
         let stdin = FileHandle.standardInput
         let stdout = FileHandle.standardOutput
@@ -14,24 +39,8 @@ public actor MCPServer {
                 let line = String(data: stdin.availableData, encoding: .utf8)?.trimmingCharacters(
                     in: .whitespacesAndNewlines), !line.isEmpty
             else { continue }
-            guard let data = line.data(using: .utf8),
-                let request = try? JSONDecoder().decode(MCPRequest.self, from: data)
-            else { continue }
-            let response: MCPResponse
-            switch request.method {
-            case "tools/list":
-                let tools = Array(toolRegistry.values).map { $0.0 }
-                response = MCPResponse(
-                    id: request.id, result: String(data: (try? JSONEncoder().encode(tools)) ?? Data(), encoding: .utf8))
-            case "tools/call":
-                if let toolName = request.params?["name"], let (_, handler) = toolRegistry[toolName] {
-                    response = MCPResponse(id: request.id, result: try await handler(request.params ?? [:]))
-                } else {
-                    response = MCPResponse(id: request.id, error: MCPError(message: "Tool not found"))
-                }
-            default: response = MCPResponse(id: request.id, error: MCPError(code: -32601, message: "Method not found"))
-            }
-            let responseData = try JSONEncoder().encode(response)
+            guard let data = line.data(using: .utf8) else { continue }
+            let responseData: Data = try await handleRequest(data)
             stdout.write(responseData)
             stdout.write("\n".data(using: .utf8)!)
         }
