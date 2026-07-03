@@ -27,6 +27,12 @@ identifier_name:
     - ctx
     - db
     - ok
+    - sm
+    - md
+    - lg
+    - xl
+    - xs
+    - xxs
   validates_start_with_lowercase: warning
   allowed_symbols: ["_"]
 

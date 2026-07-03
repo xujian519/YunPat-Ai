@@ -26,16 +26,17 @@ struct FolderTreeView: View {
                 Image(systemName: "folder.badge.gearshape")
                     .foregroundStyle(.blue)
                 Text("工作目录")
-                    .font(.headline)
+                    .font(FontStyle.headline)
                 Spacer()
                     Button { refreshEntries() } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.caption)
                     }
                 .buttonStyle(.plain)
+                .accessibilityLabel("刷新目录")
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, Spacing.xs)
 
             if let path = rootPath {
                 HStack {

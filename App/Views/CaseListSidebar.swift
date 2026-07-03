@@ -24,12 +24,11 @@ struct CaseListSidebar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 顶栏标题
             HStack {
                 Image(systemName: "folder")
                     .foregroundStyle(.blue)
                 Text("案件列表")
-                    .font(.headline)
+                    .font(FontStyle.headline)
                 Spacer()
                 Menu {
                     Button {
@@ -54,7 +53,6 @@ struct CaseListSidebar: View {
             }
             .padding()
 
-            // 分类筛选
             Picker("", selection: $filterCategory) {
                 ForEach(CaseFilter.allCases, id: \.self) { flag in
                     Text(flag.rawValue).tag(flag)
@@ -65,7 +63,6 @@ struct CaseListSidebar: View {
 
             Divider()
 
-            // 案件/标签列表
             List(selection: $tabManager.activeTabID) {
                 ForEach(filteredTabs) { tab in
                     CaseRow(tab: tab)
@@ -91,51 +88,49 @@ struct CaseListSidebar: View {
             Spacer()
 
             Divider()
-            // 底部操作
             HStack {
                 Text("共 \(tabManager.tabs.count) 个标签")
-                    .font(.system(size: 10))
+                    .font(FontStyle.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
                 if !tabManager.archivedTabs.isEmpty {
                     Text("\(tabManager.archivedTabs.count) 归档")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.orange)
+                        .font(FontStyle.caption)
+                        .foregroundStyle(Color.statusWarning)
                 }
             }
-            .padding(8)
+            .padding(Spacing.xs)
         }
         .background(.thickMaterial)
     }
 }
 
-/// 单个案件/标签行
 struct CaseRow: View {
     let tab: ChatTab
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Spacing.xxs) {
             Image(systemName: tab.typeIcon)
                 .font(.caption)
                 .foregroundStyle(tab.type == .patent ? .blue : .secondary)
             VStack(alignment: .leading, spacing: 2) {
                 Text(tab.title)
                     .lineLimit(1)
-                    .font(.system(size: 12))
+                    .font(FontStyle.callout)
                 if let caseId = tab.caseId {
                     Text(caseId)
-                        .font(.system(size: 9))
+                        .font(FontStyle.caption2)
                         .foregroundStyle(.secondary)
                 }
             }
             Spacer()
             Text(tab.flowLabel)
-                .font(.system(size: 9))
+                .font(FontStyle.caption2)
                 .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Spacing.xxs)
                 .padding(.vertical, 2)
                 .background(Color.secondary.opacity(0.1))
-                .cornerRadius(4)
+                .cornerRadius(CornerRadius.sm)
         }
         .padding(.vertical, 2)
     }

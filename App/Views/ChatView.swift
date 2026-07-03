@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 import YunPatCore
 import YunPatNetworking
 
@@ -20,6 +21,24 @@ final class ChatManager: ObservableObject {
         self.modelRouter = modelRouter
         self.loopEngine = AgentLoopEngine(modelRouter: modelRouter)
         self.requestQueue = requestQueue ?? GlobalRequestQueue()
+        requestNotificationPermission()
+    }
+
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    private func sendCollaborationNotification(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     /// 将 AgentLoopEngine 的 onTodoUpdate 回传桥接到 tabManager
@@ -97,6 +116,10 @@ final class ChatManager: ObservableObject {
             if let first = questions.first {
                 pendingClarify = ClarifyRequestDisplay(question: first)
                 clarifying = true
+                sendCollaborationNotification(
+                    title: "YunPat-Ai 需要确认",
+                    body: first
+                )
                 if let idx = tabManager.tabs.firstIndex(where: { $0.id == activeID }) {
                     tabManager.tabs[idx].clarifyRequest = ClarifyRequest(
                         question: first, options: [], allowMultiple: false
@@ -244,15 +267,65 @@ final class ChatManager: ObservableObject {
 
 struct MessageBubble: View {
     let message: ChatMessage
+    var isStreaming: Bool = false
+
     var body: some View {
-        HStack {
+        HStack(alignment: .bottom, spacing: Spacing.sm) {
             if message.role == .user { Spacer() }
-            Text(message.content)
-                .padding(10)
-                .background(message.role == .user ? Color.accentColor.opacity(0.2) : Color.secondary.opacity(0.1))
-                .cornerRadius(8)
-                .textSelection(.enabled)
+            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 2) {
+                Text(message.content.isEmpty && isStreaming ? " " : message.content)
+                    .font(FontStyle.body)
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.vertical, Spacing.xs)
+                    .background(message.role == .user
+                        ? Color.accentColor.opacity(0.2)
+                        : Color.secondary.opacity(0.1))
+                    .cornerRadius(CornerRadius.lg)
+                    .textSelection(.enabled)
+                    .animation(.interactiveSpring(duration: AnimationDuration.fast), value: message.content)
+
+                if isStreaming && message.role == .assistant {
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.7))
+                            .frame(width: 5, height: 5)
+                            .scaleEffect(typingDotScale)
+                            .animation(
+                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true),
+                                value: typingDotScale)
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.5))
+                            .frame(width: 5, height: 5)
+                            .scaleEffect(typingDotScale)
+                            .animation(
+                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true).delay(0.15),
+                                value: typingDotScale)
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.3))
+                            .frame(width: 5, height: 5)
+                            .scaleEffect(typingDotScale)
+                            .animation(
+                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true).delay(0.3),
+                                value: typingDotScale)
+                    }
+                    .padding(.leading, Spacing.sm)
+                    .onAppear { startTypingAnimation() }
+                }
+            }
             if message.role == .assistant { Spacer() }
+        }
+    }
+
+    @State private var typingDotScale: CGFloat = 1.0
+
+    private func startTypingAnimation() {
+        withAnimation {
+            typingDotScale = 0.4
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            withAnimation {
+                typingDotScale = 1.0
+            }
         }
     }
 }

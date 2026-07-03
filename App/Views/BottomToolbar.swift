@@ -11,33 +11,32 @@ struct BottomToolbar: View {
     var onSync: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.sm) {
             ToolbarButton(icon: "paperclip", help: "打开文件", action: { filePickerOpen = true })
             ToolbarButton(icon: "safari", help: "专利浏览器", action: { browserVisible.toggle() })
-                .foregroundStyle(browserVisible ? .blue : .secondary)
+                .foregroundStyle(browserVisible ? Color.statusRunning : Color.groupBackground)
             ToolbarButton(icon: "folder", help: "工作目录", action: { folderTreeVisible.toggle() })
-                .foregroundStyle(folderTreeVisible ? .blue : .secondary)
+                .foregroundStyle(folderTreeVisible ? Color.statusRunning : Color.groupBackground)
             ToolbarButton(icon: "doc.plaintext", help: "文档分屏", action: { documentSplit.toggle() })
-                .foregroundStyle(documentSplit ? .blue : .secondary)
+                .foregroundStyle(documentSplit ? Color.statusRunning : Color.groupBackground)
 
             Divider()
-                .frame(height: 16)
+                .frame(height: Spacing.md)
 
             ToolbarButton(icon: "square.and.arrow.down", help: "保存", action: onSave)
             ToolbarButton(icon: "arrow.triangle.2.circlepath", help: "同步至 Agent", action: onSync)
 
             Spacer()
 
-            // 状态指示
             Image(systemName: "circle.fill")
                 .font(.system(size: 6))
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.statusSuccess)
             Text("已连接")
-                .font(.system(size: 10))
+                .font(FontStyle.caption)
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 4)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xxs)
         .background(.thickMaterial)
     }
 }
@@ -58,7 +57,7 @@ struct ToolbarButton: View {
         .help(help)
         .scaleEffect(isHovered ? 1.15 : 1.0)
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.1)) {
+            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
                 isHovered = hovering
             }
         }

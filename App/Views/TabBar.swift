@@ -91,7 +91,7 @@ struct TabBar: View {
             Button(action: { Task { @MainActor in tabManager.addTab() } }, label: {
                 Image(systemName: "plus").font(.caption)
             })
-            .buttonStyle(.plain).padding(.horizontal, 8)
+            .buttonStyle(.plain).padding(.horizontal, Spacing.xs)
         }
     }
 }
@@ -103,17 +103,29 @@ struct TabButton: View {
     let onClose: () -> Void
 
     var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: tab.typeIcon)
-                .font(.system(size: 8))
-                .foregroundStyle(tab.type == .patent ? .blue : .secondary)
+        HStack(spacing: Spacing.xxs) {
+            tabIconView
             Text(tab.title).font(.system(size: 12, weight: isActive ? .semibold : .regular)).lineLimit(1)
             Button(action: onClose) { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)) }.buttonStyle(
                 .plain)
         }
-        .padding(.horizontal, 12).padding(.vertical, 6)
+        .padding(.horizontal, Spacing.sm).padding(.vertical, Spacing.xxs)
         .background(isActive ? Color.accentColor.opacity(0.15) : Color.clear)
-        .cornerRadius(6)
+        .cornerRadius(CornerRadius.md)
         .onTapGesture { onSelect() }
+    }
+
+    @ViewBuilder
+    private var tabIconView: some View {
+        if case .running = tab.loopState {
+            Image(systemName: "circle.circle")
+                .font(.system(size: 8))
+                .foregroundStyle(Color.statusRunning)
+                .symbolEffect(.pulse, options: .repeating)
+        } else {
+            Image(systemName: tab.typeIcon)
+                .font(.system(size: 8))
+                .foregroundStyle(tab.type == .patent ? .blue : .secondary)
+        }
     }
 }

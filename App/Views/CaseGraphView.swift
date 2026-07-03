@@ -7,12 +7,12 @@ struct CaseGraphView: View {
     @State private var relations: [CaseRelation] = []
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.sm) {
             HStack {
                 Image(systemName: "point.topleft.down.curvedto.point.filled")
                     .foregroundStyle(.blue)
                 Text("案件关系")
-                    .font(.headline)
+                    .font(FontStyle.headline)
                 Spacer()
                 if !relations.isEmpty {
                     Button {
@@ -22,20 +22,20 @@ struct CaseGraphView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.borderless)
+                    .accessibilityLabel("刷新关系图")
                 }
             }
             .padding(.horizontal)
 
             if let caseId = caseId {
-                // 当前案件节点
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.xs) {
                     HStack {
                         Image(systemName: "doc.text.magnifyingglass")
                             .font(.title3)
                             .foregroundStyle(.blue)
                         VStack(alignment: .leading) {
                             Text("本案")
-                                .font(.caption)
+                                .font(FontStyle.caption)
                                 .foregroundStyle(.secondary)
                             Text(caseId)
                                 .font(.system(size: 11, design: .monospaced))
@@ -45,24 +45,24 @@ struct CaseGraphView: View {
                             .fill(Color.blue)
                             .frame(width: 8, height: 8)
                     }
-                    .padding(8)
+                    .padding(Spacing.xs)
                     .background(Color.blue.opacity(0.05))
-                    .cornerRadius(6)
+                    .cornerRadius(CornerRadius.md)
 
                     if !relations.isEmpty {
                         Rectangle()
                             .fill(Color.secondary.opacity(0.2))
-                            .frame(width: 1, height: 16)
+                            .frame(width: 1, height: Spacing.md)
                     }
 
                     ForEach(relations) { relation in
-                        HStack(spacing: 6) {
+                        HStack(spacing: Spacing.xxs) {
                             Image(systemName: relationIcon(relation.relationType))
                                 .font(.caption)
                                 .foregroundStyle(relationColor(relation.relationType))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(relation.relationType.rawValue)
-                                    .font(.system(size: 9))
+                                    .font(FontStyle.caption2)
                                     .foregroundStyle(.secondary)
                                 Text(relation.toCaseTitle)
                                     .font(.system(size: 11))
@@ -75,29 +75,29 @@ struct CaseGraphView: View {
                             }
                             Spacer()
                         }
-                        .padding(6)
+                        .padding(Spacing.xxs)
                         .background(relationColor(relation.relationType).opacity(0.05))
-                        .cornerRadius(4)
+                        .cornerRadius(CornerRadius.sm)
                     }
 
                     if relations.isEmpty {
                         Text("暂无关联案件记录")
-                            .font(.caption)
+                            .font(FontStyle.caption)
                             .foregroundStyle(.tertiary)
-                            .padding(.top, 4)
+                            .padding(.top, Spacing.xxs)
                     }
                 }
                 .onAppear { Task { await loadRelations() } }
             } else {
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.xs) {
                     Image(systemName: "point.3.connected.trianglepath.dotted")
                         .font(.largeTitle)
                         .foregroundStyle(.secondary)
                     Text("当前标签未绑定案件")
-                        .font(.caption)
+                        .font(FontStyle.caption)
                         .foregroundStyle(.secondary)
                     Text("在案件标签中使用 🗂 查看关系")
-                        .font(.system(size: 10))
+                        .font(FontStyle.tiny)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxHeight: .infinity)

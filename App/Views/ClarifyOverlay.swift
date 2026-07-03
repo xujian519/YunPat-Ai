@@ -8,29 +8,29 @@ struct ClarifyOverlay: View {
 
     @State private var selectedOptions: Set<String> = []
     @State private var freeText: String = ""
+    @FocusState private var isFreeTextFocused: Bool
 
     var body: some View {
-        VStack(spacing: 12) {
-            // 提示栏
+        VStack(spacing: Spacing.sm) {
             HStack {
                 Image(systemName: "questionmark.circle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.statusWarning)
                 Text("需要确认")
-                    .font(.headline)
+                    .font(FontStyle.headline)
                 Spacer()
                 Button(action: onDismiss) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("关闭确认面板")
             }
 
-            // 问题
             Text(request.question)
-                .font(.body)
+                .font(FontStyle.body)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel("问题：\(request.question)")
 
-            // 选项
             if !request.options.isEmpty {
                 if request.allowMultiple {
                     multiSelectOptions
@@ -39,13 +39,13 @@ struct ClarifyOverlay: View {
                 }
             }
 
-            // 自由输入
             if request.options.isEmpty || request.allowMultiple {
                 TextField("或输入你的回答...", text: $freeText)
                     .textFieldStyle(.roundedBorder)
+                    .focused($isFreeTextFocused)
+                    .accessibilityLabel("自由输入回答")
             }
 
-            // 确认按钮
             HStack {
                 Spacer()
                 Button("跳过") {
@@ -53,6 +53,7 @@ struct ClarifyOverlay: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("跳过当前确认")
 
                 Button("确认") {
                     let answer = buildAnswer()
@@ -61,17 +62,23 @@ struct ClarifyOverlay: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(buildAnswer().isEmpty)
+                .accessibilityLabel("提交确认")
             }
         }
         .padding()
         .background(Color(named: "windowBackground"))
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.xl)
         .shadow(radius: 8)
         .padding()
+        .onAppear {
+            if request.options.isEmpty {
+                isFreeTextFocused = true
+            }
+        }
     }
 
     private var singleSelectOptions: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Spacing.xxs) {
             ForEach(request.options.prefix(6), id: \.self) { option in
                 Button(action: { onAnswer(option) }, label: {
                     HStack {
@@ -82,17 +89,18 @@ struct ClarifyOverlay: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    .padding(10)
+                    .padding(Spacing.xs)
                     .background(Color.accentColor.opacity(0.1))
-                    .cornerRadius(6)
+                    .cornerRadius(CornerRadius.md)
                 })
                 .buttonStyle(.plain)
+                .accessibilityLabel("选择：\(option)")
             }
         }
     }
 
     private var multiSelectOptions: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Spacing.xxs) {
             ForEach(request.options.prefix(6), id: \.self) { option in
                 Button(action: { toggleOption(option) }, label: {
                     HStack {
@@ -101,11 +109,12 @@ struct ClarifyOverlay: View {
                         Text(option)
                         Spacer()
                     }
-                    .padding(8)
+                    .padding(Spacing.xs)
                     .background(Color.accentColor.opacity(0.05))
-                    .cornerRadius(6)
+                    .cornerRadius(CornerRadius.md)
                 })
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(selectedOptions.contains(option) ? "已选中" : "未选中")：\(option)")
             }
         }
     }

@@ -60,6 +60,8 @@ struct YunPatApp: App {
                 Divider()
                 Button("文档分屏模式") { NotificationCenter.default.post(name: .menuToggleSplitScreen, object: nil) }
                     .keyboardShortcut("d", modifiers: [.command, .option])
+                Button("专注写作模式") { NotificationCenter.default.post(name: .menuFocusWriting, object: nil) }
+                    .keyboardShortcut("d", modifiers: [.command, .option, .shift])
                 Button("进入全屏") {
                     NSApp.keyWindow?.toggleFullScreen(nil)
                 }
@@ -135,5 +137,6 @@ extension Notification.Name {
     static let menuToggleCollaboration: Notification.Name = Notification.Name("menuToggleCollaboration")
     static let menuToggleBrowser: Notification.Name = Notification.Name("menuToggleBrowser")
     static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
+    static let menuFocusWriting: Notification.Name = Notification.Name("menuFocusWriting")
     static let dropFile: Notification.Name = Notification.Name("dropFile")
 }

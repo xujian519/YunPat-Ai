@@ -2,6 +2,7 @@ import SwiftUI
 import YunPatCore
 import YunPatNetworking
 
+// swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 struct ContentView: View {
     @StateObject private var tabManager: TabManager = TabManager()
@@ -16,64 +17,82 @@ struct ContentView: View {
     @State private var settingsOpen: Bool = false
     @State private var showWizard: Bool = false
 
+    @State private var focusWritingMode: Bool = false
+
     init(router: ModelRouter) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
     }
 
     var body: some View {
         HSplitView {
-            // ── 侧栏 ──
-            if !sidebarCollapsed {
+            if !sidebarCollapsed && !focusWritingMode {
                 CaseListSidebar(tabManager: tabManager)
-                    .frame(minWidth: 200, idealWidth: 240, maxWidth: 300)
+                    .frame(
+                        minWidth: PanelWidth.sidebarMin,
+                        idealWidth: PanelWidth.sidebarIdeal,
+                        maxWidth: PanelWidth.sidebarMax
+                    )
             }
 
-            // ── 主区域 ──
             VStack(spacing: 0) {
-                toolbar
-                Divider()
+                if !focusWritingMode {
+                    toolbar
+                    Divider()
+                }
 
-                if browserVisible {
+                if browserVisible && !focusWritingMode {
                     PatentBrowser()
-                } else if documentSplitVisible {
+                } else if documentSplitVisible && !focusWritingMode {
                     HSplitView {
                         chatArea
                         rightPanel
                     }
+                } else if focusWritingMode {
+                    DocumentWorkspace()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     chatArea
                 }
 
-                Divider()
-                BottomToolbar(
-                    filePickerOpen: $filePickerOpen,
-                    browserVisible: $browserVisible,
-                    folderTreeVisible: $folderTreeVisible,
-                    documentSplit: $documentSplitVisible,
-                    onSave: { saveCurrentDocument() },
-                    onSync: { syncToAgent() }
-                )
+                if !focusWritingMode {
+                    Divider()
+                    BottomToolbar(
+                        filePickerOpen: $filePickerOpen,
+                        browserVisible: $browserVisible,
+                        folderTreeVisible: $folderTreeVisible,
+                        documentSplit: $documentSplitVisible,
+                        onSave: { saveCurrentDocument() },
+                        onSync: { syncToAgent() }
+                    )
+                }
             }
 
-            // ── 协作面板 ──
-            if collaborationVisible {
+            if collaborationVisible && !focusWritingMode {
                 if caseGraphMode {
                     CaseGraphView(
                         caseId: activeTab?.caseId
                     )
-                    .frame(minWidth: 240, idealWidth: 280, maxWidth: 360)
+                    .frame(
+                        minWidth: PanelWidth.collaborationMin,
+                        idealWidth: PanelWidth.collaborationIdeal,
+                        maxWidth: PanelWidth.collaborationMax
+                    )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else {
                     CollaborationPanel(tabManager: tabManager, chatManager: chatManager)
-                        .frame(minWidth: 240, idealWidth: 280, maxWidth: 360)
+                        .frame(
+                            minWidth: PanelWidth.collaborationMin,
+                            idealWidth: PanelWidth.collaborationIdeal,
+                            maxWidth: PanelWidth.collaborationMax
+                        )
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: collaborationVisible)
-        .animation(.easeInOut(duration: 0.25), value: sidebarCollapsed)
-        .animation(.easeInOut(duration: 0.25), value: browserVisible)
-        .animation(.easeInOut(duration: 0.25), value: documentSplitVisible)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: collaborationVisible)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: sidebarCollapsed)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: browserVisible)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: documentSplitVisible)
         .sheet(isPresented: $settingsOpen) {
             TabSettingsView(tabManager: tabManager, chatManager: chatManager, isPresented: $settingsOpen)
         }
@@ -115,6 +134,11 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .menuToggleSplitScreen)) { _ in
             withAnimation { documentSplitVisible.toggle() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .menuFocusWriting)) { _ in
+            withAnimation(.spring(duration: AnimationDuration.spring)) {
+                focusWritingMode.toggle()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .dropFile)) { notification in
             if let url = notification.object as? URL {
                 handleDroppedFile(url)
@@ -152,8 +176,18 @@ struct ContentView: View {
 
     // MARK: - Toolbar
 
+    @State private var showModelPicker: Bool = false
+    @State private var showToolManager: Bool = false
+    @State private var availableModels: [String] = []
+
+    private var currentModelName: String {
+        guard let model = activeTab?.loopModel else { return "模型" }
+        if model.count > 15 { return String(model.prefix(15)) + "…" }
+        return model
+    }
+
     private var toolbar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Spacing.xs) {
             Button(
                 action: { withAnimation { sidebarCollapsed.toggle() } },
                 label: { Image(systemName: "sidebar.left").font(.system(size: 12)) }
@@ -171,6 +205,39 @@ struct ContentView: View {
             TabBar(tabManager: tabManager)
 
             Spacer()
+
+            Button {
+                refreshModels()
+                showModelPicker.toggle()
+            } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: "brain")
+                        .font(.system(size: 10))
+                    Text(currentModelName)
+                        .font(.system(size: 9))
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color.accentColor.opacity(0.08))
+                .cornerRadius(4)
+            }
+            .buttonStyle(.plain)
+            .help("切换模型")
+            .popover(isPresented: $showModelPicker) {
+                modelPickerPopover
+            }
+
+            Button {
+                showToolManager.toggle()
+            } label: {
+                Image(systemName: "wrench.adjustable")
+                    .font(.system(size: 10))
+            }
+            .buttonStyle(.plain)
+            .help("工具管理")
+            .popover(isPresented: $showToolManager) {
+                toolManagerPopover
+            }
 
             flowModePicker
 
@@ -194,7 +261,120 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal)
-        .padding(.top, 4)
+        .padding(.top, Spacing.xxs)
+    }
+
+    private var modelPickerPopover: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("选择模型")
+                .font(FontStyle.headline)
+                .padding(.horizontal, Spacing.sm)
+                .padding(.top, Spacing.xs)
+
+            if availableModels.isEmpty {
+                Text("未配置 API Key，请先在设置中添加")
+                    .font(FontStyle.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, Spacing.sm)
+            } else {
+                ForEach(availableModels, id: \.self) { model in
+                    Button {
+                        chatManager.setModel(model, in: tabManager)
+                        showModelPicker = false
+                    } label: {
+                        HStack {
+                            Text(model)
+                                .font(FontStyle.callout)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if activeTab?.loopModel == model {
+                                Image(systemName: "checkmark")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                        .padding(.horizontal, Spacing.sm)
+                        .padding(.vertical, Spacing.xxs)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Divider().padding(.top, Spacing.xxs)
+
+            Button {
+                settingsOpen = true
+                showModelPicker = false
+            } label: {
+                Label("配置 API Key…", systemImage: "key")
+                    .font(FontStyle.caption)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.bottom, Spacing.xs)
+        }
+        .frame(width: 250)
+        .padding(.vertical, Spacing.xxs)
+    }
+
+    private var toolManagerPopover: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("工具管理")
+                .font(FontStyle.headline)
+                .padding(.horizontal, Spacing.sm)
+                .padding(.top, Spacing.xs)
+
+            Text("已注册工具将在对话中自动被发现和调用")
+                .font(FontStyle.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, Spacing.sm)
+
+            Divider().padding(.vertical, Spacing.xxs)
+
+            Button {
+                settingsOpen = true
+                showToolManager = false
+            } label: {
+                Label("插件管理…", systemImage: "puzzlepiece.extension")
+                    .font(FontStyle.caption)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Spacing.sm)
+
+            Button {
+                settingsOpen = true
+                showToolManager = false
+            } label: {
+                Label("MCP 服务器…", systemImage: "server.rack")
+                    .font(FontStyle.caption)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Spacing.sm)
+
+            Divider().padding(.vertical, Spacing.xxs)
+
+            Button {
+                settingsOpen = true
+                showToolManager = false
+            } label: {
+                Label("打开完整设置…", systemImage: "gearshape")
+                    .font(FontStyle.caption)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.bottom, Spacing.xs)
+        }
+        .frame(width: 220)
+        .padding(.vertical, Spacing.xxs)
+    }
+
+    private func refreshModels() {
+        availableModels = [
+            ModelProvider.deepseek.defaultModel,
+            ModelProvider.openai.defaultModel,
+            ModelProvider.anthropic.defaultModel,
+            ModelProvider.glm.defaultModel
+        ]
     }
 
     private var flowModePicker: some View {
@@ -212,7 +392,7 @@ struct ContentView: View {
             Label("FullAgent", systemImage: "circle.circle").tag(AgentFlow.fullAgent)
         }
         .pickerStyle(.segmented)
-        .frame(width: 280)
+        .frame(width: PanelWidth.flowPicker)
         .help("Copilot: 直接响应 | Guided: 分步确认 | FullAgent: 自主五步")
     }
 
@@ -288,10 +468,12 @@ struct ContentView: View {
                 TextField("输入消息...", text: $chatManager.inputText)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { Task { await chatManager.sendMessage(in: tabManager) } }
+                    .accessibilityLabel("消息输入框")
                 Button("发送") { Task { await chatManager.sendMessage(in: tabManager) } }
                     .disabled(
                         chatManager.isStreaming
                             || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .accessibilityLabel("发送消息")
             }
             .padding()
         }
@@ -302,11 +484,15 @@ struct ContentView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 12) {
+                LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                     if let activeTab = activeTab {
-                        ForEach(activeTab.messages) { message in
-                            MessageBubble(message: message)
-                                .id(message.id)
+                        ForEach(Array(activeTab.messages.enumerated()), id: \.element.id) { index, message in
+                            let isLast: Bool = index == activeTab.messages.count - 1
+                            MessageBubble(
+                                message: message,
+                                isStreaming: isLast && chatManager.isStreaming && message.role == .assistant
+                            )
+                            .id(message.id)
                         }
                     }
                 }
@@ -317,89 +503,14 @@ struct ContentView: View {
                     withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
                 }
             }
+            .onChange(of: activeTab?.messages.last?.content ?? "") { _, _ in
+                if let lastID = activeTab?.messages.last?.id {
+                    withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
+                }
+            }
         }
         .task {
             await chatManager.wireTodoTo(tabManager)
         }
     }
-}
-
-// MARK: - Collaboration Panel
-
-struct CollaborationPanel: View {
-    @ObservedObject var tabManager: TabManager
-    @ObservedObject var chatManager: ChatManager
-
-    private var pendingApprovals: [ApprovalItem] {
-        guard let activeID = tabManager.activeTabID,
-            let tab = tabManager.tabs.first(where: { $0.id == activeID })
-        else { return [] }
-        var items: [ApprovalItem] = []
-        if case .waitingApproval(let req) = tab.loopState {
-            items.append(
-                ApprovalItem(
-                    title: "等待确认",
-                    detail: req.detail,
-                    checkpoint: tab.loopStateDescription
-                ))
-        }
-        for msg in tab.messages {
-            if msg.content.contains("需要确认") || msg.content.contains("⚠️") {
-                items.append(ApprovalItem(title: "待确认", detail: msg.content, checkpoint: nil))
-            }
-        }
-        return items
-    }
-
-    var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "checklist")
-                    .font(.title2)
-                Text("协作")
-                    .font(.headline)
-                Spacer()
-            }
-            .padding(.horizontal)
-
-            if pendingApprovals.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                    Text("无待确认事项")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxHeight: .infinity)
-            } else {
-                List(pendingApprovals) { item in
-                    VStack(alignment: .leading, spacing: 4) {
-                        if let checkpoint = item.checkpoint {
-                            Text(checkpoint)
-                                .font(.system(size: 10))
-                                .foregroundStyle(.blue)
-                        }
-                        Text(item.title)
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                        Text(item.detail)
-                            .font(.caption)
-                            .lineLimit(4)
-                    }
-                    .padding(4)
-                }
-                .listStyle(.plain)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.windowBackgroundColor)
-    }
-}
-
-struct ApprovalItem: Identifiable, Sendable {
-    let id: UUID = UUID()
-    let title: String
-    let detail: String
-    let checkpoint: String?
 }

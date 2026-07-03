@@ -16,27 +16,25 @@ struct DocumentWorkspace: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 工具栏
             HStack {
-                Text("文档工作区").font(.headline)
+                Text("文档工作区").font(FontStyle.headline)
                 Spacer()
                 if !annotations.isEmpty {
                     Text("\(annotations.count) 处标注")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
+                        .font(FontStyle.caption)
+                        .foregroundStyle(Color.statusWarning)
                 }
                 if editCount > 0 {
                     Text("变更: +\(editCount)")
-                        .font(.caption)
-                        .foregroundStyle(.green)
-                        .padding(.leading, 8)
+                        .font(FontStyle.caption)
+                        .foregroundStyle(Color.statusSuccess)
+                        .padding(.leading, Spacing.xs)
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, Spacing.xs)
 
-            // 同步模式
-            HStack(spacing: 8) {
+            HStack(spacing: Spacing.xs) {
                 Picker("", selection: $syncMode) {
                     ForEach(DocumentSyncMode.allCases, id: \.self) { model in
                         Text(model.rawValue).tag(model)
@@ -49,61 +47,63 @@ struct DocumentWorkspace: View {
 
                 Button(action: saveDocument) {
                     Label("保存", systemImage: "square.and.arrow.down")
-                        .font(.caption)
+                        .font(FontStyle.caption)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("保存文档")
 
                 Button(action: syncToAgent) {
                     Label("同步", systemImage: "arrow.triangle.2.circlepath")
-                        .font(.caption)
+                        .font(FontStyle.caption)
                 }
                 .buttonStyle(.plain)
                 .disabled(editCount == 0)
+                .accessibilityLabel("同步至 Agent")
             }
             .padding(.horizontal)
-            .padding(.vertical, 4)
+            .padding(.vertical, Spacing.xxs)
 
             Divider()
 
-            // 编辑器
             TextEditor(text: $documentText)
-                .font(.system(.body, design: .monospaced))
+                .font(FontStyle.bodyMonospaced)
                 .onChange(of: documentText) { _, newValue in
                     let result = parser.parse(newValue)
                     annotations = result.annotations
                     if !lastSavedText.isEmpty && newValue != lastSavedText {
                         editCount = abs(newValue.count - lastSavedText.count) / 10
                     }
-                    // 实时同步模式
                     if syncMode == .realtime && !lastSavedText.isEmpty && newValue != lastSavedText {
                         notifyAgentOfChanges(newValue)
                     }
                 }
+                .accessibilityLabel("文档编辑器")
 
-            // 标注摘要
             if !annotations.isEmpty {
                 Divider()
                 ScrollView(.horizontal) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.xs) {
                         ForEach(annotations, id: \.line) { ann in
-                            HStack(spacing: 4) {
+                            HStack(spacing: Spacing.xxs) {
                                 Image(
                                     systemName: ann.type == .deletion
                                         ? "trash"
                                         : ann.type == .insertion
                                             ? "plus.circle"
                                             : ann.type == .question ? "questionmark.circle" : "text.bubble")
-                                Text("L\(ann.line)").font(.caption2)
+                                Text("L\(ann.line)").font(FontStyle.caption2)
                             }
-                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .padding(.horizontal, Spacing.xs).padding(.vertical, Spacing.xxs)
                             .background(
                                 ann.type == .deletion
-                                    ? Color.red.opacity(0.15)
-                                    : ann.type == .insertion ? Color.green.opacity(0.15) : Color.orange.opacity(0.15)
+                                    ? Color.annotationDeletion.opacity(0.15)
+                                    : ann.type == .insertion
+                                        ? Color.annotationInsertion.opacity(0.15)
+                                        : Color.annotationQuestion.opacity(0.15)
                             )
-                            .cornerRadius(12)
+                            .cornerRadius(CornerRadius.xl)
                         }
-                    }.padding(8)
+                    }.padding(Spacing.xs)
                 }.frame(height: 40)
             }
         }
