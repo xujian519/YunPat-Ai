@@ -621,7 +621,7 @@ public struct PatentHarnessTaskState: Sendable {
 
         // reactive nudge：连续 listing 无中间 read
         let listingTools: Set<String> = [
-            "file_read", "list_files", "search_files",
+            "read_file", "list_files", "search_files",
             "patent_search", "legal_status_query", "knowledge_search"
         ]
         if listingTools.contains(envelope.toolName) {
@@ -668,7 +668,6 @@ public struct PatentHarnessTaskState: Sendable {
     }
 
     private func hash(args: [String: String]) -> String {
-        let sorted: String = args.keys.sorted().map { "\($0)=\(args[$0] ?? "")" }.joined(separator: "&")
-        return String(sorted.hashValue)
+        args.keys.sorted().map { "\($0)=\(args[$0] ?? "")" }.joined(separator: "&")
     }
 }

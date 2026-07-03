@@ -167,12 +167,12 @@ public actor SubAgentEngine {
     /// 向指定名称的子代理发送消息 (mailbox IPC)
     public func sendMessage(to name: String, message: String) -> String {
         if let agent = agents.first(where: { $0.name == name && $0.status == .running }) {
-            agent.mailbox.append(message)
+            agent.appendMailbox(message)
             return "消息已投递到 '\(agent.name)'。"
         }
         // 尝试 ID 前缀匹配
         if let agent = agents.first(where: { $0.id.uuidString.hasPrefix(name) && $0.status == .running }) {
-            agent.mailbox.append(message)
+            agent.appendMailbox(message)
             return "消息已投递到 '\(agent.name)'。"
         }
         let activeNames = agents.filter { $0.status == .running }.map(\.name).joined(separator: ", ")
@@ -271,16 +271,34 @@ public final class SubAgent: Identifiable, @unchecked Sendable {
     public let prompt: String
     public let projectFolder: String
     public let startTime: Date = Date()
+    private let lock: NSLock = NSLock()
+    private var _status: Status = .running
+    private var _result: String = ""
+    private var _mailbox: [String] = []
     public var toolGroupIDs: Set<String>?
     public var maxIterations: Int = 10
-    public var status: Status = .running
-    public var result: String = ""
     public var task: Task<String, Never>?
     public var inputTokens: Int = 0
     public var outputTokens: Int = 0
 
-    /// 跨代理消息邮箱
-    public var mailbox: [String] = []
+    public var status: Status {
+        get { lock.withLock { _status } }
+        set { lock.withLock { _status = newValue } }
+    }
+
+    public var result: String {
+        get { lock.withLock { _result } }
+        set { lock.withLock { _result = newValue } }
+    }
+
+    public var mailbox: [String] {
+        get { lock.withLock { _mailbox } }
+        set { lock.withLock { _mailbox = newValue } }
+    }
+
+    public func appendMailbox(_ message: String) {
+        lock.withLock { _mailbox.append(message) }
+    }
 
     public enum Status: String, Sendable {
         case running, completed, failed
@@ -304,12 +322,14 @@ public final class SubAgent: Identifiable, @unchecked Sendable {
 
     /// XML 格式完成通知
     public var notification: String {
-        """
+        let currentStatus: Status = status
+        let currentResult: String = result
+        return """
         <task-notification>
           <task-id>\(shortId)</task-id>
           <name>\(name)</name>
-          <status>\(status.rawValue)</status>
-          <result>\(trim(result, cap: 2000))</result>
+          <status>\(currentStatus.rawValue)</status>
+          <result>\(trim(currentResult, cap: 2000))</result>
           <usage>
             <input_tokens>\(inputTokens)</input_tokens>
             <output_tokens>\(outputTokens)</output_tokens>

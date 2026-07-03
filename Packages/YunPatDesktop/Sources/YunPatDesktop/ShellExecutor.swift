@@ -34,8 +34,13 @@ public actor ShellExecutor {
         process.standardError = errPipe
         try process.run()
         let deadline = Date().addingTimeInterval(timeout)
-        while process.isRunning && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            process.terminationHandler = { _ in
+                continuation.resume()
+            }
+            if Date() >= deadline {
+                process.terminate()
+            }
         }
         if process.isRunning { process.terminate() }
         let stdout = String(data: outPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""

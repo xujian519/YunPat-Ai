@@ -28,6 +28,7 @@ public final class SQLiteVectorIndex: @unchecked Sendable {
     private var scanStmt: OpaquePointer?
     private var scanDomainStmt: OpaquePointer?
     private var textStmt: OpaquePointer?
+    private let scanLock: NSLock = NSLock()
 
     /// SQLITE_TRANSIENT — 让 SQLite 在 bind_text 时拷贝字符串
     private let sqliteTransient = unsafeBitCast(
@@ -195,6 +196,8 @@ public final class SQLiteVectorIndex: @unchecked Sendable {
         queryEmbedding: [Float], queryNorm: Float,
         filter: IndexFilter?, topK: Int, minScore: Float
     ) -> [ScoredChunk] {
+        scanLock.lock()
+        defer { scanLock.unlock() }
         let useDomainFilter: Bool = filter?.domain != nil && !(filter?.domain?.isEmpty ?? true)
         let stmt: OpaquePointer? = useDomainFilter ? scanDomainStmt : scanStmt
 

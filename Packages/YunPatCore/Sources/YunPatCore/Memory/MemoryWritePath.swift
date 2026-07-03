@@ -62,7 +62,11 @@ public actor MemoryWritePath {
                     var context = await store.loadCaseContext(caseId) ?? CaseContext(caseId: caseId)
                     context.inventionPoints.append(contentsOf: result.facts)
                     context.lastModified = Date()
-                    try? await store.saveCaseContext(context)
+                    do {
+                        try await store.saveCaseContext(context)
+                    } catch {
+                        print("[MemoryWritePath] Failed to save case context for \(caseId): \(error)")
+                    }
                 }
             }
             // 蒸馏失败 → bounded retry（重新 append 回队列）

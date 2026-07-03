@@ -14,7 +14,7 @@ import Foundation
 /// 无需专门的 memory tool 即可操作。
 public final class LLMMemoryStore: @unchecked Sendable {
     public static let shared: LLMMemoryStore = LLMMemoryStore()
-    private let lock: NSLock = NSLock()
+    private let lock: NSRecursiveLock = NSRecursiveLock()
     /// 记忆目录
     public static let memoryDir: URL = {
         let home = FileManager.default.homeDirectoryForCurrentUser

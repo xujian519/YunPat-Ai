@@ -15,8 +15,9 @@ public final class SecureCredentialStore: @unchecked Sendable {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "yunpat.\(provider)",
-            kSecAttrService as String: "com.yunpat.ai",
-            kSecValueData as String: Data(apiKey.utf8)
+            kSecAttrService as String: "YunPat-Ai",
+            kSecValueData as String: Data(apiKey.utf8),
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
         ]
         SecItemDelete(query as CFDictionary)
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -30,9 +31,10 @@ public final class SecureCredentialStore: @unchecked Sendable {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "yunpat.\(provider)",
-            kSecAttrService as String: "com.yunpat.ai",
+            kSecAttrService as String: "YunPat-Ai",
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
         ]
         var item: CFTypeRef?
         guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
@@ -78,7 +80,31 @@ public final class SecureCredentialStore: @unchecked Sendable {
 
     /// 使用案件密钥加密数据
     public func encryptData(_ data: Data, for caseId: String) throws -> Data {
-        // Placeholder — full implementation requires SecKeyCreateEncryptedData
-        data
+        var error: Unmanaged<CFError>?
+        let tag = Data("com.yunpat.case.\(caseId)".utf8)
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassKey,
+            kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+            kSecAttrKeySizeInBits as String: 256,
+            kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
+            kSecAttrApplicationTag as String: tag,
+            kSecReturnRef as String: true
+        ]
+        var keyRef: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &keyRef) == errSecSuccess,
+              let result = keyRef,
+              // swiftlint:disable:next force_cast
+              let publicKey = SecKeyCopyPublicKey(result as! SecKey) else {
+            throw CredentialError.keyGenFailed("Case key not found for \(caseId)")
+        }
+        guard let encrypted = SecKeyCreateEncryptedData(
+            publicKey,
+            .eciesEncryptionCofactorX963SHA256AESGCM,
+            data as CFData,
+            &error
+        ) as? Data else {
+            throw CredentialError.keyGenFailed(error?.takeRetainedValue().localizedDescription)
+        }
+        return encrypted
     }
 }

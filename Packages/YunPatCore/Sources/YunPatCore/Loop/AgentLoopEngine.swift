@@ -42,18 +42,21 @@ public actor AgentLoopEngine: LoopEngine {
         }
     }
 
-    private func markManifestReady() { manifestReady = true }
+    private var readyContinuation: CheckedContinuation<Void, Never>?
+
+    private func markManifestReady() {
+        manifestReady = true
+        readyContinuation?.resume()
+        readyContinuation = nil
+    }
 
     /// 等待 Capability manifest 异步加载就绪
     ///
     /// 首次 `run()` 调用前可选等待，确保工具注册表已加载。
-    /// 内部轮询 5s（500 次 × 10ms），超时后继续执行不抛错。
+    /// 使用 CheckedContinuation 零忙等，manifest 就绪后立即恢复。
     public func waitUntilReady() async {
-        var waited: Int = 0
-        while !manifestReady && waited < 500 {
-            try? await Task.sleep(nanoseconds: 10_000_000)  // 10ms
-            waited += 1
-        }
+        if manifestReady { return }
+        await withCheckedContinuation { readyContinuation = $0 }
     }
 
     /// 一键入口：用已配置的 ModelRouter 发送文本，无需手动创建 Engine

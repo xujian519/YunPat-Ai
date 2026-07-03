@@ -101,6 +101,10 @@ public final class FallbackChainService: @unchecked Sendable {
     public var currentProvider: ModelProvider? {
         lock.lock()
         defer { lock.unlock() }
+        return currentIndexLocked
+    }
+
+    private var currentIndexLocked: ModelProvider? {
         guard currentIndex < entries.count else { return nil }
         return ModelProvider(rawValue: entries[currentIndex].provider)
     }
@@ -122,11 +126,11 @@ public final class FallbackChainService: @unchecked Sendable {
         lock.lock()
         consecutiveFailures += 1
         if consecutiveFailures >= failureThreshold {
-            let next: ModelProvider? = switchToNext()
+            let next: ModelProvider? = switchToNextLocked()
             lock.unlock()
             return next
         }
-        let current: ModelProvider? = currentProvider
+        let current: ModelProvider? = currentIndexLocked
         lock.unlock()
         return current
     }
@@ -134,6 +138,11 @@ public final class FallbackChainService: @unchecked Sendable {
     public func switchToNext() -> ModelProvider? {
         lock.lock()
         defer { lock.unlock() }
+        return switchToNextLocked()
+    }
+
+    @discardableResult
+    private func switchToNextLocked() -> ModelProvider? {
         guard let nextIdx = nextEnabledIndex(from: currentIndex) else { return nil }
         currentIndex = nextIdx
         consecutiveFailures = 0

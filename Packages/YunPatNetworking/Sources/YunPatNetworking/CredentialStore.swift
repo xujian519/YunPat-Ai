@@ -9,7 +9,8 @@ public struct CredentialStore: Sendable {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "yunpat.\(provider.rawValue)",
             kSecAttrService as String: "YunPat-Ai",
-            kSecValueData as String: apiKey.data(using: .utf8)!
+            kSecValueData as String: Data(apiKey.utf8),
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
         ]
         SecItemDelete(query as CFDictionary)
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -24,7 +25,8 @@ public struct CredentialStore: Sendable {
             kSecAttrAccount as String: "yunpat.\(provider.rawValue)",
             kSecAttrService as String: "YunPat-Ai",
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
         ]
         var item: CFTypeRef?
         guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,

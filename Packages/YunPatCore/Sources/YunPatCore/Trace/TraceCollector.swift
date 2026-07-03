@@ -49,11 +49,16 @@ public struct TraceSummary: Sendable, Codable {
 }
 
 public actor TraceCollector {
+    private let maxTraces: Int = 200
     private var traces: [TraceID: (capabilities: [CapabilityTrace], prompts: [PromptTrace])] = [:]
     private let store = TraceStore()
     public func startTrace() -> TraceID {
         let id = TraceID()
         traces[id] = ([], [])
+        if traces.count > maxTraces {
+            let oldest: TraceID? = traces.keys.sorted { $0.id.uuidString < $1.id.uuidString }.first
+            if let oldest { traces.removeValue(forKey: oldest) }
+        }
         return id
     }
     public func recordCapability(_ trace: CapabilityTrace, parent: TraceID) {

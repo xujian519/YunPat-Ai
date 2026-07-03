@@ -9,10 +9,24 @@ extension ToolDispatch {
     /// 专利检索注入点 — App 启动时配置
     private final class PatentToolHandlers: @unchecked Sendable {
         static let shared: PatentToolHandlers = PatentToolHandlers()
+        private let lock: NSLock = NSLock()
 
-        var patentSearcher: (@Sendable (String, Int) async -> [PatentSearchResultItem])?
-        var knowledgeSearcher: (@Sendable (String, Int) async -> [KnowledgeSearchResultItem])?
-        var legalStatusQuerier: (@Sendable (String) async -> LegalStatusResult?)?
+        private var _patentSearcher: (@Sendable (String, Int) async -> [PatentSearchResultItem])?
+        private var _knowledgeSearcher: (@Sendable (String, Int) async -> [KnowledgeSearchResultItem])?
+        private var _legalStatusQuerier: (@Sendable (String) async -> LegalStatusResult?)?
+
+        var patentSearcher: (@Sendable (String, Int) async -> [PatentSearchResultItem])? {
+            get { lock.withLock { _patentSearcher } }
+            set { lock.withLock { _patentSearcher = newValue } }
+        }
+        var knowledgeSearcher: (@Sendable (String, Int) async -> [KnowledgeSearchResultItem])? {
+            get { lock.withLock { _knowledgeSearcher } }
+            set { lock.withLock { _knowledgeSearcher = newValue } }
+        }
+        var legalStatusQuerier: (@Sendable (String) async -> LegalStatusResult?)? {
+            get { lock.withLock { _legalStatusQuerier } }
+            set { lock.withLock { _legalStatusQuerier = newValue } }
+        }
 
         private init() {}
     }

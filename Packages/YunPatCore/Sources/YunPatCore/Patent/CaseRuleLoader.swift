@@ -43,7 +43,9 @@ public actor CaseRuleLoader {
                         source: file
                     ))
             }
-        } catch {}
+        } catch {
+            print("[CaseRuleLoader] Failed to load rules from \(rulesDir.path): \(error)")
+        }
 
         rules.sort { $0.priority < $1.priority }
         cache[cacheKey] = rules

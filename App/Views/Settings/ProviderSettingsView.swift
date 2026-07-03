@@ -52,7 +52,11 @@ struct ProviderSettingsView: View {
     private func handleKeyChange(_ provider: ModelProvider, key: String) {
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        try? CredentialStore.shared.store(provider: provider, apiKey: trimmed)
+        do {
+            try CredentialStore.shared.store(provider: provider, apiKey: trimmed)
+        } catch {
+            registrationStatus = "Keychain 存储失败: \(error.localizedDescription)"
+        }
         Task {
             await registerProvider(provider, key: trimmed)
         }

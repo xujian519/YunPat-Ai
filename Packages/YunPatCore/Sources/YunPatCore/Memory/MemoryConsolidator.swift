@@ -51,7 +51,11 @@ public actor MemoryConsolidator {
             return MemoryItem(id: item.id, content: item.content, salience: newSalience, createdAt: item.createdAt)
         }
         ltm.lastConsolidated = Date()
-        try? await store.saveLongTermMemory(ltm)
+        do {
+            try await store.saveLongTermMemory(ltm)
+        } catch {
+            print("[MemoryConsolidator] decay save failed: \(error)")
+        }
     }
 
     // MARK: - Promote (频次提升)
@@ -80,7 +84,11 @@ public actor MemoryConsolidator {
                 )
             }
         }
-        try? await store.saveLongTermMemory(ltm)
+        do {
+            try await store.saveLongTermMemory(ltm)
+        } catch {
+            print("[MemoryConsolidator] promote save failed: \(error)")
+        }
     }
 
     // MARK: - Evict (低 salience 淘汰)
@@ -91,7 +99,11 @@ public actor MemoryConsolidator {
         ltm.items.removeAll { item in
             Double(item.salience) < salienceFloor && item.createdAt < cutoff
         }
-        try? await store.saveLongTermMemory(ltm)
+        do {
+            try await store.saveLongTermMemory(ltm)
+        } catch {
+            print("[MemoryConsolidator] evict save failed: \(error)")
+        }
     }
 
     // MARK: - Prune (旧 episode 裁切)

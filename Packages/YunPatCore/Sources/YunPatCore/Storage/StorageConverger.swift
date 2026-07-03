@@ -24,8 +24,14 @@ public struct StorageConverger: Sendable {
         task.arguments = ["status"]
         let pipe: Pipe = Pipe()
         task.standardOutput = pipe
-        try? task.run()
-        task.waitUntilExit()
+        do { try task.run() } catch {
+            print("[StorageConverger] fdesetup failed: \(error)")
+            self.fileVaultEnabled = false
+            return false
+        }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            task.terminationHandler = { _ in continuation.resume() }
+        }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         let output: String = String(data: data, encoding: .utf8) ?? ""
         let isOn = output.contains("FileVault is On")

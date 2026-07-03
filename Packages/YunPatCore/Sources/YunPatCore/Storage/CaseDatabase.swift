@@ -20,6 +20,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - Database Connection
 
     private func openDB(for caseId: String) -> OpaquePointer? {
+        guard isSafeCaseId(caseId) else { return nil }
         let dir: URL = baseDir.appendingPathComponent(caseId)
         try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         let path: String = dir.appendingPathComponent("case.sqlite").path
@@ -93,7 +94,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
     public func saveClaimsTree(_ tree: ClaimsTree, caseId: String) async throws {
         guard let db = openDB(for: caseId) else { throw dbError(nil) }
         defer { sqlite3_close(db) }
-        exec(db, "DELETE FROM claims WHERE case_id='\(escape(caseId))'")
+        execParameterized(db, "DELETE FROM claims WHERE case_id=?", caseId)
         let iso = ISO8601DateFormatter().string(from: Date())
         for node in tree.independentClaims + tree.dependentClaims {
             var stmt: OpaquePointer?
@@ -152,7 +153,7 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
     public func saveComparisonMatrix(_ matrix: ComparisonMatrix, caseId: String) async throws {
         guard let db = openDB(for: caseId) else { throw dbError(nil) }
         defer { sqlite3_close(db) }
-        exec(db, "DELETE FROM comparison_features WHERE case_id='\(escape(caseId))'")
+        execParameterized(db, "DELETE FROM comparison_features WHERE case_id=?", caseId)
         for (index, row) in matrix.featureRows.enumerated() {
             let refMapping: String =
                 (try? JSONEncoder().encode(row.referenceMapping)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
@@ -285,8 +286,17 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
         return String(cString: cstr)
     }
 
-    private func escape(_ str: String) -> String {
-        str.replacingOccurrences(of: "'", with: "''")
+    private func isSafeCaseId(_ caseId: String) -> Bool {
+        !caseId.isEmpty && caseId.count <= 128
+            && caseId.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" }
+    }
+
+    private func execParameterized(_ db: OpaquePointer?, _ sql: String, _ value: String) {
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { return }
+        defer { sqlite3_finalize(stmt) }
+        sqlite3_bind_text(stmt, 1, (value as NSString).utf8String, -1, Self.SQLITE_TRANSIENT)
+        sqlite3_step(stmt)
     }
 
     private func dbError(_ db: OpaquePointer?) -> Error {
