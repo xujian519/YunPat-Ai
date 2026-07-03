@@ -13,6 +13,7 @@ struct CaseGraphView: View {
                     .foregroundStyle(.blue)
                 Text("案件关系")
                     .font(FontStyle.headline)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 if !relations.isEmpty {
                     Button {
@@ -38,7 +39,7 @@ struct CaseGraphView: View {
                                 .font(FontStyle.caption)
                                 .foregroundStyle(.secondary)
                             Text(caseId)
-                                .font(.system(size: 11, design: .monospaced))
+                                .font(FontStyle.caption.monospaced())
                         }
                         Spacer()
                         Circle()
@@ -48,6 +49,8 @@ struct CaseGraphView: View {
                     .padding(Spacing.xs)
                     .background(Color.blue.opacity(0.05))
                     .cornerRadius(CornerRadius.md)
+                    .accessibilityLabel("本案: \(caseId)")
+                    .accessibilityAddTraits(.isSummaryElement)
 
                     if !relations.isEmpty {
                         Rectangle()
@@ -65,11 +68,11 @@ struct CaseGraphView: View {
                                     .font(FontStyle.caption2)
                                     .foregroundStyle(.secondary)
                                 Text(relation.toCaseTitle)
-                                    .font(.system(size: 11))
+                                    .font(FontStyle.caption)
                                     .lineLimit(1)
                                 if let appNo = relation.applicationNumber {
                                     Text(appNo)
-                                        .font(.system(size: 9, design: .monospaced))
+                                        .font(FontStyle.caption2.monospaced())
                                         .foregroundStyle(.tertiary)
                                 }
                             }
@@ -78,6 +81,8 @@ struct CaseGraphView: View {
                         .padding(Spacing.xxs)
                         .background(relationColor(relation.relationType).opacity(0.05))
                         .cornerRadius(CornerRadius.sm)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("\(relation.relationType.rawValue): \(relation.toCaseTitle)")
                     }
 
                     if relations.isEmpty {
@@ -85,6 +90,7 @@ struct CaseGraphView: View {
                             .font(FontStyle.caption)
                             .foregroundStyle(.tertiary)
                             .padding(.top, Spacing.xxs)
+                            .accessibilityLabel("暂无关联案件记录")
                     }
                 }
                 .onAppear { Task { await loadRelations() } }
@@ -97,7 +103,7 @@ struct CaseGraphView: View {
                         .font(FontStyle.caption)
                         .foregroundStyle(.secondary)
                     Text("在案件标签中使用 🗂 查看关系")
-                        .font(FontStyle.tiny)
+                        .font(FontStyle.caption2)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxHeight: .infinity)

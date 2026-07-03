@@ -6,10 +6,11 @@ import YunPatNetworking
 @main
 struct YunPatApp: App {
     @StateObject private var appState: AppState = AppState()
+    @State private var activeTabTitle: String = "YunPat-Ai"
 
     var body: some Scene {
         WindowGroup {
-            ContentView(router: appState.modelRouter)
+            ContentView(router: appState.modelRouter, windowTitle: $activeTabTitle)
                 .onDrop(of: [.fileURL], isTargeted: nil) { providers in
                     for provider in providers {
                         _ = provider.loadObject(ofClass: URL.self) { url, _ in
@@ -20,70 +21,127 @@ struct YunPatApp: App {
                     return true
                 }
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 1200, height: 800)
         .commands {
             // ── App Info ──
             CommandGroup(replacing: .appInfo) {
-                Button("关于 YunPat-Ai") { NSApp.orderFrontStandardAboutPanel(options: [:]) }
+                Button("关于 YunPat-Ai") {
+                    NSApp.orderFrontStandardAboutPanel(options: [:])
+                }
             }
 
             // ── File Menu ──
             CommandGroup(replacing: .newItem) {
-                Button("新建标签") { NotificationCenter.default.post(name: .menuNewTab, object: nil) }
-                    .keyboardShortcut("t", modifiers: .command)
-                Button("新建案件") { NotificationCenter.default.post(name: .menuNewCase, object: nil) }
-                    .keyboardShortcut("n", modifiers: [.command, .shift])
+                Button("新建标签") {
+                    NotificationCenter.default.post(name: .menuNewTab, object: nil)
+                }
+                .keyboardShortcut("t", modifiers: .command)
+                Button("新建案件") {
+                    NotificationCenter.default.post(name: .menuNewCase, object: nil)
+                }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
                 Divider()
-                Button("打开文件…") { NotificationCenter.default.post(name: .menuOpenFile, object: nil) }
-                    .keyboardShortcut("o", modifiers: .command)
+                Button("打开文件…") {
+                    NotificationCenter.default.post(name: .menuOpenFile, object: nil)
+                }
+                .keyboardShortcut("o", modifiers: .command)
                 Divider()
-                Button("保存当前文档") { NotificationCenter.default.post(name: .menuSave, object: nil) }
-                    .keyboardShortcut("s", modifiers: .command)
+                Button("保存当前文档") {
+                    NotificationCenter.default.post(name: .menuSave, object: nil)
+                }
+                .keyboardShortcut("s", modifiers: .command)
             }
 
-            // ── Edit Menu ──
-            CommandGroup(replacing: .undoRedo) {
-                Button("撤销") { NotificationCenter.default.post(name: .menuUndo, object: nil) }
-                    .keyboardShortcut("z", modifiers: .command)
-                Button("重做") { NotificationCenter.default.post(name: .menuRedo, object: nil) }
-                    .keyboardShortcut("z", modifiers: [.command, .shift])
+            // ── Edit Menu (保留系统默认 undo/redo，仅添加自定义项) ──
+            CommandGroup(after: .undoRedo) {
+                Divider()
             }
 
             // ── View Menu ──
             CommandMenu("显示") {
-                Button("切换侧栏") { NotificationCenter.default.post(name: .menuToggleSidebar, object: nil) }
-                    .keyboardShortcut("s", modifiers: [.command, .option])
-                Button("切换协作面板") { NotificationCenter.default.post(name: .menuToggleCollaboration, object: nil) }
-                    .keyboardShortcut("c", modifiers: [.command, .option])
-                Button("切换浏览器") { NotificationCenter.default.post(name: .menuToggleBrowser, object: nil) }
-                    .keyboardShortcut("b", modifiers: [.command, .option])
+                Button("切换侧栏") {
+                    NotificationCenter.default.post(name: .menuToggleSidebar, object: nil)
+                }
+                .keyboardShortcut("s", modifiers: [.command, .option])
+                Button("切换协作面板") {
+                    NotificationCenter.default.post(name: .menuToggleCollaboration, object: nil)
+                }
+                .keyboardShortcut("c", modifiers: [.command, .option])
+                Button("切换浏览器") {
+                    NotificationCenter.default.post(name: .menuToggleBrowser, object: nil)
+                }
+                .keyboardShortcut("b", modifiers: [.command, .option])
                 Divider()
-                Button("文档分屏模式") { NotificationCenter.default.post(name: .menuToggleSplitScreen, object: nil) }
-                    .keyboardShortcut("d", modifiers: [.command, .option])
-                Button("专注写作模式") { NotificationCenter.default.post(name: .menuFocusWriting, object: nil) }
-                    .keyboardShortcut("d", modifiers: [.command, .option, .shift])
+                Button("文档分屏模式") {
+                    NotificationCenter.default.post(name: .menuToggleSplitScreen, object: nil)
+                }
+                .keyboardShortcut("d", modifiers: [.command, .option])
+                Button("专注写作模式") {
+                    NotificationCenter.default.post(name: .menuFocusWriting, object: nil)
+                }
+                .keyboardShortcut("e", modifiers: [.command, .option, .shift])
                 Button("进入全屏") {
                     NSApp.keyWindow?.toggleFullScreen(nil)
                 }
                 .keyboardShortcut("f", modifiers: [.command, .control])
             }
+
+            // ── Window Menu ──
+            CommandGroup(replacing: .windowSize) {
+                Button("最小化") {
+                    NSApp.keyWindow?.miniaturize(nil)
+                }
+                .keyboardShortcut("m", modifiers: .command)
+                Button("缩放") {
+                    NSApp.keyWindow?.zoom(nil)
+                }
+            }
+
+            // ── Help Menu ──
+            CommandGroup(replacing: .help) {
+                Button("YunPat-Ai 帮助") {
+                    if let url = URL(string: "https://github.com/yunpat/yunpat-ai") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+            }
         }
         Settings {
-            TabView {
-                ProviderSettingsView(modelRouter: appState.modelRouter)
-                    .tabItem { Label("接口", systemImage: "key") }
-                SkillSettingsView()
-                    .tabItem { Label("技能", systemImage: "wand.and.stars") }
-                PluginSettingsView()
-                    .tabItem { Label("插件", systemImage: "puzzlepiece.extension") }
-                MCPSettingsView()
-                    .tabItem { Label("MCP", systemImage: "server.rack") }
-                KnowledgeSettingsView()
-                    .tabItem { Label("知识库", systemImage: "books.vertical") }
-            }
+            SettingsTabView(modelRouter: appState.modelRouter)
+                .frame(width: PanelWidth.settingsWidth, height: PanelWidth.settingsHeight)
         }
     }
 }
+
+// MARK: - Settings Tab View (统一设置入口)
+
+struct SettingsTabView: View {
+    let modelRouter: ModelRouter
+
+    var body: some View {
+        TabView {
+            ProviderSettingsView(modelRouter: modelRouter)
+                .tabItem { Label("接口", systemImage: "key") }
+                .tag(0)
+            SkillSettingsView()
+                .tabItem { Label("技能", systemImage: "wand.and.stars") }
+                .tag(1)
+            PluginSettingsView()
+                .tabItem { Label("插件", systemImage: "puzzlepiece.extension") }
+                .tag(2)
+            MCPSettingsView()
+                .tabItem { Label("MCP", systemImage: "server.rack") }
+                .tag(3)
+            KnowledgeSettingsView()
+                .tabItem { Label("知识库", systemImage: "books.vertical") }
+                .tag(4)
+        }
+        .padding(.top, Spacing.sm)
+    }
+}
+
+// MARK: - AppState
 
 @MainActor
 final class AppState: ObservableObject {
@@ -109,7 +167,7 @@ final class AppState: ObservableObject {
         }
 
         Task {
-            var converger: StorageConverger = StorageConverger.shared
+            let converger: StorageConverger = StorageConverger.shared
             let fvEnabled: Bool = await converger.checkFileVaultStatus()
             if !fvEnabled { print("[Storage] FileVault is OFF") }
         }

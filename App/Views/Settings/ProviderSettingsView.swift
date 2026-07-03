@@ -14,18 +14,26 @@ struct ProviderSettingsView: View {
         Form {
             Section("API Keys") {
                 SecureField("OpenAI API Key", text: $openAIKey)
+                    .accessibilityLabel("OpenAI API 密钥")
+                    .accessibilityHint("输入 OpenAI API 密钥后自动保存到钥匙串")
                     .onChange(of: openAIKey) { _, newValue in
                         handleKeyChange(.openai, key: newValue)
                     }
                 SecureField("Anthropic API Key", text: $anthropicKey)
+                    .accessibilityLabel("Anthropic API 密钥")
+                    .accessibilityHint("输入 Anthropic API 密钥后自动保存到钥匙串")
                     .onChange(of: anthropicKey) { _, newValue in
                         handleKeyChange(.anthropic, key: newValue)
                     }
                 SecureField("DeepSeek API Key", text: $deepseekKey)
+                    .accessibilityLabel("DeepSeek API 密钥")
+                    .accessibilityHint("输入 DeepSeek API 密钥后自动保存到钥匙串")
                     .onChange(of: deepseekKey) { _, newValue in
                         handleKeyChange(.deepseek, key: newValue)
                     }
                 SecureField("GLM API Key", text: $glmKey)
+                    .accessibilityLabel("GLM API 密钥")
+                    .accessibilityHint("输入 GLM API 密钥后自动保存到钥匙串")
                     .onChange(of: glmKey) { _, newValue in
                         handleKeyChange(.glm, key: newValue)
                     }

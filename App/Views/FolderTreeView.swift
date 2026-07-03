@@ -44,11 +44,11 @@ struct FolderTreeView: View {
                         .font(.caption)
                         .foregroundStyle(.blue)
                     Text(path.lastPathComponent)
-                        .font(.system(size: 11))
+                        .font(FontStyle.caption)
                         .lineLimit(1)
                     Spacer()
                     Text(path.path)
-                        .font(.system(size: 8))
+                        .font(FontStyle.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -152,7 +152,7 @@ struct FileEntryRow: View {
                         }
                     } label: {
                         Image(systemName: expanded.contains(entry.id) ? "chevron.down" : "chevron.right")
-                            .font(.system(size: 8, weight: .bold))
+                            .font(.system(size: IconSize.caption, weight: .bold))
                             .frame(width: 12)
                     }
                     .buttonStyle(.plain)
@@ -165,11 +165,11 @@ struct FileEntryRow: View {
                         ? (expanded.contains(entry.id) ? "folder" : "folder")
                         : fileIcon(entry.name)
                 )
-                .font(.system(size: 10))
+                .font(.system(size: IconSize.caption))
                 .foregroundStyle(entry.isDirectory ? .blue : .secondary)
 
                 Text(entry.name)
-                    .font(.system(size: 11))
+                    .font(FontStyle.caption)
                     .lineLimit(1)
                 Spacer()
             }

@@ -92,6 +92,8 @@ struct TabBar: View {
                 Image(systemName: "plus").font(.caption)
             })
             .buttonStyle(.plain).padding(.horizontal, Spacing.xs)
+            .accessibilityLabel("新建标签")
+            .accessibilityHint("创建新对话标签页")
         }
     }
 }
@@ -105,26 +107,39 @@ struct TabButton: View {
     var body: some View {
         HStack(spacing: Spacing.xxs) {
             tabIconView
-            Text(tab.title).font(.system(size: 12, weight: isActive ? .semibold : .regular)).lineLimit(1)
-            Button(action: onClose) { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)) }.buttonStyle(
-                .plain)
+            Text(tab.title)
+                .font(FontStyle.callout)
+                .fontWeight(isActive ? .semibold : .regular)
+                .lineLimit(1)
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(FontStyle.caption2)
+                    .fontWeight(.bold)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("关闭标签 \(tab.title)")
+            .accessibilityHint("关闭当前标签页")
         }
         .padding(.horizontal, Spacing.sm).padding(.vertical, Spacing.xxs)
         .background(isActive ? Color.accentColor.opacity(0.15) : Color.clear)
         .cornerRadius(CornerRadius.md)
         .onTapGesture { onSelect() }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(tab.title)
+        .accessibilityAddTraits(isActive ? [.isSelected, .isButton] : .isButton)
+        .accessibilityValue(isActive ? "活跃" : "未活跃")
     }
 
     @ViewBuilder
     private var tabIconView: some View {
         if case .running = tab.loopState {
             Image(systemName: "circle.circle")
-                .font(.system(size: 8))
+                .font(.system(size: IconSize.caption))
                 .foregroundStyle(Color.statusRunning)
                 .symbolEffect(.pulse, options: .repeating)
         } else {
             Image(systemName: tab.typeIcon)
-                .font(.system(size: 8))
+                .font(.system(size: IconSize.caption))
                 .foregroundStyle(tab.type == .patent ? .blue : .secondary)
         }
     }

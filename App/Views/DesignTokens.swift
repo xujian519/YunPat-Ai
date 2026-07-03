@@ -1,14 +1,18 @@
 import SwiftUI
 
+// MARK: - Spacing (8pt 网格基准，HIG §Spacing)
+
 enum Spacing {
-    static let unit: CGFloat = 4
-    static let xxs: CGFloat = unit * 1
-    static let xs: CGFloat = unit * 2
-    static let sm: CGFloat = unit * 3
-    static let md: CGFloat = unit * 4
-    static let lg: CGFloat = unit * 5
-    static let xl: CGFloat = unit * 6
+    static let unit: CGFloat = 8
+    static let xxs: CGFloat = 4
+    static let xs: CGFloat = unit * 1
+    static let sm: CGFloat = unit * 2
+    static let md: CGFloat = unit * 3
+    static let lg: CGFloat = unit * 4
+    static let xl: CGFloat = unit * 5
 }
+
+// MARK: - CornerRadius
 
 enum CornerRadius {
     static let sm: CGFloat = 4
@@ -17,17 +21,39 @@ enum CornerRadius {
     static let xl: CGFloat = 12
 }
 
+// MARK: - Font (HIG 语义字体，支持 Dynamic Type)
+
 enum FontStyle {
-    static let largeTitle: Font = .system(size: 26, weight: .bold)
-    static let title2: Font = .system(size: 19, weight: .semibold)
-    static let headline: Font = .system(size: 13, weight: .bold)
-    static let body: Font = .system(size: 13)
-    static let bodyMonospaced: Font = .system(size: 13, design: .monospaced)
-    static let callout: Font = .system(size: 12)
-    static let caption: Font = .system(size: 10)
-    static let caption2: Font = .system(size: 9)
-    static let tiny: Font = .system(size: 8)
+    static let largeTitle: Font = .largeTitle
+    static let title: Font = .title
+    static let title2: Font = .title2
+    static let title3: Font = .title3
+    static let headline: Font = .headline
+    static let subheadline: Font = .subheadline
+    static let body: Font = .body
+    static let bodyMonospaced: Font = .body.monospaced()
+    static let callout: Font = .callout
+    static let caption: Font = .caption
+    static let caption2: Font = .caption2
 }
+
+// MARK: - Icon Size (SF Symbols 统一尺寸)
+
+enum IconSize {
+    static let toolbar: CGFloat = 16
+    static let sidebar: CGFloat = 14
+    static let inlineSmall: CGFloat = 12
+    static let caption: CGFloat = 11
+}
+
+// MARK: - Hit Target (HIG 最小触控区域 44pt)
+
+enum HitTarget {
+    static let minimum: CGFloat = 44
+    static let small: CGFloat = 28
+}
+
+// MARK: - PanelWidth
 
 enum PanelWidth {
     static let sidebarMin: CGFloat = 200
@@ -38,15 +64,21 @@ enum PanelWidth {
     static let collaborationMax: CGFloat = 360
     static let folderTreeMin: CGFloat = 200
     static let folderTreeIdeal: CGFloat = 260
-    static let flowPicker: CGFloat = 280
+    static let flowPicker: CGFloat = 240
+    static let settingsWidth: CGFloat = 520
+    static let settingsHeight: CGFloat = 480
 }
 
+// MARK: - AnimationDuration
+
 enum AnimationDuration {
-    static let fast: CGFloat = 0.1
+    static let fast: CGFloat = 0.15
     static let normal: CGFloat = 0.2
     static let slow: CGFloat = 0.25
-    static let spring: CGFloat = 0.3
+    static let spring: CGFloat = 0.35
 }
+
+// MARK: - Semantic Colors
 
 extension Color {
     static let statusWarning: Color = .orange

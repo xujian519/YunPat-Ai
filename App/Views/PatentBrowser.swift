@@ -32,9 +32,9 @@ struct PatentBrowser: View {
                     }) {
                         HStack(spacing: 3) {
                             Image(systemName: preset.icon)
-                                .font(.system(size: 9))
+                                .font(FontStyle.caption2)
                             Text(preset.name)
-                                .font(.system(size: 10))
+                                .font(FontStyle.caption)
                         }
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
@@ -42,6 +42,8 @@ struct PatentBrowser: View {
                         .cornerRadius(4)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("跳转至 \(preset.name)")
+                    .accessibilityHint("切换到 \(preset.name) 网站")
                 }
                 Spacer()
             }
@@ -55,21 +57,29 @@ struct PatentBrowser: View {
                         .font(.caption)
                 })
                 .buttonStyle(.plain)
+                .accessibilityLabel("后退")
+                .accessibilityHint("浏览历史中上一页")
                 Button(action: {}, label: {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                 })
                 .buttonStyle(.plain)
+                .accessibilityLabel("前进")
+                .accessibilityHint("浏览历史中下一页")
 
-                TextField("URL", text: $urlString)
+                TextField("网址", text: $urlString)
                     .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 11))
+                    .font(FontStyle.caption)
+                    .accessibilityLabel("网址输入")
+                    .accessibilityHint("输入或粘贴专利检索网址")
 
                 Button(action: {}, label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.caption)
                 })
                 .buttonStyle(.plain)
+                .accessibilityLabel("刷新")
+                .accessibilityHint("重新加载当前页面")
             }
             .padding(.horizontal, 8)
 

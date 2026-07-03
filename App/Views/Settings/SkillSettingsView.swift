@@ -30,12 +30,17 @@ struct SkillSettingsView: View {
                     HStack(spacing: 8) {
                         Button("从文件夹扫描…") { scanFolder() }
                             .disabled(isLoading)
+                            .accessibilityLabel("从文件夹扫描技能文件")
+                            .accessibilityHint("选择包含 .skill.md 的目录进行扫描")
 
                         Button("重新加载内置技能") { reloadBuiltin() }
                             .disabled(isLoading)
+                            .accessibilityLabel("重新加载内置技能")
 
                         if !skills.isEmpty {
                             Button("清除全部", role: .destructive) { clearAll() }
+                                .accessibilityLabel("清除全部技能")
+                                .accessibilityHint("删除所有已加载的技能")
                         }
                     }
 
@@ -98,8 +103,11 @@ struct SkillSettingsView: View {
                     HStack {
                         TextField("输入测试文本…", text: $testInput)
                             .textFieldStyle(.roundedBorder)
+                            .accessibilityLabel("技能匹配测试文本输入")
                         Button("测试") { testMatch() }
                             .disabled(testInput.isEmpty || skills.isEmpty)
+                            .accessibilityLabel("测试匹配")
+                            .accessibilityHint("使用上方输入文本测试技能匹配结果")
                     }
 
                     if !testResults.isEmpty {
@@ -109,6 +117,7 @@ struct SkillSettingsView: View {
                                     Circle()
                                         .fill(scoreColor(result.score))
                                         .frame(width: 8, height: 8)
+                                        .accessibilityHidden(true)
                                     Text(result.name)
                                         .font(.subheadline)
                                         .fontWeight(.medium)
@@ -117,11 +126,14 @@ struct SkillSettingsView: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
+                                .accessibilityElement(children: .contain)
+                                .accessibilityLabel("\(result.name), 匹配度 \(String(format: "%.1f", result.score))")
                                 if !result.reason.isEmpty {
                                     Text(result.reason)
                                         .font(.caption2)
                                         .foregroundStyle(.tertiary)
                                         .padding(.leading, 16)
+                                        .accessibilityLabel("匹配原因: \(result.reason)")
                                 }
                             }
                         }
@@ -140,52 +152,13 @@ struct SkillSettingsView: View {
     // MARK: - Skill Row
 
     private func skillRow(_ skill: SkillManifest) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(skill.displayName)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                Spacer()
-                Text("v\(skill.version)")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-
-            if !skill.description.isEmpty {
-                Text(skill.description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-
-            HStack(spacing: 4) {
-                if !skill.tags.isEmpty {
-                    ForEach(skill.tags.prefix(5), id: \.self) { tag in
-                        Text(tag)
-                            .font(.caption2)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
-                    }
-                }
-                if !skill.triggers.isEmpty {
-                    Text("触发词: \(skill.triggers.joined(separator: ", "))")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-            }
-
-            if !skill.author.isEmpty {
-                Text("作者: \(skill.author)")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .padding(.vertical, 4)
+        SkillRowView(skill: skill)
     }
+}
 
-    // MARK: - Actions
+// MARK: - Actions (extension to keep struct body under limit)
+
+extension SkillSettingsView {
 
     private func refreshSkills() async {
         let mgr: SkillManager = .shared
@@ -210,7 +183,9 @@ struct SkillSettingsView: View {
                 let mgr: SkillManager = .shared
                 let loaded: [SkillManifest] = try await mgr.scan(from: url)
                 await MainActor.run {
-                    scanStatus = loaded.isEmpty ? "未找到 .skill.md 文件" : "成功加载 \(loaded.count) 个技能"
+                    scanStatus = loaded.isEmpty
+                        ? "未找到 .skill.md 文件"
+                        : "成功加载 \(loaded.count) 个技能"
                     isLoading = false
                 }
                 await refreshSkills()
@@ -231,7 +206,9 @@ struct SkillSettingsView: View {
                 let mgr: SkillManager = .shared
                 let loaded: [SkillManifest] = try await mgr.loadBuiltinSkills()
                 await MainActor.run {
-                    scanStatus = loaded.isEmpty ? "未找到内置技能 (App/Resources/Skills/ 为空)" : "成功加载 \(loaded.count) 个内置技能"
+                    scanStatus = loaded.isEmpty
+                        ? "未找到内置技能 (App/Resources/Skills/ 为空)"
+                        : "成功加载 \(loaded.count) 个内置技能"
                     isLoading = false
                 }
                 await refreshSkills()
@@ -247,7 +224,6 @@ struct SkillSettingsView: View {
     private func clearAll() {
         Task {
             await SkillManager.shared.removeAll()
-
             await refreshSkills()
             await MainActor.run { testResults = [] }
         }
@@ -275,13 +251,67 @@ struct SkillSettingsView: View {
         var reasons: [String] = []
         if match.score >= 10 { reasons.append("触发词命中") }
         if match.score.truncatingRemainder(dividingBy: 10) >= 2 { reasons.append("标签匹配") }
-        let frac = match.score - Double(Int(match.score))
+        let frac: Double = match.score - Double(Int(match.score))
         if frac > 0 { reasons.append("语义相似") }
         return reasons.joined(separator: " + ")
     }
 
     private func scoreColor(_ score: Double) -> Color {
         score >= 10 ? .green : score >= 5 ? .blue : score >= 2 ? .orange : .gray
+    }
+}
+
+struct SkillRowView: View {
+    let skill: SkillManifest
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(skill.displayName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .accessibilityLabel("技能名称: \(skill.displayName)")
+                Spacer()
+                Text("v\(skill.version)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .accessibilityElement(children: .contain)
+
+            if !skill.description.isEmpty {
+                Text(skill.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
+            HStack(spacing: 4) {
+                if !skill.tags.isEmpty {
+                    ForEach(skill.tags.prefix(5), id: \.self) { tag in
+                        Text(tag)
+                            .font(.caption2)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
+                            .accessibilityLabel("标签: \(tag)")
+                    }
+                }
+                if !skill.triggers.isEmpty {
+                    Text("触发词: \(skill.triggers.joined(separator: ", "))")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+            }
+            .accessibilityElement(children: .contain)
+
+            if !skill.author.isEmpty {
+                Text("作者: \(skill.author)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

@@ -5,7 +5,7 @@ struct CollaborationPanel: View {
     @ObservedObject var tabManager: TabManager
     @ObservedObject var chatManager: ChatManager
 
-    private var pendingApprovals: [ApprovalItem] {
+    private func pendingApprovals() -> [ApprovalItem] {
         guard let activeID = tabManager.activeTabID,
             let tab = tabManager.tabs.first(where: { $0.id == activeID })
         else { return [] }
@@ -27,7 +27,8 @@ struct CollaborationPanel: View {
     }
 
     var body: some View {
-        VStack(spacing: Spacing.sm) {
+        let approvals: [ApprovalItem] = pendingApprovals()
+        return VStack(spacing: Spacing.sm) {
             HStack {
                 Image(systemName: "checklist")
                     .font(.title2)
@@ -37,7 +38,7 @@ struct CollaborationPanel: View {
             }
             .padding(.horizontal)
 
-            if pendingApprovals.isEmpty {
+            if approvals.isEmpty {
                 VStack(spacing: Spacing.xs) {
                     Image(systemName: "checkmark.circle")
                         .font(.largeTitle)
@@ -49,21 +50,23 @@ struct CollaborationPanel: View {
                 .frame(maxHeight: .infinity)
                 .accessibilityLabel("无待确认事项")
             } else {
-                List(pendingApprovals) { item in
-                    VStack(alignment: .leading, spacing: Spacing.xxs) {
-                        if let checkpoint = item.checkpoint {
-                            Text(checkpoint)
-                                .font(FontStyle.tiny)
-                                .foregroundStyle(.blue)
+                List {
+                    ForEach(approvals) { item in
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                            if let checkpoint = item.checkpoint {
+                                Text(checkpoint)
+                                    .font(FontStyle.caption2)
+                                    .foregroundStyle(.blue)
+                            }
+                            Text(item.title)
+                                .font(FontStyle.caption)
+                                .foregroundStyle(Color.statusWarning)
+                            Text(item.detail)
+                                .font(FontStyle.caption)
+                                .lineLimit(4)
                         }
-                        Text(item.title)
-                            .font(FontStyle.caption)
-                            .foregroundStyle(Color.statusWarning)
-                        Text(item.detail)
-                            .font(FontStyle.caption)
-                            .lineLimit(4)
+                        .padding(Spacing.xxs)
                     }
-                    .padding(Spacing.xxs)
                 }
                 .listStyle(.plain)
             }

@@ -283,6 +283,24 @@ struct MessageBubble: View {
                     .cornerRadius(CornerRadius.lg)
                     .textSelection(.enabled)
                     .animation(.interactiveSpring(duration: AnimationDuration.fast), value: message.content)
+                    .accessibilityLabel(buildAccessibilityLabel())
+                    .accessibilityAddTraits(.isStaticText)
+                    .contextMenu {
+                        Button {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(message.content, forType: .string)
+                        } label: {
+                            Label("复制", systemImage: "doc.on.doc")
+                        }
+                        .keyboardShortcut("c", modifiers: .command)
+                    }
+
+                if !message.content.isEmpty && !isStreaming {
+                    Text(message.timestamp, style: .time)
+                        .font(FontStyle.caption2)
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, Spacing.xxs)
+                }
 
                 if isStreaming && message.role == .assistant {
                     HStack(spacing: 3) {
@@ -309,6 +327,8 @@ struct MessageBubble: View {
                                 value: typingDotScale)
                     }
                     .padding(.leading, Spacing.sm)
+                    .accessibilityLabel("助手正在输入")
+                    .accessibilityHidden(isStreaming == false)
                     .onAppear { startTypingAnimation() }
                 }
             }
@@ -317,6 +337,12 @@ struct MessageBubble: View {
     }
 
     @State private var typingDotScale: CGFloat = 1.0
+
+    private func buildAccessibilityLabel() -> String {
+        let role: String = message.role == .user ? "用户" : "助手"
+        let content: String = message.content.isEmpty ? "输入中" : message.content
+        return "\(role): \(content)"
+    }
 
     private func startTypingAnimation() {
         withAnimation {

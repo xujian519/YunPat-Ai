@@ -15,18 +15,22 @@ struct ChecklistView: View {
                 Label("任务清单", systemImage: "checklist")
                     .font(.headline)
                     .foregroundStyle(.secondary)
+                    .accessibilityAddTraits(.isHeader)
 
                 ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                     HStack(alignment: .top, spacing: 8) {
                         Button(action: { toggleItem(index) }, label: {
                             Image(systemName: checkedItems.contains(index) ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(checkedItems.contains(index) ? Color.green : Color.secondary)
-                                .font(.system(size: 14))
+                                .font(.system(size: IconSize.sidebar))
                         })
                         .buttonStyle(.plain)
+                        .accessibilityLabel("\(item)")
+                        .accessibilityValue(checkedItems.contains(index) ? "已完成" : "未完成")
+                        .accessibilityHint(checkedItems.contains(index) ? "标记为未完成" : "标记为已完成")
 
                         Text(item)
-                            .font(.system(size: 13))
+                            .font(FontStyle.body)
                             .strikethrough(checkedItems.contains(index))
                             .foregroundStyle(checkedItems.contains(index) ? Color.secondary : Color.primary)
                     }

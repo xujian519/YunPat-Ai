@@ -66,7 +66,7 @@ struct ClarifyOverlay: View {
             }
         }
         .padding()
-        .background(Color(named: "windowBackground"))
+        .background(.regularMaterial)
         .cornerRadius(CornerRadius.xl)
         .shadow(radius: 8)
         .padding()
@@ -135,11 +135,5 @@ struct ClarifyOverlay: View {
             return selectedOptions.sorted().joined(separator: ", ")
         }
         return ""
-    }
-}
-
-extension Color {
-    init(named: String) {
-        self.init(NSColor(named: named) ?? NSColor.windowBackgroundColor)
     }
 }

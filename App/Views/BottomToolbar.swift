@@ -31,9 +31,12 @@ struct BottomToolbar: View {
             Image(systemName: "circle.fill")
                 .font(.system(size: 6))
                 .foregroundStyle(Color.statusSuccess)
+                .accessibilityLabel("连接状态")
+                .accessibilityHidden(true)
             Text("已连接")
                 .font(FontStyle.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("连接状态: 已连接")
         }
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xxs)
@@ -51,10 +54,11 @@ struct ToolbarButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 13))
+                .font(.system(size: IconSize.toolbar))
         }
         .buttonStyle(.plain)
         .help(help)
+        .accessibilityLabel(help)
         .scaleEffect(isHovered ? 1.15 : 1.0)
         .onHover { hovering in
             withAnimation(.easeInOut(duration: AnimationDuration.fast)) {

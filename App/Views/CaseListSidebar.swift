@@ -1,7 +1,6 @@
 import SwiftUI
 import YunPatCore
 
-/// 侧栏：案件列表 + 分类筛选
 struct CaseListSidebar: View {
     @ObservedObject var tabManager: TabManager
     @State private var filterCategory: CaseFilter = .all
@@ -24,74 +23,104 @@ struct CaseListSidebar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Image(systemName: "folder")
-                    .foregroundStyle(.blue)
-                Text("案件列表")
-                    .font(FontStyle.headline)
-                Spacer()
-                Menu {
-                    Button {
-                        Task { @MainActor in
-                            tabManager.addTab(title: "新案件", type: TabType.patent, flow: AgentFlow.fullAgent)
-                        }
-                    } label: {
-                        Label("新建案件", systemImage: "doc.badge.plus")
-                    }
-                    Button {
-                        Task { @MainActor in
-                            tabManager.addTab(title: "新对话", type: TabType.general, flow: AgentFlow.copilot)
-                        }
-                    } label: {
-                        Label("新建对话", systemImage: "bubble.left")
+            header
+            filterPicker
+            Divider()
+            tabList
+            Spacer()
+            footer
+        }
+        .background(.thickMaterial)
+    }
+
+    private var header: some View {
+        HStack {
+            Image(systemName: "folder")
+                .foregroundStyle(.blue)
+            Text("案件列表")
+                .font(FontStyle.headline)
+            Spacer()
+            Menu {
+                Button {
+                    Task { @MainActor in
+                        tabManager.addTab(
+                            title: "新案件",
+                            type: TabType.patent,
+                            flow: AgentFlow.fullAgent
+                        )
                     }
                 } label: {
-                    Image(systemName: "plus.circle")
-                        .font(.title3)
+                    Label("新建案件", systemImage: "doc.badge.plus")
                 }
-                .buttonStyle(.plain)
-            }
-            .padding()
-
-            Picker("", selection: $filterCategory) {
-                ForEach(CaseFilter.allCases, id: \.self) { flag in
-                    Text(flag.rawValue).tag(flag)
+                Button {
+                    Task { @MainActor in
+                        tabManager.addTab(
+                            title: "新对话",
+                            type: TabType.general,
+                            flow: AgentFlow.copilot
+                        )
+                    }
+                } label: {
+                    Label("新建对话", systemImage: "bubble.left")
                 }
+            } label: {
+                Image(systemName: "plus.circle")
+                    .font(.title3)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
+            .buttonStyle(.plain)
+            .accessibilityLabel("新建")
+            .accessibilityHint("创建新案件或新对话")
+        }
+        .padding()
+    }
 
-            Divider()
-
-            List(selection: $tabManager.activeTabID) {
-                ForEach(filteredTabs) { tab in
-                    CaseRow(tab: tab)
-                        .tag(tab.id)
-                        .contextMenu {
-                            if tab.type == .patent {
-                                Button {
-                                    Task { @MainActor in tabManager.archiveTab(tab.id) }
-                                } label: {
-                                    Label("归档", systemImage: "archivebox")
-                                }
-                            }
-                            Button(role: .destructive) {
-                                Task { @MainActor in tabManager.closeTab(tab.id) }
-                            } label: {
-                                Label("关闭", systemImage: "xmark")
-                            }
-                        }
-                }
+    private var filterPicker: some View {
+        Picker("筛选分类", selection: $filterCategory) {
+            ForEach(CaseFilter.allCases, id: \.self) { flag in
+                Text(flag.rawValue).tag(flag)
             }
-            .listStyle(.sidebar)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityLabel("案件筛选")
+        .accessibilityValue(filterCategory.rawValue)
+        .padding(.horizontal)
+    }
 
-            Spacer()
+    private var tabList: some View {
+        List(selection: $tabManager.activeTabID) {
+            ForEach(filteredTabs) { tab in
+                TabRow(tab: tab)
+                    .tag(tab.id)
+                    .contextMenu { contextMenuItems(for: tab) }
+            }
+        }
+        .listStyle(.sidebar)
+    }
 
+    @ViewBuilder
+    private func contextMenuItems(for tab: ChatTab) -> some View {
+        if tab.type == .patent {
+            Button {
+                Task { @MainActor in tabManager.archiveTab(tab.id) }
+            } label: {
+                Label("归档", systemImage: "archivebox")
+            }
+        }
+        Button(role: .destructive) {
+            Task { @MainActor in tabManager.closeTab(tab.id) }
+        } label: {
+            Label("关闭", systemImage: "xmark")
+        }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 0) {
             Divider()
             HStack {
-                Text("共 \(tabManager.tabs.count) 个标签")
+                Text("共 \(tabManager.tabs.count) 个会话")
                     .font(FontStyle.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("共 \(tabManager.tabs.count) 个会话")
                 Spacer()
                 if !tabManager.archivedTabs.isEmpty {
                     Text("\(tabManager.archivedTabs.count) 归档")
@@ -101,18 +130,15 @@ struct CaseListSidebar: View {
             }
             .padding(Spacing.xs)
         }
-        .background(.thickMaterial)
     }
 }
 
-struct CaseRow: View {
+struct TabRow: View {
     let tab: ChatTab
 
     var body: some View {
         HStack(spacing: Spacing.xxs) {
-            Image(systemName: tab.typeIcon)
-                .font(.caption)
-                .foregroundStyle(tab.type == .patent ? .blue : .secondary)
+            tabIcon
             VStack(alignment: .leading, spacing: 2) {
                 Text(tab.title)
                     .lineLimit(1)
@@ -124,14 +150,45 @@ struct CaseRow: View {
                 }
             }
             Spacer()
-            Text(tab.flowLabel)
-                .font(FontStyle.caption2)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, Spacing.xxs)
-                .padding(.vertical, 2)
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(CornerRadius.sm)
+            flowBadge
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(buildAccessibilityLabel())
+    }
+
+    @ViewBuilder
+    private var tabIcon: some View {
+        if case .running = tab.loopState {
+            Image(systemName: "circle.circle")
+                .font(.system(size: IconSize.caption))
+                .foregroundStyle(Color.statusRunning)
+                .symbolEffect(.pulse, options: .repeating)
+        } else {
+            Image(systemName: tab.typeIcon)
+                .font(.system(size: IconSize.caption))
+                .foregroundStyle(tab.type == .patent ? .blue : .secondary)
+        }
+    }
+
+    private var flowBadge: some View {
+        Text(tab.flowLabel)
+            .font(FontStyle.caption2)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, Spacing.xxs)
+            .padding(.vertical, 2)
+            .background(Color.secondary.opacity(0.1))
+            .cornerRadius(CornerRadius.sm)
+    }
+
+    private func buildAccessibilityLabel() -> String {
+        var label: String = tab.title
+        if let caseId = tab.caseId {
+            label += ", 案件号: \(caseId)"
+        }
+        if case .running = tab.loopState {
+            label += ", 正在运行"
+        }
+        return label
     }
 }
