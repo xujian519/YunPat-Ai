@@ -68,7 +68,15 @@ public actor SubAgentEngine {
         // 异步启动执行 — 完成后自动通知所有 waitAll 注册者
         agent.task = Task { [weak self] in
             guard let self else { return "Error: engine deallocated" }
+            guard !Task.isCancelled else {
+                agent.status = .failed
+                return "Cancelled before execution"
+            }
             let notification: String = await execute(agent, router: modelRouter, provider: provider)
+            guard !Task.isCancelled else {
+                agent.status = .failed
+                return "Cancelled after execution"
+            }
             await notifyAll(notification)
             return notification
         }

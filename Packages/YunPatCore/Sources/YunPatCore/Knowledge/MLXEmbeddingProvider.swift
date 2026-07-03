@@ -1,4 +1,6 @@
 import Foundation
+
+#if canImport(MLX)
 import MLX
 import MLXEmbedders
 import MLXLMCommon
@@ -350,6 +352,24 @@ public actor MLXEmbeddingProvider: EmbeddingProvider {
     }
 }
 
+#else
+
+/// MLX 不可用时降级占位 — 所有调用抛出错误，由上层切换到 KeywordEmbedder
+public actor MLXEmbeddingProvider: EmbeddingProvider {
+    public let dimension: Int = 1024
+    public let modelName: String = "bge-m3-unavailable"
+    public private(set) var isReady: Bool = false
+
+    public init(localModelPath: URL) {}
+    public init(modelId: String = "BAAI/bge-m3") {}
+
+    public func embed(_ texts: [String]) async throws -> [[Float]] {
+        throw MLXEmbeddingError.modelNotLoaded
+    }
+}
+
+#endif
+
 // MARK: - Errors
 
 public enum MLXEmbeddingError: LocalizedError {
@@ -359,7 +379,7 @@ public enum MLXEmbeddingError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .modelNotLoaded:
-            return "MLX embedding 模型未加载"
+            return "MLX embedding 模型未加载（MLX 不可用，请使用 KeywordEmbedder 降级）"
         case .loadFailed(let detail):
             return "MLX embedding 模型加载失败: \(detail)"
         }
