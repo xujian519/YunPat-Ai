@@ -125,10 +125,11 @@ public extension JSONValue {
         }
     }
 
-    /// 整数值
+    /// 整数值（string 也尝试转为整数以兼容旧代码）
     var intValue: Int? {
         switch self {
         case .number(let value): return Int(value)
+        case .string(let value): return Int(value)
         default: return nil
         }
     }

@@ -77,20 +77,21 @@ public final class WikiAdapter: @unchecked Sendable {
         for mod in modules {
             let index: String = try await readModuleIndex(mod)
             let links = parseWikilinks(from: index)
-            for link in links where link.lowercased().contains(query.lowercased()) {
+            for link in links {
                 let content: String = try await readPage(link)
-                if !content.isEmpty {
-                    let title: String = content.components(separatedBy: .newlines).first?
-                        .replacingOccurrences(of: "^#\\s+", with: "", options: .regularExpression) ?? link
-                    candidates.append(RuleCandidate(
-                        wikilink: link,
-                        title: title,
-                        content: content,
-                        source: sourceForModule(mod),
-                        sourceLevel: sourceLevelForModule(mod),
-                        score: 0.5
-                    ))
-                }
+                let matches: Bool = link.lowercased().contains(query.lowercased())
+                    || content.lowercased().contains(query.lowercased())
+                guard matches, !content.isEmpty else { continue }
+                let title: String = content.components(separatedBy: .newlines).first?
+                    .replacingOccurrences(of: "^#\\s+", with: "", options: .regularExpression) ?? link
+                candidates.append(RuleCandidate(
+                    wikilink: link,
+                    title: title,
+                    content: content,
+                    source: sourceForModule(mod),
+                    sourceLevel: sourceLevelForModule(mod),
+                    score: 0.5
+                ))
             }
         }
         return RuleRetrievalResult(candidates: candidates)
@@ -119,7 +120,7 @@ public final class WikiAdapter: @unchecked Sendable {
         let queriesDir: URL = vaultPath.appendingPathComponent("Queries")
         try FileManager.default.createDirectory(at: queriesDir, withIntermediateDirectories: true)
         let dateStr: String = ISO8601DateFormatter().string(from: Date())
-        let filename: String = "\(dateStr).md"
+        let filename: String = "query-\(dateStr).md"
         let content: String = """
             # \(query)
             \(result)

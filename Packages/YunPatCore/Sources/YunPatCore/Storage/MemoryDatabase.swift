@@ -17,7 +17,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
         let dir: URL = home.appendingPathComponent(".yunpat/memory")
         try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         self.dbPath = dir.appendingPathComponent("memory.sqlite")
-        Task { await setupDatabase() }
+        Task { [weak self] in await self?.setupDatabase() }
     }
 
     private func setupDatabase() {
@@ -331,6 +331,8 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
 
     // MARK: - SQLite Helpers
 
+    private static let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
     @discardableResult
     private func exec(_ sql: String) -> Bool {
         sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK
@@ -338,7 +340,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
 
     private func bindText(_ stmt: OpaquePointer, _ index: Int32, _ value: String?) {
         if let val = value {
-            sqlite3_bind_text(stmt, index, (val as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, index, (val as NSString).utf8String, -1, Self.SQLITE_TRANSIENT)
         } else {
             sqlite3_bind_null(stmt, index)
         }

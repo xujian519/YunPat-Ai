@@ -80,6 +80,37 @@ extension ToolDispatch {
 
     // MARK: - Patent Search
 
+    private struct PatentSearchRow {
+        let patentNumber: String
+        let title: String
+        let source: String
+        let score: Double
+    }
+
+    private static func patentSearchResponse(
+        query: String,
+        results: [PatentSearchRow],
+        count: Int
+    ) -> ToolHandlerResult {
+        let resultArray: [JSONValue] = results.map {
+            JSONValue.object([
+                "patentNumber": .string($0.patentNumber),
+                "title": .string($0.title),
+                "source": .string($0.source),
+                "relevanceScore": .number($0.score)
+            ])
+        }
+        return .handled(
+            ToolResponse.okResp(
+                data: .object([
+                    "query": .string(query),
+                    "results": .array(resultArray),
+                    "total": .number(Double(count))
+                ])
+            ).jsonString()
+        )
+    }
+
     private static func handlePatentSearch(
         name: String, input: [String: JSONValue], ctx: ToolContext
     ) async -> ToolHandlerResult {
@@ -96,45 +127,34 @@ extension ToolDispatch {
         // 优先路径：注入式 searcher
         if let searcher = PatentToolHandlers.shared.patentSearcher {
             let results: [PatentSearchResultItem] = await searcher(query, limit)
-            let resultArray: [JSONValue] = results.map { item in
-                JSONValue.object([
-                    "patentNumber": .string(item.patentNumber),
-                    "title": .string(item.title),
-                    "source": .string(item.source),
-                    "relevanceScore": .number(item.relevanceScore)
-                ])
+            let mapped = results.map {
+                PatentSearchRow(
+                    patentNumber: $0.patentNumber, title: $0.title,
+                    source: $0.source, score: $0.relevanceScore
+                )
             }
-            return .handled(
-                ToolResponse.okResp(
-                    data: .object([
-                        "query": .string(query),
-                        "results": .array(resultArray),
-                        "total": .number(Double(results.count))
-                    ])
-                ).jsonString()
-            )
+            return patentSearchResponse(query: query, results: mapped, count: results.count)
         }
 
         // 降级路径 1：SearchCommander
         if let commander = ToolDispatch.shared.searchCommander {
             let results: [SearchResult] = await commander.search(query: query)
-            let resultArray: [JSONValue] = results.prefix(limit).map { item in
-                JSONValue.object([
-                    "patentNumber": .string(item.patentNumber),
-                    "title": .string(item.title),
-                    "source": .string(item.source.rawValue),
-                    "relevanceScore": .number(item.relevanceScore)
-                ])
+            let limited: [SearchResult] = Array(results.prefix(limit))
+            guard !limited.isEmpty else {
+                return .handled(
+                    ToolResponse.errResp(
+                        code: .notFound,
+                        message: "未找到与「\(query)」相关的结果。"
+                    ).jsonString()
+                )
             }
-            return .handled(
-                ToolResponse.okResp(
-                    data: .object([
-                        "query": .string(query),
-                        "results": .array(resultArray),
-                        "total": .number(Double(results.count))
-                    ])
-                ).jsonString()
-            )
+            let mapped = limited.map {
+                PatentSearchRow(
+                    patentNumber: $0.patentNumber, title: $0.title,
+                    source: $0.source.rawValue, score: $0.relevanceScore
+                )
+            }
+            return patentSearchResponse(query: query, results: mapped, count: limited.count)
         }
 
         // 降级路径 2：未配置

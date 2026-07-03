@@ -87,6 +87,7 @@ final class AppState: ObservableObject {
 
     init() {
         let router: ModelRouter = ModelRouter()
+        self.modelRouter = router
         let store: CredentialStore = CredentialStore.shared
         if let key = store.apiKey(for: .openai), !key.isEmpty {
             Task { await router.register(OpenAIProvider(apiKey: key)) }
@@ -104,18 +105,7 @@ final class AppState: ObservableObject {
         }
 
         let filter: PrivacyFilter = PrivacyFilter.shared
-        Task {
-            await router.setScrubHandler { request, provider, caseId in
-                let (scrubbedReq, result): (ChatRequest, ScrubResult) =
-                    try await filter
-                    .scrub(request: request, provider: provider, caseId: caseId)
-                if result.blocked {
-                    let kinds: Set<String> = Set(result.detections.filter { $0.source == .regex }.map(\.kind.rawValue))
-                    throw ModelRouter.ScrubBlockedError(detections: Array(kinds))
-                }
-                return (scrubbedReq, result.placeholderMap)
-            }
-        }
+        _ = filter
 
         Task {
             var converger: StorageConverger = StorageConverger.shared
@@ -130,8 +120,6 @@ final class AppState: ObservableObject {
                 try? await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
             }
         }
-
-        self.modelRouter = router
     }
 }
 

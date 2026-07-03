@@ -6,6 +6,9 @@ public actor SkillManager {
 
     public init() {}
 
+    private static let _shared = SkillManager()
+    public static var shared: SkillManager { _shared }
+
     public func register(_ skill: SkillContent) {
         skills.append(skill)
     }

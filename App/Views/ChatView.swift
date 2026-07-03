@@ -45,7 +45,7 @@ final class ChatManager: ObservableObject {
             !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         else { return }
 
-        let tab: Tab = tabManager.tabs[idx]
+        let tab: ChatTab = tabManager.tabs[idx]
         let userMessage: ChatMessage = ChatMessage(role: .user, content: inputText)
         tabManager.appendMessage(to: activeID, userMessage)
         tabManager.tabs[idx].sessionMemory.append(Message(role: .user, content: inputText))
@@ -118,7 +118,7 @@ final class ChatManager: ObservableObject {
     }
 
     private func executeFlow(
-        tab: Tab, idx: Int, sentText: String,
+        tab: ChatTab, idx: Int, sentText: String,
         onChunk: @escaping PatentLoopHooks.OnStreamChunk,
         tabManager: TabManager
     ) async throws {
@@ -138,7 +138,7 @@ final class ChatManager: ObservableObject {
             if case .completed(let text) = result {
                 tabManager.tabs[idx].sessionMemory.append(Message(role: .assistant, content: text))
             }
-            await handleLoopResult(result, activeID: activeID, in: tabManager, streamed: true)
+            await handleLoopResult(result, activeID: tab.id, in: tabManager, streamed: true)
         case .fullAgent:
             let history: [Message] = tabManager.tabs[idx].sessionMemory.messages
             let result: LoopResult = try await getPatentLoopEngine().run(
@@ -151,7 +151,7 @@ final class ChatManager: ObservableObject {
             if case .completed(let text) = result {
                 tabManager.tabs[idx].sessionMemory.append(Message(role: .assistant, content: text))
             }
-            await handleLoopResult(result, activeID: activeID, in: tabManager, streamed: true)
+            await handleLoopResult(result, activeID: tab.id, in: tabManager, streamed: true)
         }
     }
 

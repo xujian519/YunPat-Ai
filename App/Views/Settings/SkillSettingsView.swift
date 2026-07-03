@@ -188,10 +188,10 @@ struct SkillSettingsView: View {
     // MARK: - Actions
 
     private func refreshSkills() async {
-        let mgr: SkillManager = SkillManager.shared
-        let all: [any SkillProtocol] = await mgr.allSkills()
+        let mgr: SkillManager = .shared
+        let all: [SkillMatch] = await mgr.allSkills()
         await MainActor.run {
-            skills = all.map(\.manifest)
+            skills = all.map { $0.skill.manifest }
             skillCount = all.count
         }
     }
@@ -207,8 +207,8 @@ struct SkillSettingsView: View {
         scanStatus = ""
         Task {
             do {
-                let mgr: SkillManager = SkillManager.shared
-                let loaded: [any SkillProtocol] = try await mgr.scan(from: url)
+                let mgr: SkillManager = .shared
+                let loaded: [SkillManifest] = try await mgr.scan(from: url)
                 await MainActor.run {
                     scanStatus = loaded.isEmpty ? "未找到 .skill.md 文件" : "成功加载 \(loaded.count) 个技能"
                     isLoading = false
@@ -228,8 +228,8 @@ struct SkillSettingsView: View {
         scanStatus = ""
         Task {
             do {
-                let mgr: SkillManager = SkillManager.shared
-                let loaded: [any SkillProtocol] = try await mgr.loadBuiltinSkills()
+                let mgr: SkillManager = .shared
+                let loaded: [SkillManifest] = try await mgr.loadBuiltinSkills()
                 await MainActor.run {
                     scanStatus = loaded.isEmpty ? "未找到内置技能 (App/Resources/Skills/ 为空)" : "成功加载 \(loaded.count) 个内置技能"
                     isLoading = false
@@ -247,6 +247,7 @@ struct SkillSettingsView: View {
     private func clearAll() {
         Task {
             await SkillManager.shared.removeAll()
+
             await refreshSkills()
             await MainActor.run { testResults = [] }
         }
@@ -255,7 +256,7 @@ struct SkillSettingsView: View {
     func testMatch() {
         guard !testInput.isEmpty else { return }
         Task {
-            let mgr: SkillManager = SkillManager.shared
+            let mgr: SkillManager = .shared
             let request: UserRequest = UserRequest(content: testInput)
             let matches: [SkillMatch] = await mgr.match(for: request)
             await MainActor.run {
@@ -263,7 +264,7 @@ struct SkillSettingsView: View {
                     SkillMatchDisplay(
                         name: match.skill.manifest.displayName,
                         score: match.score,
-                        reason: matchReason(m)
+                        reason: matchReason(match)
                     )
                 }
             }

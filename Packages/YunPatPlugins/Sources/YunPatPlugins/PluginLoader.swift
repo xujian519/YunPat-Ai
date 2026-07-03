@@ -18,6 +18,10 @@ public actor PluginLoader {
         loadedBundles[pluginID]?.unload()
         loadedBundles[pluginID] = nil
     }
+
+    public func bundle(for pluginID: String) -> Bundle? {
+        loadedBundles[pluginID]
+    }
 }
 
 public enum PluginError: Error {

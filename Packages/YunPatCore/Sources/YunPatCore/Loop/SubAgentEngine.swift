@@ -131,7 +131,7 @@ public actor SubAgentEngine {
             continuation.onTermination = { @Sendable [weak self] _ in
                 Task { await self?.removeContinuation(streamId) }
             }
-            Task { await self.registerContinuation(streamId, continuation) }
+            Task { [weak self] in await self?.registerContinuation(streamId, continuation) }
         }
     }
 

@@ -97,8 +97,12 @@ public actor MemoryConsolidator {
     // MARK: - Prune (旧 episode 裁切)
 
     private func prune() async {
-        // MemoryStore 当前不支持 episode 列表，由 MemoryWritePath 管理
-        // 保留接口供后续 SQLite 迁移后使用
+        let db: MemoryDatabase = .shared
+        let all: [Episode] = await db.loadAllEpisodes()
+        let cutoff: Date = Date().addingTimeInterval(-90 * 86400)
+        for episode in all where episode.createdAt < cutoff {
+            await db.deleteEpisode(id: episode.id)
+        }
     }
 
     // MARK: - Helpers

@@ -133,7 +133,7 @@ final class TypedToolTests: XCTestCase {
 
         let result: ToolHandlerResult = await tool.handler(
             "typed_patent_search",
-            ["query": "hello"],
+            ["query": .string("hello")],
             ToolContext(toolId: "", projectFolder: "", selectedProvider: .openai)
         )
 
@@ -148,7 +148,7 @@ final class TypedToolTests: XCTestCase {
         let tool: TypedReadFileTool = TypedReadFileTool()
         let result: ToolHandlerResult = await tool.handler(
             "typed_read_file",
-            ["unexpected": 42],
+            ["unexpected": .number(42)],
             ToolContext(toolId: "", projectFolder: "", selectedProvider: .openai)
         )
 

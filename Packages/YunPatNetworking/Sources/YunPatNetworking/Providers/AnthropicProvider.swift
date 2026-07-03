@@ -28,7 +28,11 @@ public final class AnthropicProvider: ModelBackend {
 
     public func chat(_ request: ChatRequest) -> AsyncThrowingStream<ChatChunk, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            Task { [weak self] in
+                guard let self else {
+                    continuation.finish(throwing: CancellationError())
+                    return
+                }
                 guard !apiKey.isEmpty else {
                     continuation.finish(throwing: RateLimitError(message: "API key is empty"))
                     return

@@ -123,9 +123,7 @@ struct SemanticRetrievalTests {
         defer { try? FileManager.default.removeItem(at: vault) }
 
         let adapter = WikiAdapter(vaultPath: vault)
-        let embedder = KeywordEmbedder()
-        let index = InMemoryVectorIndex(vaultPath: vault, embedder: embedder)
-        let engine = RuleEngine(adapter: adapter, embedder: embedder, semanticIndex: index)
+        let engine = RuleEngine(adapter: adapter)
 
         let facts = StructuredFacts(
             technicalField: "机械装置",

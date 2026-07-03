@@ -38,7 +38,11 @@ public final class OMLXBackend: ModelBackend, @unchecked Sendable {
 
     public func chat(_ request: ChatRequest) -> AsyncThrowingStream<ChatChunk, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            Task { [weak self] in
+                guard let self else {
+                    continuation.finish(throwing: CancellationError())
+                    return
+                }
                 let model: String = request.model.isEmpty ? ModelProvider.mlx.defaultModel : request.model
                 do {
                     try await loadModelIfNeeded(model)

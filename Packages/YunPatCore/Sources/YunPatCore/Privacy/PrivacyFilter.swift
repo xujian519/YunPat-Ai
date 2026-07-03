@@ -90,23 +90,23 @@ public actor PrivacyFilter { // swiftlint:disable:this type_body_length
         map: [String: String]
     ) -> AsyncThrowingStream<ChatChunk, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            Task { [weak self] in
                 do {
                     for try await chunk in stream {
                         switch chunk {
                         case .text(let text):
-                            continuation.yield(.text(replacePlaceholders(in: text, map: map)))
+                            continuation.yield(.text(self?.replacePlaceholders(in: text, map: map) ?? text))
                         case .toolCall(let id, let name, let args):
                             continuation.yield(
                                 .toolCall(
                                     id: id, name: name,
-                                    arguments: replacePlaceholders(in: args, map: map)
+                                    arguments: self?.replacePlaceholders(in: args, map: map) ?? args
                                 ))
                         case .toolCallDelta(let id, let args):
                             continuation.yield(
                                 .toolCallDelta(
                                     id: id,
-                                    arguments: replacePlaceholders(in: args, map: map)
+                                    arguments: self?.replacePlaceholders(in: args, map: map) ?? args
                                 ))
                         case .finish(let reason, let usage):
                             continuation.yield(.finish(reason: reason, usage: usage))
@@ -311,7 +311,7 @@ public actor PrivacyFilter { // swiftlint:disable:this type_body_length
     }
 
     /// 替换文本中的占位符为原文
-    private func replacePlaceholders(in text: String, map: [String: String]) -> String {
+    nonisolated private func replacePlaceholders(in text: String, map: [String: String]) -> String {
         var result: String = text
         for (placeholder, original) in map {
             result = result.replacingOccurrences(of: placeholder, with: original)

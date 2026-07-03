@@ -75,16 +75,30 @@ public actor RuleEngine {
 
     private func findMatchingLinks(in index: String, for facts: StructuredFacts) -> [String] {
         var links: [String] = []
-        let keywords: [String] = facts.inventionPoints + [facts.technicalField, facts.problem]
+        let keywords: [String] = (facts.inventionPoints + [facts.technicalField, facts.problem])
+            .filter { !$0.isEmpty }
         for line in index.components(separatedBy: .newlines) where line.hasPrefix("- [[") {
-            for keyword in keywords where !keyword.isEmpty && line.localizedCaseInsensitiveContains(keyword) {
-                let pattern: String = #"\[\[([^\]]+)\]\]"#
-                if let regex = try? NSRegularExpression(pattern: pattern),
-                    let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
-                    let range = Range(match.range(at: 1), in: line) {
-                    links.append(String(line[range]))
+            let pattern: String = #"\[\[([^\]]+)\]\]"#
+            guard let regex = try? NSRegularExpression(pattern: pattern),
+                let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+                let range = Range(match.range(at: 1), in: line)
+            else { continue }
+            let linkName: String = String(line[range])
+
+            // Extract tag keywords after ]]
+            let afterBracketStart: Int = match.range.location + match.range.length
+            let afterBracket: String = afterBracketStart < line.count
+                ? String(line[line.index(line.startIndex, offsetBy: afterBracketStart)...]) : ""
+            let tagWords: [String] = afterBracket.split(separator: " ").map { String($0) }.filter { !$0.isEmpty }
+
+            // Bidirectional match: user keyword contains concept term, or concept term contains user keyword
+            let conceptTerms: [String] = [linkName] + tagWords
+            let matched: Bool = keywords.contains { keyword in
+                conceptTerms.contains { term in
+                    keyword.localizedCaseInsensitiveContains(term) || term.localizedCaseInsensitiveContains(keyword)
                 }
             }
+            if matched { links.append(linkName) }
         }
         return links
     }

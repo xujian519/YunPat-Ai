@@ -9,10 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "Packages/YunPatNetworking"),
-        .package(path: "Packages/YunPatCore"),
-        .package(path: "Packages/YunPatDesktop"),
-        .package(path: "Packages/YunPatPlugins"),
-        .package(path: "Packages/YunPatSandbox")
+        .package(path: "Packages/YunPatCore")
     ],
     targets: [
         .target(

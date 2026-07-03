@@ -62,6 +62,14 @@ public final class ToolDispatch: @unchecked Sendable {
     var handlers: [String: ToolHandler] = [:]
     var toolSpecs: [String: ToolSpec] = [:]
 
+    private let todoChecklistLock: NSLock = NSLock()
+    private var _todoChecklist: String = ""
+
+    var todoChecklist: String {
+        get { todoChecklistLock.withLock { _todoChecklist } }
+        set { todoChecklistLock.withLock { _todoChecklist = newValue } }
+    }
+
     private init() {
         buildDispatchTable()
     }
@@ -220,20 +228,12 @@ extension ToolDispatch {
 
     // MARK: - Loop Tools (todo / complete / clarify)
 
-    private static let todoChecklistLock: NSLock = NSLock()
-    private nonisolated(unsafe) static var _todoChecklist: String = ""
-
-    private static var todoChecklist: String {
-        get { todoChecklistLock.withLock { _todoChecklist } }
-        set { todoChecklistLock.withLock { _todoChecklist = newValue } }
-    }
-
     private static func handleTodo(
         name: String, input: [String: JSONValue], ctx: ToolContext
     ) async -> ToolHandlerResult {
         let markdown: String = input["markdown"]?.stringValue ?? ""
         guard !markdown.isEmpty else { return .handled("Error: markdown field required") }
-        todoChecklist = markdown
+        shared.todoChecklist = markdown
         return .handled("✅ 任务清单已更新:\n\n\(markdown)")
     }
 

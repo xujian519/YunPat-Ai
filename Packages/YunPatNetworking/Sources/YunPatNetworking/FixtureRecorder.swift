@@ -33,18 +33,18 @@ public final class HTTPFixtureRecorder: ModelBackend, @unchecked Sendable {
         let reqCount: Int = request.messages.count
 
         return AsyncThrowingStream { continuation in
-            Task {
+            Task { [weak self] in
                 var collected: [FixtureChunk] = []
                 do {
                     for try await chunk in rawStream {
                         collected.append(FixtureChunk(from: chunk))
                         continuation.yield(chunk)
                     }
-                    self.appendRecord(model: reqModel, count: reqCount, chunks: collected)
+                    self?.appendRecord(model: reqModel, count: reqCount, chunks: collected)
                     continuation.finish()
                 } catch {
                     collected.append(.error((error as? LocalizedError)?.errorDescription ?? error.localizedDescription))
-                    self.appendRecord(model: reqModel, count: reqCount, chunks: collected)
+                    self?.appendRecord(model: reqModel, count: reqCount, chunks: collected)
                     continuation.finish(throwing: error)
                 }
             }

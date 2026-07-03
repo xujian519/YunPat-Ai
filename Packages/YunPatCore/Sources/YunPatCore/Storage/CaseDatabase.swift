@@ -266,13 +266,15 @@ public actor CaseDatabase {  // swiftlint:disable:this type_body_length
 
     // MARK: - Helpers
 
+    private static let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
     private func exec(_ db: OpaquePointer?, _ sql: String) {
         sqlite3_exec(db, sql, nil, nil, nil)
     }
 
     private func bind(_ db: OpaquePointer?, _ stmt: OpaquePointer, _ index: Int32, _ value: String?) {
         if let val = value {
-            sqlite3_bind_text(stmt, index, (val as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, index, (val as NSString).utf8String, -1, Self.SQLITE_TRANSIENT)
         } else {
             sqlite3_bind_null(stmt, index)
         }

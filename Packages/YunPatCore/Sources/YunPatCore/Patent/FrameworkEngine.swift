@@ -97,11 +97,17 @@ public struct ArticleFrameworkJudgment: Sendable {
 public actor FrameworkEngine {
 
     private var frameworks: [String: ArticleFramework] = [:]
+    private var promptExecutor: (@Sendable (String) async throws -> String)?
 
     public init() {
         for framework in FrameworkEngine.builtinFrameworks {
             frameworks[framework.articleId] = framework
         }
+    }
+
+    /// 配置 LLM 执行器 — App 启动时注入 ModelRouter.chat
+    public func configurePromptExecutor(_ executor: @Sendable @escaping (String) async throws -> String) {
+        promptExecutor = executor
     }
 
     /// Three hardcoded frameworks for MVP.
@@ -270,11 +276,14 @@ public actor FrameworkEngine {
 
         let prompt: String = buildPrompt(framework: framework, step: stepDef, facts: facts)
 
-        // Placeholder: in production this calls an LLM
-        let result: [String: String] = [
-            "prompt": prompt,
-            "status": "placeholder — LLM integration pending"
-        ]
+        var result: [String: String] = ["prompt": prompt]
+        if let executor = promptExecutor {
+            let llmOutput: String = try await executor(prompt)
+            result["analysis"] = llmOutput
+            result["status"] = "completed"
+        } else {
+            result["status"] = "LLM 未配置 — 仅返回提示词"
+        }
 
         return ArticleStepResult(
             stepId: stepId,

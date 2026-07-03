@@ -13,8 +13,12 @@ public actor PluginManager {
     }
 
     public func verify(_ pluginID: String) async throws -> Bool {
-        guard plugins[pluginID] != nil else { throw PluginError.bundleNotFound }
-        let valid = true /* signature verification placeholder */
+        guard let entry = plugins[pluginID] else { throw PluginError.bundleNotFound }
+        guard let bundle = await loader.bundle(for: pluginID) else {
+            plugins[pluginID]?.state = .failed
+            return false
+        }
+        let valid: Bool = try await verifier.verify(entry.manifest, bundle: bundle)
         plugins[pluginID]?.state = valid ? .verified : .failed
         return valid
     }

@@ -48,22 +48,22 @@ public final class AnnotationParser {
         let lines: [String] = text.components(separatedBy: .newlines)
         for (index, line) in lines.enumerated() {
             if let match = parsePattern("{del:", "}", in: line) {
-                annotations.append(DocumentAnnotation(line: i + 1, type: .deletion, content: match))
+                annotations.append(DocumentAnnotation(line: index + 1, type: .deletion, content: match))
                 cleanText = cleanText.replacingOccurrences(of: "{del:\(match)}", with: match)
             }
             if let match = parsePattern("{ins:", "}", in: line) {
-                annotations.append(DocumentAnnotation(line: i + 1, type: .insertion, content: match))
+                annotations.append(DocumentAnnotation(line: index + 1, type: .insertion, content: match))
                 cleanText = cleanText.replacingOccurrences(of: "{ins:\(match)}", with: match)
             }
             if line.contains("{???}") {
                 let content = line.replacingOccurrences(of: "{???}", with: "").trimmingCharacters(in: .whitespaces)
-                annotations.append(DocumentAnnotation(line: i + 1, type: .question, content: content))
+                annotations.append(DocumentAnnotation(line: index + 1, type: .question, content: content))
             }
             if line.contains("💬") {
                 let parts = line.components(separatedBy: "💬")
                 if parts.count > 1 {
                     let comment = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
-                    annotations.append(DocumentAnnotation(line: i + 1, type: .comment, content: comment))
+                    annotations.append(DocumentAnnotation(line: index + 1, type: .comment, content: comment))
                 }
             }
         }
