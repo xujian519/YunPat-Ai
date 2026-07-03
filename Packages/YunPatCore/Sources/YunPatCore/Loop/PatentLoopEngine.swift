@@ -29,6 +29,8 @@ public actor PatentLoopEngine: LoopEngine {
     private let loopGuard: LoopGuard
     private var stuckGuard: StuckGuard
     private let subAgentEngine: SubAgentEngine
+    private let frameworkEngine: FrameworkEngine
+    private let strategyRegistry: StrategyRegistry
     private var consecutiveReads: Int = 0
     public var planMode: PlanMode = .auto
     public var loopModel: String
@@ -61,6 +63,23 @@ public actor PatentLoopEngine: LoopEngine {
             giveUpThreshold: config.stuckGiveUpThreshold
         )
         self.subAgentEngine = .shared
+        self.frameworkEngine = FrameworkEngine()
+        self.strategyRegistry = StrategyRegistry()
+        Task { [weak self, modelRouter, provider, loopModel = provider.defaultModel] in
+            guard let self else { return }
+            await self.strategyRegistry.registerDefaults()
+            await self.frameworkEngine.configurePromptExecutor { prompt in
+                let chatReq = ChatRequest(
+                    model: loopModel, messages: [Message(role: .user, content: prompt)])
+                let stream: AsyncThrowingStream<ChatChunk, Error> = try await modelRouter.chat(
+                    chatReq, provider: provider)
+                var full: String = ""
+                for try await chunk in stream {
+                    if case .text(let text) = chunk { full += text }
+                }
+                return full
+            }
+        }
     }
 
     // 执行五步专利分析流程
@@ -83,7 +102,7 @@ public actor PatentLoopEngine: LoopEngine {
         consecutiveReads = 0
         let traceID: TraceID = await TraceCollector().startTrace()
         let startTime: Date = Date()
-        var toolCount: Int = 0
+        let toolCount: Int = 0
         var llmCallCount: Int = 0
 
         state = .running(step: "extracting-facts")
@@ -142,6 +161,7 @@ public actor PatentLoopEngine: LoopEngine {
         // Step 3: 规划 — 生成策略并注入执行
         state = .running(step: "planning")
         var plan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
+        llmCallCount += 1
 
         // 注入案件级规则
         if let workspaceURL {
@@ -149,10 +169,21 @@ public actor PatentLoopEngine: LoopEngine {
             if !caseRules.isEmpty { plan = caseRules + "\n\n" + plan }
         }
 
+        // Step 3b: 法律框架推理 + 结构化推理策略
+        let frameworkAnalysis: String = await runFrameworkAnalysis(facts: facts, rules: rules, flow: flow)
+        if !frameworkAnalysis.isEmpty {
+            plan += "\n\n---\n【法律框架分析】\n\(frameworkAnalysis)"
+        }
+        let strategyOutput: String = await runReasoningStrategy(facts: facts, rules: rules)
+        if !strategyOutput.isEmpty {
+            plan += "\n\n---\n【结构化推理】\n\(strategyOutput)"
+        }
+
         // Step 4+5: 执行 → 评估 → 迭代修订
         while revisionCount < config.maxIterations {
             let execReq: UserRequest = UserRequest(content: plan.isEmpty ? facts.technicalField : plan)
             let loopResult: LoopResult = await runExecution(execReq: execReq)
+            llmCallCount += 1
             switch loopResult {
             case .completed(let text) where !text.isEmpty:
                 // ── [协作点 ④] 中途干预（Guided 模式，首轮执行后）──
@@ -243,33 +274,16 @@ public actor PatentLoopEngine: LoopEngine {
         return .exceededRevisionLimit([Issue(description: "超过最大修订次数 \(config.maxIterations)")])
     }
 
-    /// 执行一次修订迭代
-    private func executeRevision(
-        revisionCount: Int, facts: StructuredFacts, rules: ApplicableRules,
-        traceID: TraceID, startTime: Date, flow: AgentFlow
-    ) async throws -> LoopResult? {
-        state = .running(step: "planning")
-        let plan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
-        guard !plan.isEmpty else { return nil }
-
-        state = .running(step: "executing-plan")
-        let execReq: UserRequest = UserRequest(content: plan)
-        let result: LoopResult = await runExecution(execReq: execReq)
-
-        switch result {
-        case .completed(let text) where text.contains("exceeded") || text.contains("error"):
-            // Run a second pass
-            let revisedPlan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
-            let retryReq: UserRequest = UserRequest(content: revisedPlan)
-            return await runExecution(execReq: retryReq)
-        default:
-            return result
-        }
-    }
-
     /// Step 3: 使用 LLM 构建策略
     private func buildPlan(facts: StructuredFacts, rules: ApplicableRules, traceID: TraceID) async throws -> String {
+        let systemContext: String = try await contextEngine.buildPrompt(
+            for: UserRequest(content: "技术领域：\(facts.technicalField)\n问题：\(facts.problem)"),
+            flow: .fullAgent
+        )
         let prompt: String = """
+            \(systemContext)
+
+            ---
             你是一位资深中国专利代理人。基于以下信息制定策略：
 
             技术领域：\(facts.technicalField)
@@ -317,6 +331,58 @@ public actor PatentLoopEngine: LoopEngine {
         var hasher: Hasher = Hasher()
         hasher.combine(String(text))
         return String(format: "%016lx", hasher.finalize())
+    }
+
+    // MARK: - Framework & Strategy Integration
+
+    /// 运行法律框架分析 — 按案件类型选择适用法条框架，逐步执行法律推理
+    private func runFrameworkAnalysis(
+        facts: StructuredFacts, rules: ApplicableRules, flow: AgentFlow
+    ) async -> String {
+        let caseType: CaseType = flow == .fullAgent ? .patentability : .drafting
+        let frameworks: [ArticleFramework] = await frameworkEngine.listApplicable(caseType: caseType)
+        guard !frameworks.isEmpty else { return "" }
+
+        let factStrings: [String] = [facts.technicalField, facts.problem] + facts.inventionPoints
+        var results: [String] = []
+        for framework in frameworks.prefix(2) {
+            var stepOutputs: [String] = []
+            for step in framework.steps.prefix(3) {
+                if let stepResult = try? await frameworkEngine.executeStep(
+                    framework: framework, stepId: step.id, facts: factStrings
+                ), let analysis = stepResult.output["analysis"] {
+                    stepOutputs.append("### \(step.name)\n\(analysis.prefix(300))")
+                }
+            }
+            if !stepOutputs.isEmpty {
+                results.append("#### \(framework.name)\n\(stepOutputs.joined(separator: "\n\n"))")
+            }
+        }
+        return results.joined(separator: "\n\n")
+    }
+
+    /// 运行结构化推理策略 — 将事实和规则通过策略引擎结构化
+    private func runReasoningStrategy(
+        facts: StructuredFacts, rules: ApplicableRules
+    ) async -> String {
+        let blackboard: FactBlackboard = FactBlackboard()
+        await blackboard.writeFacts(
+            technicalField: facts.technicalField,
+            problem: facts.problem,
+            inventionPoints: facts.inventionPoints,
+            missingInfo: facts.missingInfo
+        )
+        let strategyName: String = facts.inventionPoints.isEmpty ? "react" : "six_step"
+        guard let strategy: any ReasoningStrategy = await strategyRegistry.strategy(named: strategyName)
+        else { return "" }
+        let context: ReasoningContext = ReasoningContext(
+            userRequest: UserRequest(
+                content: facts.problem.isEmpty ? facts.technicalField : facts.problem),
+            blackboard: blackboard, rules: rules
+        )
+        guard let output: ReasoningOutput = try? await strategy.execute(context: context)
+        else { return "" }
+        return String(output.result.prefix(1500))
     }
 
     /// 用 PatentToolLoop 执行一次分析任务

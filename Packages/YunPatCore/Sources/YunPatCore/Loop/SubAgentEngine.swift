@@ -222,7 +222,7 @@ public actor SubAgentEngine {
             },
             modelStep: { [router, provider] messages, _ in
                 do {
-                    let chatReq = ChatRequest(model: "deepseek-chat", messages: messages)
+                    let chatReq = ChatRequest(model: provider.defaultModel, messages: messages)
                     let stream = try await router.chat(chatReq, provider: provider)
                     var full: String = ""
                     for try await chunk in stream {
