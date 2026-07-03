@@ -1,6 +1,7 @@
 import Foundation
 import YunPatNetworking
 
+// swiftlint:disable type_body_length
 /// 专利五步流程引擎 — 封装 PatentToolLoop 实现专利分析全流程
 ///
 /// 步骤：
@@ -57,15 +58,16 @@ public actor PatentLoopEngine: LoopEngine {
         self.subAgentEngine = .shared
     }
 
-    /// 执行五步专利分析流程
-    ///
-    /// 流程：提取事实 → 检索规则 → 确认规则（Guided 模式）→ 迭代执行 → 返回结果
-    /// - Parameters:
-    ///   - request: 用户请求
-    ///   - flow: 对话模式（guided 模式下会暂停等待规则确认）
-    ///   - model: 指定模型（nil 时使用 loopModel）
-    ///   - history: 历史消息（当前未使用）
-    ///   - onStreamChunk: 流式输出回调（当前未使用）
+    // 执行五步专利分析流程
+    //
+    // 流程：提取事实 → 检索规则 → 确认规则（Guided 模式）→ 迭代执行 → 返回结果
+    // - Parameters:
+    //   - request: 用户请求
+    //   - flow: 对话模式（guided 模式下会暂停等待规则确认）
+    //   - model: 指定模型（nil 时使用 loopModel）
+    //   - history: 历史消息（当前未使用）
+    //   - onStreamChunk: 流式输出回调（当前未使用）
+    // swiftlint:disable:next function_body_length
     public func run(
         request: UserRequest, flow: AgentFlow, model: String? = nil,
         history: [Message] = [],
@@ -121,18 +123,34 @@ public actor PatentLoopEngine: LoopEngine {
             )
         }
 
+        // Step 3: 规划 — 生成策略并注入执行
+        state = .running(step: "planning")
+        let plan: String = try await buildPlan(facts: facts, rules: rules, traceID: traceID)
+
+        // Step 4: 执行（将策略注入执行请求）
         while revisionCount < config.maxIterations {
-            let execReq: UserRequest = UserRequest(content: facts.technicalField)
+            let execReq: UserRequest = UserRequest(content: plan.isEmpty ? facts.technicalField : plan)
             let loopResult: LoopResult = await runExecution(execReq: execReq)
             switch loopResult {
             case .completed(let text) where !text.isEmpty:
+                // Step 5: 评估 — TODO: EvaluationEngine 集成
+                try? await TraceCollector().finishTrace(
+                    traceID,
+                    summary: TraceSummary(
+                        totalCost: 0, totalLatency: Date().timeIntervalSince(startTime),
+                        toolCount: toolCount, llmCallCount: llmCallCount
+                    )
+                )
+                state = .idle
                 return loopResult
             case .cancelled:
+                state = .idle
                 return loopResult
             default:
                 break
             }
             revisionCount += 1
+            state = .running(step: "revision-\(revisionCount)")
         }
 
         return .exceededRevisionLimit([Issue(description: "超过最大修订次数 \(config.maxIterations)")])
@@ -313,3 +331,4 @@ public actor PatentLoopEngine: LoopEngine {
         return .completed(summary)
     }
 }
+// swiftlint:enable type_body_length

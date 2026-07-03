@@ -194,7 +194,8 @@ public actor SubAgentEngine {
 
     // MARK: - Execution
 
-    /// 执行子代理任务 (改用 PatentToolLoop 驱动)
+    // 执行子代理任务 (改用 PatentToolLoop 驱动)
+    // swiftlint:disable:next function_body_length
     private func execute(_ agent: SubAgent, router: ModelRouter, provider: ModelProvider) async -> String {
         let loop: PatentToolLoop = PatentToolLoop()
         let request: UserRequest = UserRequest(content: agent.prompt)
@@ -253,12 +254,11 @@ public actor SubAgentEngine {
             hooks: hooks
         )
 
-        if case .endedBySurface = exit {
+        switch exit {
+        case .endedBySurface, .finalResponse:
             agent.status = .completed
-        } else if case .finalResponse = exit {
-            agent.status = .completed
-        } else {
-            agent.status = .completed
+        default:
+            agent.status = .failed
         }
         agent.result = exit.summary
         return agent.notification

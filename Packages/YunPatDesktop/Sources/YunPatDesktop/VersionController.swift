@@ -31,7 +31,7 @@ public actor VersionController {
     }
 
     public func gitStatus() async throws -> String {
-        let output: ShellResult = try await shell.execute("git status --porcelain", cwd: workspaceRoot)
+        let output: ShellOutput = try await shell.execute("git status --porcelain", cwd: workspaceRoot)
         return output.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
@@ -45,7 +45,8 @@ public actor VersionController {
     }
 
     public func log(limit: Int = 10) async throws -> [VersionInfo] {
-        let output: ShellResult = try await shell.execute("git log --format='%H|%s|%aI|%an' -\(limit)", cwd: workspaceRoot)
+        let cmd: String = "git log --format='%H|%s|%aI|%an' -\(limit)"
+        let output: ShellOutput = try await shell.execute(cmd, cwd: workspaceRoot)
         let lines: [String] = output.stdout
             .components(separatedBy: "\n")
             .filter { !$0.isEmpty }
@@ -58,7 +59,8 @@ public actor VersionController {
     /// or the process lacks permissions.
     @discardableResult
     public func timeMachineSnapshot() async throws -> Bool {
-        let output: ShellResult = try await shell.execute("tmutil localsnapshot / 2>/dev/null", cwd: workspaceRoot, timeout: 10)
+        let cmd: String = "tmutil localsnapshot / 2>/dev/null"
+        let output: ShellOutput = try await shell.execute(cmd, cwd: workspaceRoot, timeout: 10)
         return output.exitCode == 0
     }
 

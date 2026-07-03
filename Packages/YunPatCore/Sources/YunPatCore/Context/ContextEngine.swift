@@ -1,13 +1,20 @@
 import Foundation
+import YunPatNetworking
 
-/// 上下文引擎 — 根据请求和流程模式构建 system prompt，集成技能匹配
+/// 上下文引擎 — 根据请求和流程模式构建 system prompt，集成技能匹配与上下文压缩
 ///
-/// 集成技能匹配（SkillManager），将匹配的技能注入到 prompt 中。
-public final class ContextEngine: @unchecked Sendable {
+/// 集成：
+/// - SystemPromptService：专利专用系统提示词（反幻觉规则 + 高效行动规则）
+/// - SkillManager：三级 RAG 技能匹配注入
+/// - TokenEstimator：CJK 感知的精确 token 估算
+/// - CompactionWatermark：KV 稳定的历史消息压缩
+public actor ContextEngine {
     private let skillManager: SkillManager?
+    private var compactionWatermark: CompactionWatermark = CompactionWatermark()
 
     public init(skillManager: SkillManager? = nil) {
         self.skillManager = skillManager
+        self.compactionWatermark = CompactionWatermark()
     }
 
     /// 构建 system prompt
@@ -16,12 +23,21 @@ public final class ContextEngine: @unchecked Sendable {
     ///   - request: 用户请求（含 content 和 attachments）
     ///   - flow: 对话流程模式
     ///   - maxTokenBudget: 最大 token 预算（超出时截断），默认 4000
+    ///   - provider: 模型提供商（影响 token 估算精度），默认 .openai
     /// - Returns: 完整的 system prompt 文本
-    public func buildPrompt(for request: UserRequest, flow: AgentFlow, maxTokenBudget: Int = 4000) async throws
-        -> String {
+    public func buildPrompt(
+        for request: UserRequest,
+        flow: AgentFlow,
+        maxTokenBudget: Int = 4000,
+        provider: ModelProvider = .openai
+    ) async throws -> String {
         var parts: [String] = []
-        parts.append("你是一个有用的 AI 助手。")
 
+        // 1. 加载专利专用系统提示词
+        let basePrompt: String = await SystemPromptService.shared.prompt()
+        parts.append(basePrompt)
+
+        // 2. 注入技能匹配结果
         if let skillManager {
             let matches: [SkillMatch] = await skillManager.match(for: request)
             if !matches.isEmpty {
@@ -33,12 +49,46 @@ public final class ContextEngine: @unchecked Sendable {
             }
         }
 
+        // 3. 追加用户请求上下文
         parts.append("用户：\(request.content)")
+
         let full = parts.joined(separator: "\n\n")
-        let estimatedTokens: Int = full.count / 4
+
+        // 4. 使用精确 token 估算进行截断
+        let estimatedTokens = TokenEstimator.estimate(text: full, provider: provider)
         if estimatedTokens > maxTokenBudget {
-            return String(full.prefix(maxTokenBudget * 4))
+            let charsPerToken = TokenEstimator.charsPerToken(for: provider)
+            let maxChars = Int(Double(maxTokenBudget) * charsPerToken)
+            return String(full.prefix(maxChars))
         }
         return full
+    }
+
+    /// 压缩历史消息（KV 稳定，保护 paged-attention prefix cache）
+    ///
+    /// - Parameters:
+    ///   - messages: 历史消息列表
+    ///   - request: 当前请求（含 system prompt 和 tools）
+    ///   - provider: 模型提供商
+    ///   - window: 上下文窗口大小
+    /// - Returns: 压缩后的消息列表 + 是否超预算
+    public func compactHistory(
+        messages: [Message],
+        request: ChatRequest,
+        provider: ModelProvider,
+        window: Int = 128_000
+    ) -> CompactResult {
+        let budget = ContextBudget(window: window)
+        return compactionWatermark.compact(
+            messages: messages,
+            request: request,
+            budget: budget,
+            provider: provider
+        )
+    }
+
+    /// 重置压缩状态（新会话开始时调用）
+    public func resetCompaction() {
+        compactionWatermark = CompactionWatermark()
     }
 }

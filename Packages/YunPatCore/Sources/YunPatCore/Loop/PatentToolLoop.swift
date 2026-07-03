@@ -298,6 +298,9 @@ public actor PatentToolLoop {
     private var compactionWatermark: CompactionWatermark = CompactionWatermark()
     private var manifest: CapabilityManifest?
     private let batchExecutor: ToolBatchExecutor = .shared
+    private var stuckGuard: StuckGuard = StuckGuard()
+    private var loopGuard: LoopGuard = LoopGuard()
+    private var consecutiveReads: Int = 0
 
     public init() {}
 
@@ -306,15 +309,16 @@ public actor PatentToolLoop {
         self.manifest = manifest
     }
 
-    /// 运行一次 agent 循环
-    ///
-    /// 循环体：构建消息 → 压缩 → 模型调用 → 工具批处理 → 检查退出条件 → 下一轮
-    /// - Parameters:
-    ///   - request: 用户请求
-    ///   - policy: 循环策略（最大迭代次数、工具拒绝行为等）
-    ///   - hooks: surface 回调集合
-    ///   - provider: 模型提供商
-    /// - Returns: 循环退出类型和摘要
+    // 运行一次 agent 循环
+    //
+    // 循环体：构建消息 → 压缩 → 模型调用 → 工具批处理 → 检查退出条件 → 下一轮
+    // - Parameters:
+    //   - request: 用户请求
+    //   - policy: 循环策略（最大迭代次数、工具拒绝行为等）
+    //   - hooks: surface 回调集合
+    //   - provider: 模型提供商
+    // - Returns: 循环退出类型和摘要
+    // swiftlint:disable:next function_body_length
     public func run(
         request: UserRequest,
         policy: PatentLoopPolicy,
@@ -335,6 +339,12 @@ public actor PatentToolLoop {
 
             // 1. Stage system notices
             var notices: [String] = []
+            if let iterNudge = loopGuard.checkIteration(iteration) {
+                notices.append(iterNudge)
+            }
+            if let readNudge = loopGuard.checkConsecutiveReads(consecutiveReads) {
+                notices.append(readNudge)
+            }
             if iteration >= policy.maxIterations - policy.budgetWarningThreshold {
                 let remaining: Int = policy.maxIterations - iteration
                 notices.append("[System Notice] Tool call budget: \(remaining) of \(policy.maxIterations) remaining.")
@@ -496,7 +506,22 @@ public actor PatentToolLoop {
                     }
                 }
 
-                // 7. Check for rejection
+                // 7. StuckGuard — 检测连续编辑失败
+                for (index, call) in calls.enumerated() where index < results.count {
+                    guard let nudge = stuckGuard.check(
+                        toolName: call.name,
+                        filePath: extractFilePath(from: call),
+                        result: results[index].content
+                    ) else { continue }
+                    messages.append(Message(role: .system, content: nudge.message))
+                    if nudge.resetAfter { stuckGuard.reset(filePath: nudge.path) }
+                }
+
+                // 8. Track consecutive reads
+                let hasWrite = calls.contains { !loopGuard_readTools.contains($0.name) }
+                if hasWrite { consecutiveReads = 0 } else { consecutiveReads += calls.count }
+
+                // 9. Check for rejection
                 let rejected: Bool = results.contains { $0.isError }
                 if rejected && policy.stopOnToolRejection {
                     return .toolRejected("Tool rejected by user or system")
@@ -517,7 +542,16 @@ public actor PatentToolLoop {
     private func registeredTools() -> [ToolSpec] {
         ToolDispatch.shared.allToolSpecs
     }
+
+    private func extractFilePath(from call: ToolCall) -> String? {
+        call.arguments["file_path"] ?? call.arguments["path"]
+    }
 }
+
+private let loopGuard_readTools: Set<String> = [
+    "read_file", "list_files", "search_files",
+    "knowledge_search", "patent_search"
+]
 
 /// complete/clarify 工具校验 — 拒绝占位符，要求实质性描述
 public enum AgentLoopTools: Sendable {

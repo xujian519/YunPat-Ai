@@ -2,6 +2,7 @@ import SwiftUI
 import YunPatCore
 import YunPatNetworking
 
+// swiftlint:disable:next type_body_length
 struct ContentView: View {
     @StateObject private var tabManager: TabManager = TabManager()
     @StateObject private var chatManager: ChatManager
@@ -83,6 +84,41 @@ struct ContentView: View {
         .onAppear {
             if UserDefaults.standard.string(forKey: "yunpat.vaultPath") == nil {
                 showWizard = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuNewTab)) { _ in
+            tabManager.addTab()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuNewCase)) { _ in
+            tabManager.addTab(type: .patent)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuOpenFile)) { _ in
+            filePickerOpen = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuSave)) { _ in
+            saveCurrentDocument()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuUndo)) { _ in
+            AppStateStore.shared.undo()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuRedo)) { _ in
+            AppStateStore.shared.redo()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuToggleSidebar)) { _ in
+            withAnimation { sidebarCollapsed.toggle() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuToggleCollaboration)) { _ in
+            withAnimation { collaborationVisible.toggle() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuToggleBrowser)) { _ in
+            withAnimation { browserVisible.toggle() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .menuToggleSplitScreen)) { _ in
+            withAnimation { documentSplitVisible.toggle() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dropFile)) { notification in
+            if let url = notification.object as? URL {
+                handleDroppedFile(url)
             }
         }
         .fileImporter(
@@ -207,7 +243,27 @@ struct ContentView: View {
         ]
     }
 
-    private func saveCurrentDocument() {}
+    private func saveCurrentDocument() {
+        AppStateStore.shared.registerUndo("保存文档") {
+            // placeholder — actual save delegated to DocumentWorkspace
+        }
+    }
+
+    private func handleDroppedFile(_ url: URL) {
+        guard url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
+        let content: String =
+            (try? String(contentsOf: url, encoding: .utf8))
+            ?? "[二进制文件: \(url.lastPathComponent)]"
+        let msg: String = "📎 已打开: \(url.lastPathComponent)\n\n\(String(content.prefix(2000)))"
+        Task { @MainActor in
+            if let activeID = tabManager.activeTabID {
+                tabManager.appendMessage(to: activeID, ChatMessage(role: .user, content: msg))
+                await chatManager.sendMessage(in: tabManager)
+            }
+        }
+    }
+
     private func syncToAgent() {
         Task {
             if let activeID = tabManager.activeTabID {

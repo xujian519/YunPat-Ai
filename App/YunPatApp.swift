@@ -68,8 +68,10 @@ struct YunPatApp: App {
         }
         Settings {
             TabView {
-                ProviderSettingsView()
+                ProviderSettingsView(modelRouter: appState.modelRouter)
                     .tabItem { Label("接口", systemImage: "key") }
+                SkillSettingsView()
+                    .tabItem { Label("技能", systemImage: "wand.and.stars") }
                 PluginSettingsView()
                     .tabItem { Label("插件", systemImage: "puzzlepiece.extension") }
                 MCPSettingsView()
@@ -103,9 +105,6 @@ final class AppState: ObservableObject {
             guard let glmURL = URL(string: "https://open.bigmodel.cn/api/paas/v4") else { return }
             Task { await router.register(OpenAICompatProvider(apiKey: key, baseURL: glmURL, provider: .glm)) }
         }
-
-        let filter: PrivacyFilter = PrivacyFilter.shared
-        _ = filter
 
         Task {
             var converger: StorageConverger = StorageConverger.shared
