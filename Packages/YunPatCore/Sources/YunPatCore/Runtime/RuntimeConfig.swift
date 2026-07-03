@@ -74,8 +74,8 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
     public var semanticIndexPath: URL?
 
     // ── 检索模式 ──
-    /// 检索模式："disabled" / "keyword" / "semantic"
-    public var retrievalMode: String
+    /// 检索模式
+    public var retrievalMode: RetrievalMode
 
     // MARK: - Init
 
@@ -100,7 +100,7 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
         vaultPath: URL? = nil,
         embeddingModelPath: URL? = nil,
         semanticIndexPath: URL? = nil,
-        retrievalMode: String = "disabled"
+        retrievalMode: RetrievalMode = .disabled
     ) {
         self.maxIterations = maxIterations
         self.eventInterval = eventInterval
@@ -124,6 +124,14 @@ public struct RuntimeConfig: Sendable, Codable, Equatable {
         self.semanticIndexPath = semanticIndexPath
         self.retrievalMode = retrievalMode
     }
+}
+
+// MARK: - Retrieval Mode
+
+public enum RetrievalMode: String, Codable, Sendable, Equatable {
+    case disabled
+    case keyword
+    case semantic
 }
 
 // MARK: - Builder
@@ -300,7 +308,8 @@ extension RuntimeConfig {
         if let indexPathStr = defaults.string(forKey: "yunpat.semanticIndexPath") {
             config.semanticIndexPath = URL(fileURLWithPath: indexPathStr)
         }
-        if let mode = defaults.string(forKey: "yunpat.retrievalMode") {
+        if let modeRaw = defaults.string(forKey: "yunpat.retrievalMode"),
+           let mode = RetrievalMode(rawValue: modeRaw) {
             config.retrievalMode = mode
         }
 

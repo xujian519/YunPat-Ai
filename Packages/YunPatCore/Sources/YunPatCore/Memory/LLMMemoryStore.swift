@@ -242,12 +242,16 @@ public struct MemoryEntry: Sendable {
     public func serialize() -> String {
         """
         ---
-        name: \(name)
-        description: \(description)
+        name: \(sanitizeFrontmatter(name))
+        description: \(sanitizeFrontmatter(description))
         type: \(type.rawValue)
         id: \(id)
         ---
         \(content)
         """
+    }
+
+    private func sanitizeFrontmatter(_ value: String) -> String {
+        value.replacingOccurrences(of: "---", with: "\\-\\-\\-")
     }
 }

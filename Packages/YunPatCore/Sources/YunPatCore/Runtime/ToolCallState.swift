@@ -132,7 +132,7 @@ public struct ToolCallRecord: Identifiable, Sendable {
     }
 
     /// 开始执行
-    public mutating func start() -> ToolCallRecord {
+    public func start() -> ToolCallRecord {
         var copy: ToolCallRecord = self
         copy.state = .executing
         copy.startedAt = Date()
@@ -140,14 +140,14 @@ public struct ToolCallRecord: Identifiable, Sendable {
     }
 
     /// 等待用户确认
-    public mutating func awaitUser() -> ToolCallRecord {
+    public func awaitUser() -> ToolCallRecord {
         var copy: ToolCallRecord = self
         copy.state.insert(.awaitingUser)
         return copy
     }
 
     /// 执行完成
-    public mutating func complete(output: String) -> ToolCallRecord {
+    public func complete(output: String) -> ToolCallRecord {
         var copy: ToolCallRecord = self
         copy.state = [.completed]
         copy.output = output
@@ -156,7 +156,7 @@ public struct ToolCallRecord: Identifiable, Sendable {
     }
 
     /// 执行失败
-    public mutating func fail(error: Error) -> ToolCallRecord {
+    public func fail(error: Error) -> ToolCallRecord {
         var copy: ToolCallRecord = self
         copy.state = [.failed]
         copy.errorMessage = error.localizedDescription
@@ -165,7 +165,7 @@ public struct ToolCallRecord: Identifiable, Sendable {
     }
 
     /// 取消
-    public mutating func cancel() -> ToolCallRecord {
+    public func cancel() -> ToolCallRecord {
         var copy: ToolCallRecord = self
         copy.state = [.cancelled]
         copy.completedAt = Date()

@@ -17,10 +17,10 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
         let dir: URL = home.appendingPathComponent(".yunpat/memory")
         try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         self.dbPath = dir.appendingPathComponent("memory.sqlite")
-        Task { [weak self] in await self?.setupDatabase() }
     }
 
-    private func setupDatabase() {
+    private func ensureDatabase() {
+        guard db == nil else { return }
         openDatabase()
         createTables()
     }
@@ -95,6 +95,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - LTM Items
 
     public func saveLTMItem(_ item: LTMItem) async throws {
+        ensureDatabase()
         guard let db else { return }
         let json = try JSONEncoder().encode(item)
         guard let jsonStr = String(data: json, encoding: .utf8) else { return }
@@ -119,6 +120,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func loadAllLTMItems() async -> [LTMItem] {
+        ensureDatabase()
         guard let db else { return [] }
         var stmt: OpaquePointer?
         guard
@@ -138,6 +140,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func deleteLTMItem(id: UUID) async {
+        ensureDatabase()
         guard let db else { return }
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, "DELETE FROM ltm_items WHERE id=?", -1, &stmt, nil) == SQLITE_OK, let stmt else {
@@ -151,6 +154,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - Pinned Facts
 
     public func savePinnedFact(_ fact: PinnedFact) async throws {
+        ensureDatabase()
         guard let db else { return }
         let json = try JSONEncoder().encode(fact)
         guard let jsonStr = String(data: json, encoding: .utf8) else { return }
@@ -172,6 +176,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func loadAllPinnedFacts() async -> [PinnedFact] {
+        ensureDatabase()
         guard let db else { return [] }
         var stmt: OpaquePointer?
         guard
@@ -191,6 +196,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func deletePinnedFact(id: UUID) async {
+        ensureDatabase()
         guard let db else { return }
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, "DELETE FROM pinned_facts WHERE id=?", -1, &stmt, nil) == SQLITE_OK, let stmt
@@ -203,6 +209,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - Case Context
 
     public func saveCaseContext(_ ctx: CaseContext) async throws {
+        ensureDatabase()
         guard let db else { return }
         let invJSON: Data = try JSONEncoder().encode(ctx.inventionPoints)
         let refJSON: Data = try JSONEncoder().encode(ctx.keyReferences)
@@ -227,6 +234,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func loadCaseContext(_ caseId: String) async -> CaseContext? {
+        ensureDatabase()
         guard let db else { return nil }
         let loadSQL: String =
             "SELECT application_number, technical_field, invention_points, key_references, open_issues, last_modified FROM case_contexts WHERE case_id=?"  // swiftlint:disable:this line_length
@@ -252,6 +260,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - Episodes
 
     public func saveEpisode(_ episode: Episode) async throws {
+        ensureDatabase()
         guard let db else { return }
         let json = try JSONEncoder().encode(episode)
         guard let jsonStr = String(data: json, encoding: .utf8) else { return }
@@ -279,6 +288,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func loadAllEpisodes() async -> [Episode] {
+        ensureDatabase()
         guard let db else { return [] }
         var stmt: OpaquePointer?
         guard
@@ -298,6 +308,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func deleteEpisode(id: UUID) async {
+        ensureDatabase()
         guard let db else { return }
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, "DELETE FROM episodes WHERE id=?", -1, &stmt, nil) == SQLITE_OK, let stmt else {
@@ -311,6 +322,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     // MARK: - Maintenance
 
     public func clearAll() async {
+        ensureDatabase()
         exec("DELETE FROM ltm_items")
         exec("DELETE FROM pinned_facts")
         exec("DELETE FROM case_contexts")
@@ -322,7 +334,46 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     }
 
     public func vacuum() async {
+        ensureDatabase()
         exec("VACUUM")
+    }
+
+    // MARK: - Recent / Batch
+
+    public func loadRecentEpisodes(limit: Int = 20) async -> [Episode] {
+        ensureDatabase()
+        guard let db else { return [] }
+        var stmt: OpaquePointer?
+        guard
+            sqlite3_prepare_v2(
+                db,
+                "SELECT summary FROM episodes ORDER BY created_at DESC LIMIT ?",
+                -1, &stmt, nil) == SQLITE_OK, let stmt
+        else { return [] }
+        defer { sqlite3_finalize(stmt) }
+        sqlite3_bind_int64(stmt, 1, Int64(limit))
+        var episodes: [Episode] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let json = colText(stmt, 0), let data = json.data(using: .utf8),
+                let episode = try? JSONDecoder().decode(Episode.self, from: data) {
+                episodes.append(episode)
+            }
+        }
+        return episodes
+    }
+
+    public func deleteEpisodes(before date: Date) async {
+        ensureDatabase()
+        guard let db else { return }
+        let iso = ISO8601DateFormatter().string(from: date)
+        var stmt: OpaquePointer?
+        guard
+            sqlite3_prepare_v2(db, "DELETE FROM episodes WHERE created_at < ?", -1, &stmt, nil) == SQLITE_OK,
+            let stmt
+        else { return }
+        defer { sqlite3_finalize(stmt) }
+        bindText(stmt, 1, iso)
+        sqlite3_step(stmt)
     }
 
     deinit {
@@ -335,7 +386,8 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
 
     @discardableResult
     private func exec(_ sql: String) -> Bool {
-        sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK
+        guard let db else { return false }
+        return sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK
     }
 
     private func bindText(_ stmt: OpaquePointer, _ index: Int32, _ value: String?) {

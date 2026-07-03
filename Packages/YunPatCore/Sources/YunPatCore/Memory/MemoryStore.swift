@@ -60,4 +60,13 @@ public actor MemoryStore {
         }
         return decoded
     }
+
+    // MARK: - Case IDs
+
+    public func listCaseIds() -> [String] {
+        let prefix: String = "yunpat.memory.case."
+        return defaults.dictionaryRepresentation().keys
+            .filter { $0.hasPrefix(prefix) }
+            .map { String($0.dropFirst(prefix.count)) }
+    }
 }

@@ -163,19 +163,7 @@ public actor MemoryEngine {
 
     /// Promote session facts into a CaseContext, clear session facts.
     public func consolidate() async throws -> CaseContext {
-        let techField = sessionFacts(ofCategory: .technicalFeature).first?.fact ?? ""
-        let inventionPoints = sessionFacts(ofCategory: .technicalFeature).map(\.fact)
-        let keyRefs =
-            sessionFacts
-            .filter { $0.category == .legalRule || $0.category == .decision }
-            .map(\.fact)
-
-        let ctx = CaseContext(
-            caseId: "active",
-            technicalField: techField,
-            inventionPoints: inventionPoints,
-            keyReferences: keyRefs
-        )
+        let ctx = buildCaseContext()
         try await store.saveCaseContext(ctx)
         sessionFacts.removeAll()
         return ctx
@@ -184,21 +172,10 @@ public actor MemoryEngine {
     /// Full consolidation: promote session facts to CaseContext,
     /// and persist strategy-level facts to LongTermMemory.
     public func consolidateDeep() async throws -> (CaseContext, LongTermMemory) {
-        let techField = sessionFacts(ofCategory: .technicalFeature).first?.fact ?? ""
-        let inventionPoints = sessionFacts(ofCategory: .technicalFeature).map(\.fact)
-        let keyRefs =
-            sessionFacts
-            .filter { $0.category == .legalRule || $0.category == .decision }
-            .map(\.fact)
-        let strategies = sessionFacts(ofCategory: .strategy).map(\.fact)
-
-        let ctx = CaseContext(
-            caseId: "active",
-            technicalField: techField,
-            inventionPoints: inventionPoints,
-            keyReferences: keyRefs
-        )
+        let ctx = buildCaseContext()
         try await store.saveCaseContext(ctx)
+
+        let strategies = sessionFacts(ofCategory: .strategy).map(\.fact)
         sessionFacts.removeAll()
 
         var ltm = await store.loadLongTermMemory()
@@ -208,5 +185,22 @@ public actor MemoryEngine {
         ltm.lastConsolidated = Date()
         try await store.saveLongTermMemory(ltm)
         return (ctx, ltm)
+    }
+
+    // MARK: - Helpers
+
+    private func buildCaseContext() -> CaseContext {
+        let techField = sessionFacts(ofCategory: .technicalFeature).first?.fact ?? ""
+        let inventionPoints = sessionFacts(ofCategory: .technicalFeature).map(\.fact)
+        let keyRefs =
+            sessionFacts
+            .filter { $0.category == .legalRule || $0.category == .decision }
+            .map(\.fact)
+        return CaseContext(
+            caseId: "active",
+            technicalField: techField,
+            inventionPoints: inventionPoints,
+            keyReferences: keyRefs
+        )
     }
 }

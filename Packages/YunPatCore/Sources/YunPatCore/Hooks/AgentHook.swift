@@ -47,7 +47,11 @@ public actor HookChain {
     /// 在指定点执行所有匹配的 Hook
     public func execute(point: HookPoint, context: HookContext) async {
         for hook in hooks where hook.point == point {
-            try? await hook.execute(context: context)
+            do {
+                try await hook.execute(context: context)
+            } catch {
+                print("[HookChain] Hook '\(type(of: hook))' at point '\(point)' failed: \(error)")
+            }
         }
     }
 }

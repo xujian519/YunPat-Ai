@@ -144,7 +144,7 @@ public struct CompactionWatermark: Sendable {
     }
 
     private func contentHash(_ msg: Message) -> String {
-        "\(msg.role.rawValue):\(msg.content.prefix(80))"
+        "\(msg.role.rawValue):\(msg.content.hashValue)"
     }
 
     // MARK: - Helpers

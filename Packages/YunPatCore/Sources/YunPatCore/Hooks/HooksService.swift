@@ -236,6 +236,10 @@ public actor HooksService {
 
     private func save() {
         guard let data = try? JSONEncoder().encode(rules) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        do {
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            print("[HooksService] Failed to save hooks.json: \(error)")
+        }
     }
 }
