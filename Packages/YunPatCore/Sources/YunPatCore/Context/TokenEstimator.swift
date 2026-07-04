@@ -7,12 +7,14 @@ public enum TokenEstimator: Sendable {
     /// 每 token 的平均字符数（按 provider/语言）
     public static func charsPerToken(for provider: ModelProvider) -> Double {
         switch provider {
-        case .deepseek, .glm:
+        case .deepseek, .glm, .qwen:
             return 1.8  // 中文为主，~1.5-2 char/token
-        case .openai, .anthropic:
+        case .openai, .anthropic, .mistral:
             return 2.5  // 中英混合
-        case .ollama, .mlx:
+        case .ollama, .mlx, .siliconflow, .together:
             return 2.0
+        case .openrouter:
+            return 2.5  // 聚合平台，混合场景
         }
     }
 

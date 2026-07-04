@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// 设计 §13 HIG 要求：退出重启无缝
 struct WindowStateRestoration: ViewModifier {
-    @AppStorage("yunpat.sidebarCollapsed") private var sidebarCollapsed: Bool = false
+    @AppStorage("yunpat.leftDockVisible") private var leftDockVisible: Bool = true
     @AppStorage("yunpat.lastActiveTab") private var lastActiveTab: String = ""
     @AppStorage("yunpat.windowFrame") private var windowFrameData = Data()
 

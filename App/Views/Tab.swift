@@ -34,7 +34,7 @@ struct ChatTab: Identifiable, Equatable {
         self.loopState = .idle
         self.loopPreference = flow
         self.autoFlowEnabled = (type == .general)
-        self.loopModel = ModelProvider.deepseek.defaultModel
+        self.loopModel = "deepseek-v4-flash"
         self.sessionMemory = SessionMemory(tabId: tabId)
     }
 
@@ -48,9 +48,9 @@ struct ChatTab: Identifiable, Equatable {
 
     var flowLabel: String {
         switch loopPreference {
-        case .copilot: return "Copilot"
-        case .guided: return "Guided"
-        case .fullAgent: return "FullAgent"
+        case .copilot: return "自由问答"
+        case .guided: return "分步撰写"
+        case .fullAgent: return "自动代理"
         }
     }
 

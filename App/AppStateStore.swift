@@ -1,18 +1,85 @@
 import Combine
 import SwiftUI
 
+// MARK: - Dock Panel Enums
+
+public enum LeftDockPanel: String, CaseIterable, Codable {
+    case caseList
+    case folderTree
+    case knowledge  // 预留
+}
+
+public enum RightDockPanel: String, CaseIterable, Codable {
+    case collaboration
+    case caseGraph
+}
+
 /// Combine 响应式状态管理中心
 @MainActor
 public final class AppStateStore: ObservableObject, @unchecked Sendable {
     public static let shared = AppStateStore()
 
+    // ── Dock 系统（新统一状态，逐步替代旧变量）──
+
+    @Published public var leftDockVisible: Bool = true
+    @Published public var rightDockVisible: Bool = false
+    @Published public var bottomDockVisible: Bool = false
+    @Published public var centerMode: CenterMode = .chat
+    @Published public var leftDockActivePanel: LeftDockPanel = .caseList
+    @Published public var rightDockActivePanel: RightDockPanel = .collaboration
+
+    /// 专注写作退出时恢复的状态快照
+    struct FocusWritingSnapshot {
+        var leftVisible: Bool
+        var rightVisible: Bool
+        var bottomVisible: Bool
+        var mode: CenterMode
+    }
+    var focusWritingRestoreState: FocusWritingSnapshot?
+
+    // MARK: - Focus Writing
+
+    /// 进入专注写作：快照当前状态并隐藏所有 Dock
+    func enterFocusWriting() {
+        focusWritingRestoreState = FocusWritingSnapshot(
+            leftVisible: leftDockVisible,
+            rightVisible: rightDockVisible,
+            bottomVisible: bottomDockVisible,
+            mode: centerMode
+        )
+        leftDockVisible = false
+        rightDockVisible = false
+        bottomDockVisible = false
+        centerMode = .focusWriting
+    }
+
+    func exitFocusWriting() {
+        if let restore = focusWritingRestoreState {
+            leftDockVisible = restore.leftVisible
+            rightDockVisible = restore.rightVisible
+            bottomDockVisible = restore.bottomVisible
+            centerMode = restore.mode
+            focusWritingRestoreState = nil
+        } else {
+            centerMode = .chat
+        }
+    }
+
+    // ── 旧状态（逐步废弃）──
+
+    @available(*, deprecated, message: "改用 leftDockVisible")
     @Published public var sidebarCollapsed: Bool = false
+    @available(*, deprecated, message: "改用 rightDockVisible")
     @Published public var collaborationVisible: Bool = false
+    @available(*, deprecated, message: "改用 centerMode == .browser")
     @Published public var browserVisible: Bool = false
+    @available(*, deprecated, message: "文件树已移入 Left Dock")
     @Published public var documentSplitVisible: Bool = false
+    @available(*, deprecated, message: "改用 rightDockActivePanel == .caseGraph")
     @Published public var caseGraphMode: Bool = false
-    @Published public var isStreaming: Bool = false
+    @available(*, deprecated, message: "改用 StatusBar 连接指示器")
     @Published public var connectionStatus: String = "已连接"
+    @Published public var isStreaming: Bool = false
 
     // 撤销/重做
     public let undoManager = UndoManager()

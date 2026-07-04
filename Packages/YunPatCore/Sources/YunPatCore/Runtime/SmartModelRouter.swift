@@ -84,6 +84,8 @@ public struct SmartModelRouter: Sendable {
 
         case .ollama, .mlx:
             return preferred.defaultModel
+        default:
+            return preferred.defaultModel
         }
     }
 }

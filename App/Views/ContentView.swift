@@ -5,16 +5,11 @@ import YunPatNetworking
 struct ContentView: View {
     @StateObject private var tabManager: TabManager = TabManager()
     @StateObject private var chatManager: ChatManager
-    @State private var sidebarCollapsed: Bool = false
-    @State private var collaborationVisible: Bool = false
-    @State private var documentSplitVisible: Bool = false
-    @State private var browserVisible: Bool = false
-    @State private var folderTreeVisible: Bool = false
-    @State private var caseGraphMode: Bool = false
     @State private var filePickerOpen: Bool = false
     @State private var showWizard: Bool = false
-    @State private var focusWritingMode: Bool = false
     @Binding var windowTitle: String
+
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     init(router: ModelRouter, windowTitle: Binding<String>) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -22,24 +17,40 @@ struct ContentView: View {
     }
 
     var body: some View {
-        HSplitView {
-            sidebarSection
-            mainSection
-            collaborationSection
+        VStack(spacing: 0) {
+            HSplitView {
+                leftDockSection
+                mainSection
+                rightDockSection
+            }
+
+            if appState.bottomDockVisible && appState.centerMode != .focusWriting {
+                Divider()
+                DocumentWorkspace()
+                    .frame(minHeight: PanelWidth.bottomDockMinHeight, idealHeight: PanelWidth.bottomDockIdealHeight)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if appState.centerMode != .focusWriting {
+                Divider()
+                StatusBar(
+                    filePickerOpen: $filePickerOpen,
+                    onSave: { /* TODO: 接入文档保存逻辑 */ },
+                    onSync: { syncToAgent() }
+                )
+            }
         }
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: collaborationVisible)
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: sidebarCollapsed)
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: browserVisible)
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: documentSplitVisible)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.leftDockVisible)
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.rightDockVisible)
+        .animation(
+            .easeInOut(duration: AnimationDuration.slow),
+            value: appState.bottomDockVisible || appState.centerMode == .focusWriting
+        )
+        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.centerMode)
         .modifier(ContentViewModifiers(
             windowTitle: $windowTitle,
             tabManager: tabManager,
             chatManager: chatManager,
-            sidebarCollapsed: $sidebarCollapsed,
-            collaborationVisible: $collaborationVisible,
-            documentSplitVisible: $documentSplitVisible,
-            browserVisible: $browserVisible,
-            focusWritingMode: $focusWritingMode,
             showWizard: $showWizard,
             filePickerOpen: $filePickerOpen
         ))
@@ -51,13 +62,34 @@ struct ContentView: View {
         )
     }
 
-    // MARK: - Sidebar
+    // MARK: - Left Dock
 
     @ViewBuilder
-    private var sidebarSection: some View {
-        if !sidebarCollapsed && !focusWritingMode {
-            CaseListSidebar(tabManager: tabManager)
-                .frame(minWidth: PanelWidth.sidebarMin, idealWidth: PanelWidth.sidebarIdeal)
+    private var leftDockSection: some View {
+        if appState.leftDockVisible && appState.centerMode != .focusWriting {
+            switch appState.leftDockActivePanel {
+            case .caseList:
+                CaseListSidebar(tabManager: tabManager)
+                    .frame(
+                        minWidth: PanelWidth.sidebarMin,
+                        idealWidth: PanelWidth.sidebarIdeal,
+                        maxWidth: PanelWidth.sidebarMax
+                    )
+            case .folderTree:
+                FolderTreeView(rootPath: activeTab?.workspacePath)
+                    .frame(minWidth: PanelWidth.folderTreeMin, idealWidth: PanelWidth.folderTreeIdeal)
+            case .knowledge:
+                VStack {
+                    Image(systemName: "books.vertical")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.secondary)
+                    Text("知识库（开发中）")
+                        .font(FontStyle.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.thickMaterial)
+            }
         }
     }
 
@@ -65,57 +97,50 @@ struct ContentView: View {
 
     private var mainSection: some View {
         VStack(spacing: 0) {
-            if !focusWritingMode {
+            if appState.centerMode != .focusWriting {
                 TabStripContent(
                     tabManager: tabManager,
                     chatManager: chatManager
                 )
                 Divider()
             }
-            contentArea
-            if !focusWritingMode {
-                Divider()
-                BottomToolbar(
-                    filePickerOpen: $filePickerOpen,
-                    browserVisible: $browserVisible,
-                    folderTreeVisible: $folderTreeVisible,
-                    documentSplit: $documentSplitVisible,
-                    onSave: {},
-                    onSync: { syncToAgent() }
-                )
-            }
+            centerContent
         }
     }
 
     @ViewBuilder
-    private var contentArea: some View {
-        if browserVisible && !focusWritingMode {
-            PatentBrowser()
-        } else if documentSplitVisible && !focusWritingMode {
-            HSplitView { chatArea; rightPanel }
-        } else if focusWritingMode {
-            FocusWritingContent(focusWritingMode: $focusWritingMode)
-        } else {
+    private var centerContent: some View {
+        switch appState.centerMode {
+        case .chat:
             chatArea
+        case .browser:
+            PatentBrowser()
+        case .focusWriting:
+            FocusWritingContent(onExit: { appState.exitFocusWriting() })
         }
     }
 
-    private var rightPanel: some View {
-        FolderTreeView(rootPath: activeTab?.workspacePath)
-    }
-
-    // MARK: - Collaboration Section
+    // MARK: - Right Dock
 
     @ViewBuilder
-    private var collaborationSection: some View {
-        if collaborationVisible && !focusWritingMode {
-            if caseGraphMode {
-                CaseGraphView(caseId: activeTab?.caseId)
-                    .frame(minWidth: PanelWidth.collaborationMin, idealWidth: PanelWidth.collaborationIdeal)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            } else {
+    private var rightDockSection: some View {
+        if appState.rightDockVisible && appState.centerMode != .focusWriting {
+            switch appState.rightDockActivePanel {
+            case .collaboration:
                 CollaborationPanel(tabManager: tabManager, chatManager: chatManager)
-                    .frame(minWidth: PanelWidth.collaborationMin, idealWidth: PanelWidth.collaborationIdeal)
+                    .frame(
+                        minWidth: PanelWidth.collaborationMin,
+                        idealWidth: PanelWidth.collaborationIdeal,
+                        maxWidth: PanelWidth.collaborationMax
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            case .caseGraph:
+                CaseGraphView(caseId: activeTab?.caseId)
+                    .frame(
+                        minWidth: PanelWidth.collaborationMin,
+                        idealWidth: PanelWidth.collaborationIdeal,
+                        maxWidth: PanelWidth.collaborationMax
+                    )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
@@ -193,7 +218,7 @@ struct ContentView: View {
             if let activeID = tabManager.activeTabID {
                 tabManager.appendMessage(
                     to: activeID,
-                    ChatMessage(role: .system, content: "文档已同步至 Agent")
+                    ChatMessage(role: .user, content: "文档已同步至 Agent")
                 )
             }
         }
@@ -205,8 +230,12 @@ struct ContentView: View {
                 guard url.startAccessingSecurityScopedResource() else { continue }
                 defer { url.stopAccessingSecurityScopedResource() }
                 Task { @MainActor in
-                    let raw: String? = try? String(contentsOf: url, encoding: .utf8)
-                    let safe: String = raw ?? "二进制文件"
+                    let safe: String
+                    do {
+                        safe = try String(contentsOf: url, encoding: .utf8)
+                    } catch {
+                        safe = "二进制文件（无法读取文本内容）"
+                    }
                     let name: String = url.lastPathComponent
                     let msg: String = "已打开: \(name)\n\n\(safe.prefix(2000))"
                     if let id = tabManager.activeTabID {
@@ -222,7 +251,7 @@ struct ContentView: View {
 // MARK: - Extracted Subviews
 
 struct FocusWritingContent: View {
-    @Binding var focusWritingMode: Bool
+    var onExit: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -232,7 +261,7 @@ struct FocusWritingContent: View {
                     Spacer()
                     Button {
                         withAnimation(.spring(duration: AnimationDuration.spring)) {
-                            focusWritingMode = false
+                            onExit()
                         }
                     } label: {
                         Label("退出专注模式", systemImage: "xmark.circle.fill")

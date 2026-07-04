@@ -5,14 +5,14 @@ let package = Package(
     name: "YunPatAi",
     platforms: [.macOS(.v15)],
     products: [
-        .library(name: "YunPatApp", targets: ["YunPatApp"])
+        .executable(name: "YunPatAi", targets: ["YunPatApp"])
     ],
     dependencies: [
         .package(path: "Packages/YunPatNetworking"),
         .package(path: "Packages/YunPatCore")
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "YunPatApp",
             dependencies: [
                 .product(name: "YunPatNetworking", package: "YunPatNetworking"),

@@ -5,13 +5,10 @@ struct ContentViewModifiers: ViewModifier {
     @Binding var windowTitle: String
     @ObservedObject var tabManager: TabManager
     @ObservedObject var chatManager: ChatManager
-    @Binding var sidebarCollapsed: Bool
-    @Binding var collaborationVisible: Bool
-    @Binding var documentSplitVisible: Bool
-    @Binding var browserVisible: Bool
-    @Binding var focusWritingMode: Bool
     @Binding var showWizard: Bool
     @Binding var filePickerOpen: Bool
+
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     func body(content: Content) -> some View {
         content
@@ -31,27 +28,36 @@ struct ContentViewModifiers: ViewModifier {
                 filePickerOpen = true
             }
             .onReceive(publisher(for: .menuToggleSidebar)) { _ in
-                withAnimation { sidebarCollapsed.toggle() }
+                withAnimation { appState.leftDockVisible.toggle() }
             }
             .onReceive(publisher(for: .menuToggleCollaboration)) { _ in
-                withAnimation { collaborationVisible.toggle() }
+                withAnimation { appState.rightDockVisible.toggle() }
             }
             .onReceive(publisher(for: .menuToggleBrowser)) { _ in
-                withAnimation { browserVisible.toggle() }
+                withAnimation {
+                    appState.centerMode = appState.centerMode == .browser ? .chat : .browser
+                }
             }
             .onReceive(publisher(for: .menuToggleSplitScreen)) { _ in
-                withAnimation { documentSplitVisible.toggle() }
+                withAnimation {
+                    appState.leftDockActivePanel = appState.leftDockActivePanel == .folderTree
+                        ? .caseList : .folderTree
+                }
             }
             .onReceive(publisher(for: .menuFocusWriting)) { _ in
                 withAnimation(.spring(duration: AnimationDuration.spring)) {
-                    focusWritingMode.toggle()
+                    if appState.centerMode == .focusWriting {
+                        appState.exitFocusWriting()
+                    } else {
+                        appState.enterFocusWriting()
+                    }
                 }
             }
             .onReceive(publisher(for: .menuUndo)) { _ in
-                AppStateStore.shared.undo()
+                appState.undo()
             }
             .onReceive(publisher(for: .menuRedo)) { _ in
-                AppStateStore.shared.redo()
+                appState.redo()
             }
     }
 
@@ -69,7 +75,7 @@ struct ContentViewModifiers: ViewModifier {
     private var toolbarGroup: some ToolbarContent {
         ToolbarItemGroup {
             Button(
-                action: { withAnimation { sidebarCollapsed.toggle() } },
+                action: { withAnimation { appState.leftDockVisible.toggle() } },
                 label: { Label("侧栏", systemImage: "sidebar.left") }
             ).help("显示/隐藏侧栏")
 

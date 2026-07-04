@@ -67,6 +67,29 @@ enum PanelWidth {
     static let flowPicker: CGFloat = 240
     static let settingsWidth: CGFloat = 520
     static let settingsHeight: CGFloat = 480
+
+    // Bottom Dock
+    static let bottomDockMinHeight: CGFloat = 180
+    static let bottomDockIdealHeight: CGFloat = 280
+
+    // StatusBar
+    static let statusBarHeight: CGFloat = 32
+}
+
+// MARK: - Dock System
+
+/// Dock 位置枚举。与 Zed 三 Dock 架构对齐。
+public enum DockPosition: String, CaseIterable, Codable {
+    case left
+    case right
+    case bottom
+}
+
+/// 中心区域内容模式。
+public enum CenterMode: String, CaseIterable, Codable {
+    case chat
+    case browser
+    case focusWriting
 }
 
 // MARK: - AnimationDuration
