@@ -88,10 +88,28 @@ struct StatusBar: View {
                 action: { appState.centerMode = appState.centerMode == .browser ? .chat : .browser }
             )
             StatusBarButton(
+                icon: "chart.pie",
+                help: "成本仪表盘",
+                isActive: appState.rightDockActivePanel == .costDashboard && appState.rightDockVisible,
+                action: { appState.rightDockActivePanel = .costDashboard; appState.rightDockVisible = true }
+            )
+            StatusBarButton(
+                icon: "brain.head.profile",
+                help: "记忆审计",
+                isActive: appState.rightDockActivePanel == .memoryAudit && appState.rightDockVisible,
+                action: { appState.rightDockActivePanel = .memoryAudit; appState.rightDockVisible = true }
+            )
+            StatusBarButton(
                 icon: "checklist",
                 help: "协作面板",
-                isActive: appState.rightDockVisible,
-                action: { appState.rightDockVisible.toggle() }
+                isActive: appState.rightDockActivePanel == .collaboration && appState.rightDockVisible,
+                action: { appState.rightDockActivePanel = .collaboration; appState.rightDockVisible = true }
+            )
+            StatusBarButton(
+                icon: "point.topleft.down.curvedto.point.bottomright.up",
+                help: "案件图谱",
+                isActive: appState.rightDockActivePanel == .caseGraph && appState.rightDockVisible,
+                action: { appState.rightDockActivePanel = .caseGraph; appState.rightDockVisible = true }
             )
             StatusBarButton(
                 icon: "doc.text",

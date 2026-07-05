@@ -3,35 +3,31 @@ import YunPatNetworking
 
 /// 聊天界面适配器 — 封装 PatentToolLoop 提供 ModelRouter 驱动的 Agent 循环
 ///
-/// 保留原公共 API (`run(request:flow:) → LoopResult`) 向后兼容，
-/// 内部委托给 PatentToolLoop 驱动。
-///
 /// 简化入口：`AgentLoopEngine.run(text:modelRouter:)` 一键发送文本。
 public actor AgentLoopEngine: LoopEngine {
     public var state: LoopState = .idle
 
     private let modelRouter: ModelRouter
-    private let provider: ModelProvider
+    private let defaultProvider: ModelProvider
     private let loop: PatentToolLoop
     private let contextEngine: ContextEngine
+    private let routingEngine: RoutingEngine
 
-    /// todo 清单更新的 UI 回调（MainActor）
     private var onTodoUpdate: (@Sendable (String) -> Void)?
 
-    /// manifest 是否就绪
     private var manifestReady: Bool = false
 
-    /// 初始化 AgentLoopEngine
-    /// - Parameters:
-    ///   - modelRouter: 模型路由
-    ///   - provider: 默认模型提供商
-    public init(modelRouter: ModelRouter, provider: ModelProvider = .deepseek) {
+    public init(
+        modelRouter: ModelRouter,
+        provider: ModelProvider = .deepseek,
+        routingEngine: RoutingEngine? = nil
+    ) {
         self.modelRouter = modelRouter
-        self.provider = provider
+        self.defaultProvider = provider
+        self.routingEngine = routingEngine ?? RoutingEngine()
         self.loop = PatentToolLoop()
         self.contextEngine = ContextEngine()
 
-        // 异步注入 capability manifest
         let reg: CapabilityRegistry = CapabilityRegistry()
         Task { [weak self] in
             guard let self else { return }
@@ -51,22 +47,12 @@ public actor AgentLoopEngine: LoopEngine {
     }
 
     /// 等待 Capability manifest 异步加载就绪
-    ///
-    /// 首次 `run()` 调用前可选等待，确保工具注册表已加载。
-    /// 支持多 Task 并发等待，使用 Continuation 数组而非单值避免悬挂。
     public func waitUntilReady() async {
         if manifestReady { return }
         await withCheckedContinuation { readyContinuations.append($0) }
     }
 
     /// 一键入口：用已配置的 ModelRouter 发送文本，无需手动创建 Engine
-    ///
-    /// - Parameters:
-    ///   - text: 用户输入文本
-    ///   - modelRouter: 模型路由（决定调用哪个 LLM）
-    ///   - provider: 模型提供商（默认 DeepSeek）
-    ///   - flow: 对话流程模式（默认 copilot）
-    /// - Returns: 循环执行结果
     public static func run(
         text: String,
         modelRouter: ModelRouter,
@@ -78,22 +64,12 @@ public actor AgentLoopEngine: LoopEngine {
         return try await engine.run(request: UserRequest(content: text), flow: flow)
     }
 
-    /// 注册 todo 清单更新回调，当 PatentToolLoop 更新检查清单时通知 UI 侧
-    ///
-    /// - Parameter block: 接收完整 Markdown 清单文本的闭包
+    /// 注册 todo 清单更新回调
     public func setOnTodoUpdate(_ block: @escaping @Sendable (String) -> Void) {
         self.onTodoUpdate = block
     }
 
     /// 执行一次 Agent 循环
-    ///
-    /// 内部构建 system prompt → 智能路由模型 → 委托 PatentToolLoop 驱动。
-    /// - Parameters:
-    ///   - request: 用户请求
-    ///   - flow: 对话流程模式
-    ///   - model: 指定模型（nil 时自动路由）
-    ///   - history: 历史消息列表
-    ///   - onStreamChunk: 流式输出回调
     public func run(
         request: UserRequest, flow: AgentFlow, model: String? = nil,
         history: [Message] = [],
@@ -102,35 +78,79 @@ public actor AgentLoopEngine: LoopEngine {
         state = .running(step: "building-context")
         let systemPrompt: String = try await contextEngine.buildPrompt(for: request, flow: flow)
 
-        // 智能路由：无显式指定模型时按任务特征自动选择
         let effectiveModel: String
         if let specifiedModel = model {
             effectiveModel = specifiedModel
         } else {
             let category: SmartModelRouter.TaskCategory = SmartModelRouter.classify(request)
-            effectiveModel = SmartModelRouter.selectModel(for: category, preferred: provider)
+            effectiveModel = SmartModelRouter.selectModel(for: category, preferred: defaultProvider)
         }
 
         let hooks: PatentLoopHooks = makeHooks(
             systemPrompt: systemPrompt, request: request,
-            model: effectiveModel, history: history, onStreamChunk: onStreamChunk)
+            model: effectiveModel, provider: defaultProvider,
+            history: history, onStreamChunk: onStreamChunk)
 
         state = .running(step: "executing")
         let exit: LoopExit = await loop.run(
             request: request,
             policy: flow == .copilot ? .chat : .patentFlow,
             hooks: hooks,
-            provider: provider
+            provider: defaultProvider
         )
 
         state = .idle
         return LoopResult(exit: exit)
     }
 
-    // MARK: - Chat Hooks
+    /// 带智能路由的执行方法
+    public func runWithRouting(
+        request: UserRequest, flow: AgentFlow, model: String? = nil,
+        provider: ModelProvider? = nil,
+        caseId: String? = nil,
+        history: [Message] = [],
+        onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil
+    ) async throws -> LoopResult {
+        state = .running(step: "building-context")
+        let systemPrompt: String = try await contextEngine.buildPrompt(for: request, flow: flow)
+
+        let effectiveProvider: ModelProvider
+        let effectiveModel: String
+        if let specifiedModel = model {
+            effectiveModel = specifiedModel
+            effectiveProvider = provider ?? defaultProvider
+        } else if let specifiedProvider = provider {
+            let category: SmartModelRouter.TaskCategory = SmartModelRouter.classify(request)
+            effectiveModel = SmartModelRouter.selectModel(for: category, preferred: specifiedProvider)
+            effectiveProvider = specifiedProvider
+        } else {
+            let decision: RoutingDecision = await routingEngine.route(
+                RoutingRequest(content: request.content, caseId: caseId)
+            )
+            effectiveModel = decision.model
+            effectiveProvider = decision.provider
+        }
+
+        let hooks: PatentLoopHooks = makeHooks(
+            systemPrompt: systemPrompt, request: request,
+            model: effectiveModel, provider: effectiveProvider,
+            caseId: caseId, history: history, onStreamChunk: onStreamChunk)
+
+        state = .running(step: "executing")
+        let exit: LoopExit = await loop.run(
+            request: request,
+            policy: flow == .copilot ? .chat : .patentFlow,
+            hooks: hooks,
+            provider: effectiveProvider
+        )
+
+        state = .idle
+        return LoopResult(exit: exit)
+    }
 
     private func makeHooks(
         systemPrompt: String, request: UserRequest, model: String,
+        provider: ModelProvider, caseId: String? = nil,
         history: [Message] = [],
         onStreamChunk: PatentLoopHooks.OnStreamChunk? = nil
     ) -> PatentLoopHooks {
@@ -141,7 +161,7 @@ public actor AgentLoopEngine: LoopEngine {
                 all.append(Message(role: .user, content: request.content))
                 return all
             },
-            modelStream: { [modelRouter, provider, model] messages, toolSpecs in
+            modelStream: { [modelRouter, provider, model, caseId, routingEngine] messages, toolSpecs in
                 let toolDefs: [ChatToolDefinition] = toolSpecs.map {
                     ChatToolDefinition(name: $0.name, description: $0.description, parameters: $0.parameters)
                 }
@@ -153,7 +173,14 @@ public actor AgentLoopEngine: LoopEngine {
                     try await modelRouter
                     .chat(chatReq, provider: provider)
                 return AsyncThrowingStream { continuation in
-                    Self.processStream(rawStream: rawStream, into: continuation)
+                    let config: StreamConfig = StreamConfig(
+                        caseId: caseId, provider: provider,
+                        model: model, routingEngine: routingEngine
+                    )
+                    Self.processStream(
+                        rawStream: rawStream, config: config,
+                        into: continuation
+                    )
                 }
             },
             executeTool: { [provider] call in
@@ -178,7 +205,6 @@ public actor AgentLoopEngine: LoopEngine {
         )
     }
 
-    /// 解析 LLM 返回的工具调用 JSON 参数为 [String: String] 字典
     private static func parseToolArgs(_ json: String) -> [String: String] {
         guard let data: Data = json.data(using: .utf8),
               let dict: [String: Any] = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -194,10 +220,25 @@ public actor AgentLoopEngine: LoopEngine {
             }
         }
     }
+}
 
-    /// 将 ChatChunk 流转换为 ModelStepChunk 流，处理工具调用累积
+// MARK: - Stream Types
+
+extension AgentLoopEngine {
+    struct StreamConfig {
+        let caseId: String?
+        let provider: ModelProvider
+        let model: String
+        let routingEngine: RoutingEngine
+    }
+}
+
+// MARK: - Stream Processing
+
+extension AgentLoopEngine {
     private static func processStream(
         rawStream: AsyncThrowingStream<ChatChunk, Error>,
+        config: StreamConfig,
         into continuation: AsyncThrowingStream<ModelStepChunk, Error>.Continuation
     ) {
         Task {
@@ -221,7 +262,12 @@ public actor AgentLoopEngine: LoopEngine {
                         hasToolCalls = true
                         if !deltaOrder.contains(id) { deltaOrder.append(id) }
                         deltaArgs[id, default: ""] += arguments
-                    case .finish(let reason, _):
+                    case .finish(let reason, let usage):
+                        if let usage {
+                            await config.routingEngine.reportUsage(
+                                caseId: config.caseId, provider: config.provider, model: config.model, usage: usage
+                            )
+                        }
                         flushToolCalls(deltaOrder, deltaNames, deltaArgs, into: continuation)
                         if !hasToolCalls && reason != .toolCalls {
                             continuation.yield(.done(accumulated))

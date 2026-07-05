@@ -152,6 +152,20 @@ struct ContentView: View {
                         maxWidth: PanelWidth.collaborationMax
                     )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
+            case .costDashboard:
+                CostDashboardView(caseId: activeTab?.caseId)
+                    .frame(
+                        minWidth: PanelWidth.costDashboardMin,
+                        idealWidth: PanelWidth.costDashboardIdeal
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            case .memoryAudit:
+                MemoryAuditView()
+                    .frame(
+                        minWidth: PanelWidth.memoryAuditMin,
+                        idealWidth: PanelWidth.memoryAuditIdeal
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
     }

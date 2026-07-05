@@ -137,10 +137,13 @@ struct SettingsTabView: View {
             KnowledgeSettingsView()
                 .tabItem { Label("知识库", systemImage: "books.vertical") }
                 .tag(4)
+            RoutingSettingsView()
+                .tabItem { Label("路由", systemImage: "chart.pie") }
+                .tag(5)
         }
         .padding(.top, Spacing.sm)
         .onReceive(NotificationCenter.default.publisher(for: .openSettingsTab)) { note in
-            if let idx = note.object as? Int, (0...4).contains(idx) {
+            if let idx = note.object as? Int, (0...5).contains(idx) {
                 selectedTab = idx
             }
             openSettingsWindow()
@@ -224,6 +227,6 @@ extension Notification.Name {
     static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
     static let menuFocusWriting: Notification.Name = Notification.Name("menuFocusWriting")
     static let dropFile: Notification.Name = Notification.Name("dropFile")
-    /// 打开设置页到指定 Tab (object: Int — 0=接口, 1=技能, 2=插件, 3=MCP, 4=知识库)
+    /// 打开设置页到指定 Tab (object: Int — 0=接口, 1=技能, 2=插件, 3=MCP, 4=知识库, 5=路由)
     static let openSettingsTab: Notification.Name = Notification.Name("openSettingsTab")
 }

@@ -74,6 +74,10 @@ enum PanelWidth {
     static let folderTreeIdeal: CGFloat = 260
     static let caseWorkspaceMin: CGFloat = 260
     static let caseWorkspaceIdeal: CGFloat = 300
+    static let costDashboardMin: CGFloat = 260
+    static let costDashboardIdeal: CGFloat = 300
+    static let memoryAuditMin: CGFloat = 260
+    static let memoryAuditIdeal: CGFloat = 320
     static let flowPicker: CGFloat = 240
     static let settingsWidth: CGFloat = 520
     static let settingsHeight: CGFloat = 480

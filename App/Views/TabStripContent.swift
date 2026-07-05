@@ -9,6 +9,7 @@ struct TabStripContent: View {
 
     var body: some View {
         HStack(spacing: 0) {
+            RoutingIndicator()
             Spacer()
             ModelPickerButton(tabManager: tabManager, chatManager: chatManager)
             FlowModePicker(tabManager: tabManager, chatManager: chatManager)
@@ -17,6 +18,32 @@ struct TabStripContent: View {
         }
         .padding(.horizontal, Spacing.xs)
         .padding(.top, Spacing.xxs)
+    }
+}
+
+// MARK: - RoutingIndicator
+
+struct RoutingIndicator: View {
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
+
+    var body: some View {
+        Button {
+            appState.rightDockActivePanel = .costDashboard
+            appState.rightDockVisible = true
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "chart.pie")
+                    .font(.system(size: IconSize.inlineSmall))
+                Text("自动")
+                    .font(FontStyle.caption)
+            }
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 3)
+            .background(Color.green.opacity(0.08))
+            .cornerRadius(CornerRadius.sm)
+        }
+        .buttonStyle(.plain)
+        .help("自动路由 — 点击查看成本仪表盘")
     }
 }
 

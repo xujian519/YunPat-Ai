@@ -12,6 +12,8 @@ public enum LeftDockPanel: String, CaseIterable, Codable {
 public enum RightDockPanel: String, CaseIterable, Codable {
     case collaboration
     case caseGraph
+    case costDashboard
+    case memoryAudit
 }
 
 /// Combine 响应式状态管理中心
