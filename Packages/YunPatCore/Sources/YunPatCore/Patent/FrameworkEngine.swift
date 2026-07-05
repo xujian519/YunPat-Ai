@@ -110,11 +110,13 @@ public actor FrameworkEngine {
         promptExecutor = executor
     }
 
-    /// Three hardcoded frameworks for MVP.
+    /// Five built-in frameworks covering the main patent practice workflows.
     public static let builtinFrameworks: [ArticleFramework] = [
         makePatentLaw22_2(),
         makePatentLaw22_3(),
-        makePatentLaw26_4()
+        makePatentLaw26_4(),
+        makeClaimDrafting(),
+        makeOAResponse()
     ]
 
     // MARK: - Framework 1: 新颖性 (Article 22.2)
@@ -222,17 +224,83 @@ public actor FrameworkEngine {
         )
     }
 
+    // MARK: - Framework 4: 权利要求撰写
+
+    private static func makeClaimDrafting() -> ArticleFramework {
+        ArticleFramework(
+            articleId: "claimDrafting",
+            name: "权利要求撰写流程",
+            lawRef: "专利法第26条第4款",
+            guidelineRef: "审查指南第二部分第二章",
+            steps: [
+                ArticleStepDefinition(
+                    id: "draft_step1",
+                    order: 1,
+                    name: "理解发明核心",
+                    ruleRef: "审查指南第二部分第二章2.1",
+                    inputHint: "从交底书中提炼技术问题、技术方案和技术效果三要素"
+                ),
+                ArticleStepDefinition(
+                    id: "draft_step2",
+                    order: 2,
+                    name: "撰写独立权利要求",
+                    ruleRef: "审查指南第二部分第二章3.1",
+                    inputHint: "划分前序部分和特征部分，确保保护范围合理且得到说明书支持"
+                ),
+                ArticleStepDefinition(
+                    id: "draft_step3",
+                    order: 3,
+                    name: "撰写从属权利要求",
+                    ruleRef: "审查指南第二部分第二章3.2",
+                    inputHint: "围绕独立权利要求增加附加技术特征，构建多层保护体系"
+                ),
+                ArticleStepDefinition(
+                    id: "draft_step4",
+                    order: 4,
+                    name: "合规性自检",
+                    ruleRef: "专利法26.4/22.2",
+                    inputHint: "检查清楚性、支持性、新颖性预估，排除禁止表述"
+                )
+            ],
+            applicableTo: [.drafting, .patentability]
+        )
+    }
+
     // MARK: - Loading
 
-    /// Load frameworks from a directory path. For MVP, this returns the
-    /// in-memory cache of built-in frameworks regardless of the directory.
-    /// Future: parse YAML framework definitions from disk.
+    /// Load frameworks from a directory path.
+    ///
+    /// Scans for `.json` files in the given directory and decodes them as
+    /// `ArticleFramework` definitions. Files that fail to decode are skipped
+    /// with a warning. Built-in frameworks are always available as a baseline.
     public func loadFromDirectory(dirPath: String) -> [String: ArticleFramework] {
         if frameworks.isEmpty {
             for framework in FrameworkEngine.builtinFrameworks {
                 frameworks[framework.articleId] = framework
             }
         }
+
+        let dirURL: URL = URL(fileURLWithPath: dirPath)
+        let fileManager: FileManager = FileManager.default
+        guard let enumerator: FileManager.DirectoryEnumerator = fileManager.enumerator(
+            at: dirURL,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return frameworks
+        }
+
+        let decoder: JSONDecoder = JSONDecoder()
+        for case let fileURL as URL in enumerator where fileURL.pathExtension == "json" {
+            guard let data: Data = try? Data(contentsOf: fileURL) else { continue }
+            do {
+                let framework: ArticleFramework = try decoder.decode(ArticleFramework.self, from: data)
+                frameworks[framework.articleId] = framework
+            } catch {
+                print("[FrameworkEngine] Failed to decode \(fileURL.lastPathComponent): \(error)")
+            }
+        }
+
         return frameworks
     }
 
@@ -322,6 +390,51 @@ public actor FrameworkEngine {
             - 事实与法律的对应分析
             - 该步骤的初步结论
             """
+    }
+}
+
+// MARK: - OA Response Framework
+
+extension FrameworkEngine {
+
+    private static func makeOAResponse() -> ArticleFramework {
+        ArticleFramework(
+            articleId: "oaResponse",
+            name: "审查意见答复流程",
+            lawRef: "专利法第22条第3款",
+            guidelineRef: "审查指南第二部分第四章/第八章",
+            steps: [
+                ArticleStepDefinition(
+                    id: "oa_step1",
+                    order: 1,
+                    name: "解析审查意见",
+                    ruleRef: "审查指南第二部分第八章",
+                    inputHint: "提取审查员引用的对比文件、法条依据和审查结论"
+                ),
+                ArticleStepDefinition(
+                    id: "oa_step2",
+                    order: 2,
+                    name: "区别特征分析",
+                    ruleRef: "审查指南第二部分第四章3.2.1",
+                    inputHint: "确认申请与对比文件的区别技术特征，重新确定实际解决的技术问题"
+                ),
+                ArticleStepDefinition(
+                    id: "oa_step3",
+                    order: 3,
+                    name: "意见陈述撰写",
+                    ruleRef: "审查指南第二部分第四章3.2.2",
+                    inputHint: "基于区别特征和非显而易见性论据，撰写创造性争辩意见"
+                ),
+                ArticleStepDefinition(
+                    id: "oa_step4",
+                    order: 4,
+                    name: "修改方案建议",
+                    ruleRef: "专利法33",
+                    inputHint: "提出权利要求修改方案（如有必要），确保不超范围且克服驳回理由"
+                )
+            ],
+            applicableTo: [.oaResponse, .rejectionResponse]
+        )
     }
 }
 

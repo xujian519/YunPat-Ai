@@ -137,8 +137,10 @@ public actor RuleEngine {
     /// 收集所有 wiki 页面标题作为语义搜索候选集
     private func reRankByAuthority(_ candidates: [RuleCandidate], query: String) async -> [RuleCandidate] {
         guard !candidates.isEmpty else { return [] }
-        let ranked: [RankedResult] = candidates.enumerated().map { (i, c) in
-            RankedResult(documentId: c.wikilink, content: c.content, source: .hybrid, score: c.score, rank: i + 1)
+        let ranked: [RankedResult] = candidates.enumerated().map { (index, cand) in
+            RankedResult(
+                documentId: cand.wikilink, content: cand.content,
+                source: .hybrid, score: cand.score, rank: index + 1)
         }
         let reRanked: [RankedResult] = await authorityScorer.reRank(results: ranked)
         let order: [String: Int] = Dictionary(

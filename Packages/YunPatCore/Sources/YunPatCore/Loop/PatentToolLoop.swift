@@ -301,6 +301,8 @@ public actor PatentToolLoop {
     private var stuckGuard: StuckGuard = StuckGuard()
     private var loopGuard: LoopGuard = LoopGuard()
     private var consecutiveReads: Int = 0
+    /// 当前会话的工具交互历史（assistant 工具调用 + tool 结果），跨迭代轮次累积
+    private var toolConversation: [Message] = []
 
     public init() {}
 
@@ -332,6 +334,7 @@ public actor PatentToolLoop {
         ]
 
         taskState.beginMessage()
+        toolConversation.removeAll()
         let budget: ContextBudget = ContextBudget(capabilities: provider.defaultCapabilities)
 
         while iteration < policy.maxIterations {
@@ -364,6 +367,9 @@ public actor PatentToolLoop {
                 messages.append(Message(role: .system, content: notice))
             }
 
+            // 追加工具交互历史（跨迭代轮次累积，供 LLM 看到上一轮工具结果）
+            messages.append(contentsOf: toolConversation)
+
             // 3. Compact history if needed
             let compacted: CompactResult = compactionWatermark.compact(
                 messages: messages, request: ChatRequest(model: "", messages: messages),
@@ -386,16 +392,17 @@ public actor PatentToolLoop {
                 do {
                     let stream: AsyncThrowingStream<ModelStepChunk, Error> = try await modelStream(messages, tools)
                     var fullText: String = ""
+                    var hadToolCalls: Bool = false
                     for try await chunk in stream {
                         switch chunk {
                         case .textDelta(let text):
                             fullText += text
                             await hooks.onStreamChunk?(text)
-                        case .done(let text):
-                            let finalText: String = fullText.isEmpty ? text : fullText
-                            return .finalResponse(finalText.isEmpty ? text : finalText)
+                        case .done:
+                            if hadToolCalls { break }
+                            return .finalResponse(fullText.isEmpty ? "No response" : fullText)
                         case .toolCall(let call):
-                            // 工具调用走批处理
+                            hadToolCalls = true
                             let ctx: ToolContext = ToolContext(
                                 toolId: call.id, projectFolder: "",
                                 selectedProvider: provider
@@ -425,8 +432,15 @@ public actor PatentToolLoop {
                                     }
                                 )
                             taskState = updatedState
+                            // 追加 assistant 工具调用 + tool 结果到交互历史
+                            toolConversation.append(Message(role: .assistant, content: fullText))
                             for (index, callItem) in [call].enumerated() {
-                                guard index < results.count, !results[index].isError else { continue }
+                                guard index < results.count else { continue }
+                                toolConversation.append(Message(
+                                    role: .tool, content: results[index].content,
+                                    toolCallID: callItem.id, name: callItem.name
+                                ))
+                                guard !results[index].isError else { continue }
                                 if callItem.name == "complete" || callItem.name == "task_complete" {
                                     return .endedBySurface(
                                         EndedBySurface(kind: .complete, summary: results[index].content)
@@ -444,6 +458,10 @@ public actor PatentToolLoop {
                         case .error(let error):
                             return .finalResponse("Error: \(error)")
                         }
+                    }
+                    if hadToolCalls {
+                        taskState.beginMessage()
+                        continue
                     }
                     return .finalResponse(fullText.isEmpty ? "No response" : fullText)
                 } catch {
@@ -494,6 +512,16 @@ public actor PatentToolLoop {
                     }
                 )
                 taskState = updatedState
+
+                // 追加 assistant 工具调用 + tool 结果到交互历史
+                toolConversation.append(Message(role: .assistant, content: ""))
+                for (index, call) in calls.enumerated() {
+                    guard index < results.count else { continue }
+                    toolConversation.append(Message(
+                        role: .tool, content: results[index].content,
+                        toolCallID: call.id, name: call.name
+                    ))
+                }
 
                 // 6. Check intercept in results (simplified — executor already handled)
                 for (index, call) in calls.enumerated() {

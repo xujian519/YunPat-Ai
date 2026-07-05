@@ -141,37 +141,19 @@ public actor AgentLoopEngine: LoopEngine {
                 all.append(Message(role: .user, content: request.content))
                 return all
             },
-            modelStream: { [modelRouter, provider, model] messages, _ in
-                let chatReq: ChatRequest = ChatRequest(model: model, messages: messages)
+            modelStream: { [modelRouter, provider, model] messages, toolSpecs in
+                let toolDefs: [ChatToolDefinition] = toolSpecs.map {
+                    ChatToolDefinition(name: $0.name, description: $0.description, parameters: $0.parameters)
+                }
+                let chatReq: ChatRequest = ChatRequest(
+                    model: model, messages: messages,
+                    tools: toolDefs.isEmpty ? nil : toolDefs
+                )
                 let rawStream: AsyncThrowingStream<ChatChunk, Error> =
                     try await modelRouter
                     .chat(chatReq, provider: provider)
                 return AsyncThrowingStream { continuation in
-                    Task {
-                        do {
-                            var accumulated: String = ""
-                            for try await chunk in rawStream {
-                                switch chunk {
-                                case .text(let text):
-                                    accumulated += text
-                                    continuation.yield(.textDelta(text))
-                                case .finish:
-                                    continuation.yield(.done(accumulated))
-                                    continuation.finish()
-                                    return
-                                case .error(let error):
-                                    continuation.yield(.error(error.localizedDescription))
-                                    continuation.finish()
-                                    return
-                                default:
-                                    break
-                                }
-                            }
-                            continuation.finish()
-                        } catch {
-                            continuation.finish(throwing: error)
-                        }
-                    }
+                    Self.processStream(rawStream: rawStream, into: continuation)
                 }
             },
             executeTool: { [provider] call in
@@ -194,6 +176,86 @@ public actor AgentLoopEngine: LoopEngine {
             },
             onStreamChunk: onStreamChunk
         )
+    }
+
+    /// 解析 LLM 返回的工具调用 JSON 参数为 [String: String] 字典
+    private static func parseToolArgs(_ json: String) -> [String: String] {
+        guard let data: Data = json.data(using: .utf8),
+              let dict: [String: Any] = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return [:] }
+        return dict.reduce(into: [String: String]()) { result, entry in
+            if let str: String = entry.value as? String {
+                result[entry.key] = str
+            } else if let num: NSNumber = entry.value as? NSNumber {
+                result[entry.key] = num.stringValue
+            } else if let data: Data = try? JSONSerialization.data(withJSONObject: entry.value),
+                      let str: String = String(data: data, encoding: .utf8) {
+                result[entry.key] = str
+            }
+        }
+    }
+
+    /// 将 ChatChunk 流转换为 ModelStepChunk 流，处理工具调用累积
+    private static func processStream(
+        rawStream: AsyncThrowingStream<ChatChunk, Error>,
+        into continuation: AsyncThrowingStream<ModelStepChunk, Error>.Continuation
+    ) {
+        Task {
+            do {
+                var accumulated: String = ""
+                var deltaArgs: [String: String] = [:]
+                var deltaNames: [String: String] = [:]
+                var deltaOrder: [String] = []
+                var hasToolCalls: Bool = false
+                for try await chunk in rawStream {
+                    switch chunk {
+                    case .text(let text):
+                        accumulated += text
+                        continuation.yield(.textDelta(text))
+                    case .toolCall(let id, let name, let arguments):
+                        hasToolCalls = true
+                        if !deltaOrder.contains(id) { deltaOrder.append(id) }
+                        deltaNames[id] = name
+                        deltaArgs[id] = arguments
+                    case .toolCallDelta(let id, let arguments):
+                        hasToolCalls = true
+                        if !deltaOrder.contains(id) { deltaOrder.append(id) }
+                        deltaArgs[id, default: ""] += arguments
+                    case .finish(let reason, _):
+                        flushToolCalls(deltaOrder, deltaNames, deltaArgs, into: continuation)
+                        if !hasToolCalls && reason != .toolCalls {
+                            continuation.yield(.done(accumulated))
+                        }
+                        continuation.finish()
+                        return
+                    case .error(let error):
+                        continuation.yield(.error(error.localizedDescription))
+                        continuation.finish()
+                        return
+                    }
+                }
+                flushToolCalls(deltaOrder, deltaNames, deltaArgs, into: continuation)
+                if !hasToolCalls {
+                    continuation.yield(.done(accumulated))
+                }
+                continuation.finish()
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        }
+    }
+
+    private static func flushToolCalls(
+        _ order: [String],
+        _ names: [String: String],
+        _ args: [String: String],
+        into continuation: AsyncThrowingStream<ModelStepChunk, Error>.Continuation
+    ) {
+        for id in order {
+            let name: String = names[id] ?? "unknown"
+            let parsed: [String: String] = parseToolArgs(args[id] ?? "{}")
+            continuation.yield(.toolCall(ToolCall(id: id, name: name, arguments: parsed)))
+        }
     }
 }
 

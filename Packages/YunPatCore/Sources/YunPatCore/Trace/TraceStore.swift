@@ -21,10 +21,10 @@ public final class TraceStore: @unchecked Sendable {
                     "error": cap.error ?? NSNull()
                 ] as [String: Any]
             },
-            "prompts": prompts.map { pt in
+            "prompts": prompts.map { prompt in
                 [
-                    "systemPromptHash": pt.systemPromptHash, "cost": pt.cost, "latency": pt.latency,
-                    "model": pt.model
+                    "systemPromptHash": prompt.systemPromptHash, "cost": prompt.cost, "latency": prompt.latency,
+                    "model": prompt.model
                 ] as [String: Any]
             },
             "summary": [

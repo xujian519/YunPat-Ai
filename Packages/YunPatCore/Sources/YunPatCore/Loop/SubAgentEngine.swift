@@ -113,7 +113,7 @@ public actor SubAgentEngine {
     ///
     /// - Parameter timeout: 超时秒数，默认 120
     /// - Returns: 所有非运行态子代理
-    public func waitAll(timeout: TimeInterval = 120) async -> [SubAgent] {
+    public func waitAllRaw(timeout: TimeInterval = 120) async -> [SubAgent] {
         guard activeCount > 0 else { return agents.filter { $0.status != .running } }
 
         let stream = notificationStream()
@@ -349,5 +349,52 @@ public final class SubAgent: Identifiable, @unchecked Sendable {
 
     private func trim(_ str: String, cap: Int) -> String {
         str.count <= cap ? str : String(str.prefix(cap)) + "..."
+    }
+}
+
+// MARK: - AgentScheduler Conformance
+
+extension SubAgentEngine: AgentScheduler {
+
+    @discardableResult
+    public func spawn(params: SpawnParams) async -> String {
+        await spawn(
+            name: params.name,
+            prompt: params.prompt,
+            projectFolder: params.projectFolder,
+            maxIterations: params.maxIterations,
+            toolGroupIDs: params.toolGroupIDs,
+            modelRouter: params.modelRouter,
+            provider: params.provider
+        )
+    }
+
+    public func waitAll(timeout: TimeInterval) async -> [SubAgentSummary] {
+        let completed: [SubAgent] = await waitAllRaw(timeout: timeout)
+        return completed.map { agent in
+            SubAgentSummary(
+                id: agent.id.uuidString,
+                name: agent.name,
+                status: agent.status.rawValue,
+                resultSummary: agent.result,
+                durationMs: Int(agent.duration * 1000)
+            )
+        }
+    }
+
+    public func cancelAll() async {
+        reset()
+    }
+
+    public func collectSummaries() async -> [SubAgentSummary] {
+        agents.map { agent in
+            SubAgentSummary(
+                id: agent.id.uuidString,
+                name: agent.name,
+                status: agent.status.rawValue,
+                resultSummary: agent.result,
+                durationMs: Int(agent.duration * 1000)
+            )
+        }
     }
 }

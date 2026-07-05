@@ -36,7 +36,7 @@ public final class LegacySemanticIndex: @unchecked Sendable {
 
     private func openDatabase() {
         var handle: OpaquePointer?
-        let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX
+        let flags: Int32 = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX
         guard sqlite3_open_v2(dbPath.path, &handle, flags, nil) == SQLITE_OK,
               let handle else {
             isAvailable = false
@@ -51,7 +51,7 @@ public final class LegacySemanticIndex: @unchecked Sendable {
     private func checkSchema() {
         guard let db else { isAvailable = false; return }
         var stmt: OpaquePointer?
-        let sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='chunks'"
+        let sql: String = "SELECT name FROM sqlite_master WHERE type='table' AND name='chunks'"
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK,
               sqlite3_step(stmt) == SQLITE_ROW else {
             sqlite3_finalize(stmt)
@@ -125,6 +125,7 @@ public final class LegacySemanticIndex: @unchecked Sendable {
 
 extension LegacySemanticIndex: SemanticIndex {
 
+    // swiftlint:disable:next function_body_length
     public func search(
         queryEmbedding: [Float],
         topK: Int,
@@ -141,7 +142,7 @@ extension LegacySemanticIndex: SemanticIndex {
         queryNorm = sqrt(queryNorm)
         guard queryNorm > 0 else { return [] }
 
-        let sql = """
+        let sql: String = """
             SELECT chunk_id, file_path, title, content, chunk_index, embedding, embedding_dim
             FROM chunks
             ORDER BY chunk_index
@@ -177,13 +178,13 @@ extension LegacySemanticIndex: SemanticIndex {
             let vecNorm = sqrt(normSq)
             guard vecNorm > 0 else { continue }
 
-            let score = dot / (queryNorm * vecNorm)
+            let score: Float = dot / (queryNorm * vecNorm)
             guard score >= minScore else { continue }
 
             let candidateModule = inferModule(from: filePath)
 
             if let filter {
-                if let modules = filter.modules, let m = candidateModule, !modules.contains(m) { continue }
+                if let modules = filter.modules, let mod = candidateModule, !modules.contains(mod) { continue }
                 if let docTypes = filter.docTypes, !docTypes.contains(inferDocType(from: filePath)) { continue }
             }
 
@@ -244,9 +245,9 @@ private struct MinHeap<T: Sendable> {
     }
 
     mutating func siftUp(from index: Int) {
-        var child = index
+        var child: Int = index
         while child > 0 {
-            let parent = (child - 1) / 2
+            let parent: Int = (child - 1) / 2
             if elements[child].score >= elements[parent].score { break }
             elements.swapAt(child, parent)
             child = parent
@@ -254,12 +255,12 @@ private struct MinHeap<T: Sendable> {
     }
 
     mutating func siftDown(from index: Int) {
-        var parent = index
-        let count = elements.count
+        var parent: Int = index
+        let count: Int = elements.count
         while true {
-            let left = 2 * parent + 1
-            let right = 2 * parent + 2
-            var smallest = parent
+            let left: Int = 2 * parent + 1
+            let right: Int = 2 * parent + 2
+            var smallest: Int = parent
             if left < count, elements[left].score < elements[smallest].score { smallest = left }
             if right < count, elements[right].score < elements[smallest].score { smallest = right }
             if smallest == parent { break }

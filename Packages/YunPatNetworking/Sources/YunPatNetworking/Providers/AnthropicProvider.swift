@@ -123,6 +123,20 @@ public final class AnthropicProvider: ModelBackend {
             body["system"] = systemPrompt
         }
         if let temp = request.temperature { body["temperature"] = temp }
+        if let tools = request.tools, !tools.isEmpty {
+            body["tools"] = tools.map { tool in
+                var schema: Any = ["type": "object", "properties": [:]]
+                if let data = tool.parameters.data(using: .utf8),
+                   let parsed = try? JSONSerialization.jsonObject(with: data) {
+                    schema = parsed
+                }
+                return [
+                    "name": tool.name,
+                    "description": tool.description,
+                    "input_schema": schema
+                ] as [String: Any]
+            }
+        }
 
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
         return urlRequest

@@ -29,11 +29,19 @@ public struct SearchResult: Sendable {
     }
 }
 
-/// 多源检索协调器 — 本地知识库 + 外部检索 URL 生成
+/// 多源检索协调器 — 本地知识库 + 外部检索（真实 HTTP + URL 生成回退）
 public actor SearchCommander {
     private let wikiAdapter: WikiAdapter
+    private var remoteSearchHandler: (@Sendable (String, SearchSource) async -> [SearchResult])?
 
     public init(wikiAdapter: WikiAdapter) { self.wikiAdapter = wikiAdapter }
+
+    /// 注入远程检索处理器 — App 层可用 PatentClient 接入真实 HTTP 检索
+    public func configureRemoteSearch(
+        _ handler: @Sendable @escaping (String, SearchSource) async -> [SearchResult]
+    ) {
+        remoteSearchHandler = handler
+    }
 
     /// 按优先级从多个源检索并合并
     public func search(
@@ -53,11 +61,17 @@ public actor SearchCommander {
     // MARK: - Source Dispatch
 
     private func searchSource(_ source: SearchSource, query: String) async -> [SearchResult] {
+        if let handler = remoteSearchHandler {
+            let remoteResults: [SearchResult] = await handler(query, source)
+            if !remoteResults.isEmpty { return remoteResults }
+        }
+
         switch source {
         case .localKB:
             return await searchLocalKB(query: query)
         case .googlePatents:
-            return buildGooglePatentsResults(query: query)
+            let httpResults: [SearchResult] = await searchGooglePatentsHTTP(query: query)
+            return httpResults.isEmpty ? buildGooglePatentsResults(query: query) : httpResults
         case .cnipa:
             return buildCNIPAResults(query: query)
         case .espacenet:
@@ -86,6 +100,81 @@ public actor SearchCommander {
             ]
         }
         return []
+    }
+
+    // MARK: - Google Patents HTTP (XHR API)
+
+    /// 通过 Google Patents XHR API 执行真实检索
+    private func searchGooglePatentsHTTP(query: String) async -> [SearchResult] {
+        let patentNumbers: [String] = extractPatentNumbers(from: query)
+        if !patentNumbers.isEmpty {
+            return patentNumbers.map { patentNum in
+                SearchResult(
+                    source: .googlePatents,
+                    patentNumber: patentNum,
+                    title: "Google Patents: \(patentNum)",
+                    relevanceScore: 1.0,
+                    metadata: [
+                        "url": "https://patents.google.com/patent/\(patentNum)/en",
+                        "type": "direct"
+                    ]
+                )
+            }
+        }
+
+        let encodedQuery: String = encodeQuery(query)
+        let apiURLString: String =
+            "https://patents.google.com/xhr/query?url=q%3D\(encodedQuery)%26num%3D10&exp="
+        guard let url: URL = URL(string: apiURLString) else { return [] }
+
+        var request: URLRequest = URLRequest(url: url, timeoutInterval: 15)
+        request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", forHTTPHeaderField: "User-Agent")
+        request.setValue("https://patents.google.com", forHTTPHeaderField: "Origin")
+
+        do {
+            let (data, response): (Data, URLResponse) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return [] }
+            return parseGooglePatentsXHR(data: data)
+        } catch {
+            print("[SearchCommander] Google Patents HTTP failed: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    /// 解析 Google Patents XHR JSON 响应，提取专利号、标题和摘要
+    private func parseGooglePatentsXHR(data: Data) -> [SearchResult] {
+        guard let json: Any = try? JSONSerialization.jsonObject(with: data),
+              let root = json as? [String: Any],
+              let cluster = root["results_cluster"] as? [String: Any] else { return [] }
+
+        var results: [SearchResult] = []
+
+        if let resultsArray = cluster["result"] as? [[String: Any]] {
+            for (idx, item) in resultsArray.prefix(10).enumerated() {
+                guard let patent = item["patent"] as? [String: Any] else { continue }
+                let publicationNumber: String = (patent["publication_number"] as? String) ?? "unknown"
+                let title: String = (patent["title"] as? [String: Any])?["en"] as? String
+                    ?? (patent["snippet"] as? String)?.prefix(80).description
+                    ?? publicationNumber
+                let snippet: String = (patent["snippet"] as? String) ?? ""
+
+                results.append(
+                    SearchResult(
+                        source: .googlePatents,
+                        patentNumber: publicationNumber,
+                        title: title,
+                        relevanceScore: max(0.9 - Double(idx) * 0.08, 0.3),
+                        metadata: [
+                            "url": "https://patents.google.com/patent/\(publicationNumber)/en",
+                            "snippet": String(snippet.prefix(200)),
+                            "type": "remote"
+                        ]
+                    )
+                )
+            }
+        }
+
+        return results
     }
 
     // MARK: - Google Patents URL Builder
@@ -230,6 +319,11 @@ public actor SearchCommander {
     private func encodeQuery(_ query: String) -> String {
         query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
     }
+}
+
+// MARK: - Pure Helpers
+
+extension SearchCommander {
 
     /// 从查询文本中提取专利号（支持 CN/US/EP/WO + 数字格式）
     private func extractPatentNumbers(from text: String) -> [String] {

@@ -1,6 +1,6 @@
+import PatentClient
 import SwiftUI
 import WebKit
-import PatentClient
 
 /// 内嵌专利浏览器 — Google Patents / CNIPA / Espacenet / WIPO / USPTO 直达
 struct PatentBrowser: View {
@@ -65,7 +65,7 @@ struct PatentBrowser: View {
                 Button(action: {
                     selectedPreset = index
                     urlString = preset.url
-                }) {
+                }, label: {
                     HStack(spacing: 3) {
                         Image(systemName: preset.icon).font(FontStyle.caption2)
                         Text(preset.name).font(FontStyle.caption)
@@ -73,7 +73,7 @@ struct PatentBrowser: View {
                     .padding(.horizontal, 6).padding(.vertical, 3)
                     .background(selectedPreset == index ? Color.accentColor.opacity(0.15) : Color.clear)
                     .cornerRadius(4)
-                }
+                })
                 .buttonStyle(.plain)
                 .accessibilityLabel("跳转至 \(preset.name)")
             }
@@ -84,15 +84,15 @@ struct PatentBrowser: View {
 
     private var navigationBar: some View {
         HStack(spacing: 4) {
-            Button(action: { postNavigationAction(.goBack) }) {
+            Button(action: { postNavigationAction(.goBack) }, label: {
                 Image(systemName: "chevron.left").font(.caption)
-            }
+            })
             .buttonStyle(.plain).disabled(!canGoBack)
             .accessibilityLabel("后退")
 
-            Button(action: { postNavigationAction(.goForward) }) {
+            Button(action: { postNavigationAction(.goForward) }, label: {
                 Image(systemName: "chevron.right").font(.caption)
-            }
+            })
             .buttonStyle(.plain).disabled(!canGoForward)
             .accessibilityLabel("前进")
 
@@ -101,9 +101,9 @@ struct PatentBrowser: View {
                 .onSubmit { postNavigationAction(.navigate) }
                 .accessibilityLabel("网址输入")
 
-            Button(action: { postNavigationAction(.refresh) }) {
+            Button(action: { postNavigationAction(.refresh) }, label: {
                 Image(systemName: "arrow.clockwise").font(.caption)
-            }
+            })
             .buttonStyle(.plain).disabled(isLoading)
             .accessibilityLabel("刷新")
 
@@ -147,12 +147,13 @@ struct PatentBrowser: View {
     }
 
     private func extractPatentNumber(from url: String) -> String? {
+        // swiftlint:disable:next large_tuple
         let patterns: [(pattern: String, group: Int, transform: (String) -> String)] = [
             ( #"patents\.google\.com/patent/([^/?]+)"#, 1, { $0 }),
             ( #"patents\.google\.com/patent/([^/?]+)/"#, 1, { $0 }),
             ( #"patentscope\.wipo\.int/search/.*WO=([^&]+)"#, 1, { $0 }),
             ( #"patentscope\.wipo\.int/search/.*number=([^&]+)"#, 1, { $0 }),
-            ( #"worldwide\.espacenet\.com/.*publication=([^&]+)"#, 1, { $0 }),
+            ( #"worldwide\.espacenet\.com/.*publication=([^&]+)"#, 1, { $0 })
         ]
         for (pattern, group, transform) in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]),
@@ -202,6 +203,10 @@ struct WebViewRepresentable: NSViewRepresentable {
         var parent: WebViewRepresentable
         weak var webView: WKWebView?
         nonisolated(unsafe) private var observer: NSObjectProtocol?
+        private var urlObservation: NSKeyValueObservation?
+        private var loadingObservation: NSKeyValueObservation?
+        private var backObservation: NSKeyValueObservation?
+        private var forwardObservation: NSKeyValueObservation?
 
         init(parent: WebViewRepresentable) {
             self.parent = parent
@@ -219,29 +224,29 @@ struct WebViewRepresentable: NSViewRepresentable {
         }
 
         func observeNavigation() {
-            webView?.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
-            webView?.addObserver(self, forKeyPath: #keyPath(WKWebView.isLoading), options: .new, context: nil)
-            webView?.addObserver(self, forKeyPath: #keyPath(WKWebView.canGoBack), options: .new, context: nil)
-            webView?.addObserver(self, forKeyPath: #keyPath(WKWebView.canGoForward), options: .new, context: nil)
-        }
-
-        override func observeValue(forKeyPath keyPath: String?, of object: Any?,
-                                    change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-            Task { @MainActor in
-                guard let webView = self.webView else { return }
-                switch keyPath {
-                case #keyPath(WKWebView.url):
-                    if let currentURL = webView.url?.absoluteString, currentURL != parent.urlString {
-                        parent.urlString = currentURL
-                    }
-                case #keyPath(WKWebView.isLoading):
+            urlObservation = webView?.observe(\.url, options: .new) { [weak self] webView, _ in
+                Task { @MainActor [weak self] in
+                    guard let self, let currentURL = webView.url?.absoluteString,
+                          currentURL != parent.urlString else { return }
+                    parent.urlString = currentURL
+                }
+            }
+            loadingObservation = webView?.observe(\.isLoading, options: .new) { [weak self] webView, _ in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
                     parent.isLoading = webView.isLoading
-                case #keyPath(WKWebView.canGoBack):
+                }
+            }
+            backObservation = webView?.observe(\.canGoBack, options: .new) { [weak self] webView, _ in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
                     parent.canGoBack = webView.canGoBack
-                case #keyPath(WKWebView.canGoForward):
+                }
+            }
+            forwardObservation = webView?.observe(\.canGoForward, options: .new) { [weak self] webView, _ in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
                     parent.canGoForward = webView.canGoForward
-                default:
-                    break
                 }
             }
         }

@@ -4,7 +4,7 @@ import YunPatCore
 import YunPatNetworking
 
 @MainActor
-final class ChatManager: ObservableObject {
+final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_length
     @Published var inputText: String = ""
     @Published var isStreaming: Bool = false
     @Published var clarifying: Bool = false
@@ -202,7 +202,7 @@ final class ChatManager: ObservableObject {
             await handleLoopResult(result, activeID: tab.id, in: tabManager, streamed: true)
         case .fullAgent:
             let history: [Message] = tabManager.tabs[idx].sessionMemory.messages
-            let engine = await getPatentLoopEngine()
+            let engine: PatentLoopEngine = await getPatentLoopEngine()
             let result: LoopResult = try await engine.run(
                 request: UserRequest(content: sentText),
                 flow: .fullAgent,

@@ -341,6 +341,68 @@ public actor PatentLoopEngine: LoopEngine {
         return String(format: "%016lx", hasher.finalize())
     }
 
+    /// 解析 LLM 返回的工具调用 JSON 参数为 [String: String] 字典
+    private static func parseToolArgs(_ json: String) -> [String: String] {
+        guard let data: Data = json.data(using: .utf8),
+              let dict: [String: Any] = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return [:] }
+        return dict.reduce(into: [String: String]()) { result, entry in
+            if let str: String = entry.value as? String {
+                result[entry.key] = str
+            } else if let num: NSNumber = entry.value as? NSNumber {
+                result[entry.key] = num.stringValue
+            } else if let data: Data = try? JSONSerialization.data(withJSONObject: entry.value),
+                      let str: String = String(data: data, encoding: .utf8) {
+                result[entry.key] = str
+            }
+        }
+    }
+
+    /// 从 ChatChunk 流中收集文本和工具调用，返回 ModelStepResult
+    private static func collectModelStep(
+        from stream: AsyncThrowingStream<ChatChunk, Error>
+    ) async -> ModelStepResult {
+        var full: String = ""
+        var deltaArgs: [String: String] = [:]
+        var deltaNames: [String: String] = [:]
+        var deltaOrder: [String] = []
+        var hasToolCalls: Bool = false
+        do {
+            for try await chunk in stream {
+            switch chunk {
+            case .text(let text):
+                full += text
+            case .toolCall(let id, let name, let arguments):
+                hasToolCalls = true
+                if !deltaOrder.contains(id) { deltaOrder.append(id) }
+                deltaNames[id] = name
+                deltaArgs[id] = arguments
+            case .toolCallDelta(let id, let arguments):
+                hasToolCalls = true
+                if !deltaOrder.contains(id) { deltaOrder.append(id) }
+                deltaArgs[id, default: ""] += arguments
+            case .error(let error):
+                return .error(error.localizedDescription)
+            default:
+                break
+            }
+        }
+        } catch {
+            return .error(error.localizedDescription)
+        }
+        if hasToolCalls {
+            let calls: [ToolCall] = deltaOrder.map { id in
+                ToolCall(
+                    id: id,
+                    name: deltaNames[id] ?? "unknown",
+                    arguments: parseToolArgs(deltaArgs[id] ?? "{}")
+                )
+            }
+            return .toolCalls(calls)
+        }
+        return .textResponse(full)
+    }
+
     // MARK: - Framework & Strategy Integration
 
     /// 运行法律框架分析 — 按案件类型选择适用法条框架，逐步执行法律推理
@@ -370,6 +432,8 @@ public actor PatentLoopEngine: LoopEngine {
     }
 
     /// 运行结构化推理策略 — 将事实和规则通过策略引擎结构化
+    ///
+    /// 流程：写入事实 → ReasoningWalker 图谱步行 → 写入推理链 → 策略选择与执行
     private func runReasoningStrategy(
         facts: StructuredFacts, rules: ApplicableRules
     ) async -> String {
@@ -380,7 +444,19 @@ public actor PatentLoopEngine: LoopEngine {
             inventionPoints: facts.inventionPoints,
             missingInfo: facts.missingInfo
         )
-        let strategyName: String = facts.inventionPoints.isEmpty ? "react" : "six_step"
+
+        let kgReport: String = await runKnowledgeGraphWalk(facts: facts, blackboard: blackboard)
+        let hasKGChains: Bool = !(await blackboard.reasoningChains).isEmpty
+
+        let strategyName: String
+        if hasKGChains {
+            strategyName = "kg_reasoning"
+        } else if facts.inventionPoints.isEmpty {
+            strategyName = "react"
+        } else {
+            strategyName = "six_step"
+        }
+
         guard let strategy: any ReasoningStrategy = await strategyRegistry.strategy(named: strategyName)
         else { return "" }
         let context: ReasoningContext = ReasoningContext(
@@ -399,7 +475,58 @@ public actor PatentLoopEngine: LoopEngine {
             print("[PatentLoopEngine] Reasoning strategy returned nil")
             return ""
         }
-        return String(output.result.prefix(1500))
+
+        var result: String = String(output.result.prefix(1200))
+        if !kgReport.isEmpty {
+            result += "\n\n### 知识图谱覆盖分析\n\(kgReport)"
+        }
+        return result
+    }
+
+    /// 运行知识图谱步行推理 — 从事实出发在 PatentLawKG 上 BFS 构建推理链
+    ///
+    /// 将 WalkChain 结果转换为 ReasoningChain 写入 blackboard，
+    /// 并返回覆盖分析报告供 plan 注入。
+    private func runKnowledgeGraphWalk(
+        facts: StructuredFacts, blackboard: FactBlackboard
+    ) async -> String {
+        let walker: ReasoningWalker = ReasoningWalker()
+        let walkFacts: [String] = [facts.technicalField, facts.problem] + facts.inventionPoints
+        let walkInput: ReasoningWalkInput = ReasoningWalkInput(
+            facts: walkFacts, caseType: .patentability, maxDepth: 3, maxChains: 5
+        )
+        let walkResult: ReasoningWalkResult = await walker.walk(input: walkInput)
+
+        let reasoningChains: [ReasoningChain] = walkResult.chains.compactMap { chain in
+            let lastNode: ReasoningChainNode? = chain.nodes.last { $0.nodeType != "relation" }
+            let target: String = lastNode?.name ?? "未知"
+            let evidenceParts: [String] = [
+                chain.legalBasis.lawArticle,
+                chain.legalBasis.guidelineRule
+            ].compactMap { $0 }
+            let evidence: String = evidenceParts.isEmpty
+                ? "置信度: \(String(format: "%.2f", chain.confidence))"
+                : evidenceParts.joined(separator: "; ")
+            return ReasoningChain(from: chain.factRef, toNode: target, evidence: evidence)
+        }
+
+        if !reasoningChains.isEmpty {
+            let existingConstraints: [RuleConstraint] = await blackboard.ruleConstraints
+            await blackboard.writeReasoningResults(
+                chains: reasoningChains, constraints: existingConstraints
+            )
+        }
+
+        guard !walkResult.chains.isEmpty else { return "" }
+        var report: String = "覆盖率: \(String(format: "%.0f%%", walkResult.coverage * 100))"
+        if !walkResult.gaps.isEmpty {
+            report += "\n缺口: " + walkResult.gaps.prefix(5).joined(separator: "; ")
+        }
+        let highConfidence: [WalkChain] = walkResult.chains.filter { $0.confidence >= 0.6 }
+        if !highConfidence.isEmpty {
+            report += "\n高置信链: " + highConfidence.map(\.factRef).prefix(3).joined(separator: "; ")
+        }
+        return report
     }
 
     /// 用 PatentToolLoop 执行一次分析任务
@@ -409,17 +536,19 @@ public actor PatentLoopEngine: LoopEngine {
             buildMessages: { [execReq] in
                 [Message(role: .user, content: execReq.content)]
             },
-            modelStep: { [modelRouter, provider, model] messages, _ in
+            modelStep: { [modelRouter, provider, model] messages, toolSpecs in
                 do {
-                    let chatReq: ChatRequest = ChatRequest(model: model, messages: messages)
+                    let toolDefs: [ChatToolDefinition] = toolSpecs.map {
+                        ChatToolDefinition(name: $0.name, description: $0.description, parameters: $0.parameters)
+                    }
+                    let chatReq: ChatRequest = ChatRequest(
+                        model: model, messages: messages,
+                        tools: toolDefs.isEmpty ? nil : toolDefs
+                    )
                     let stream: AsyncThrowingStream<ChatChunk, Error> = try await modelRouter.chat(
                         chatReq, provider: provider
                     )
-                    var full: String = ""
-                    for try await chunk in stream {
-                        if case .text(let text) = chunk { full += text }
-                    }
-                    return .textResponse(full)
+                    return await Self.collectModelStep(from: stream)
                 } catch {
                     return .error(error.localizedDescription)
                 }
@@ -489,7 +618,7 @@ public actor PatentLoopEngine: LoopEngine {
             provider: provider
         )
 
-        let completed: [SubAgent] = await subAgentEngine.waitAll(timeout: 300)
+        let completed: [SubAgent] = await subAgentEngine.waitAllRaw(timeout: 300)
         let notifications: [String] = completed.map { $0.notification }
 
         state = .idle

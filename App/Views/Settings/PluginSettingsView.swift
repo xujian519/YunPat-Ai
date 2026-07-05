@@ -111,9 +111,9 @@ struct PluginSettingsView: View {
                 at: dir, includingPropertiesForKeys: nil
             ) {
                 for item in contents {
-                    let isDir = (try? item.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+                    let isDir: Bool = (try? item.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
                     if isDir {
-                        let pluginName = item.lastPathComponent
+                        let pluginName: String = item.lastPathComponent
                         discovered.append(PluginInfo(
                             name: pluginName, version: "1.0", enabled: true
                         ))

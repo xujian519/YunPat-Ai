@@ -64,7 +64,7 @@ public actor KnowledgeBaseManager {
         self.wikiAdapter = adapter
 
         // 4. 设置 VectorSearch.shared.embedHandler → 使用 MLXEmbeddingProvider
-        let providerRef = embedder
+        let providerRef: MLXEmbeddingProvider = embedder
         await VectorSearch.shared.setEmbedHandler { [providerRef] texts in
             do {
                 return try await providerRef.embed(texts)

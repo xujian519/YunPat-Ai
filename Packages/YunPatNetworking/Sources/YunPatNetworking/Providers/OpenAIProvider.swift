@@ -139,6 +139,23 @@ public final class OpenAIProvider: ModelBackend {
         }
         if let temp = request.temperature { body["temperature"] = temp }
         if let maxTokens = request.maxTokens { body["max_tokens"] = maxTokens }
+        if let tools = request.tools, !tools.isEmpty {
+            body["tools"] = tools.map { tool in
+                var params: Any = [:]
+                if let data = tool.parameters.data(using: .utf8),
+                   let parsed = try? JSONSerialization.jsonObject(with: data) {
+                    params = parsed
+                }
+                return [
+                    "type": "function",
+                    "function": [
+                        "name": tool.name,
+                        "description": tool.description,
+                        "parameters": params
+                    ]
+                ] as [String: Any]
+            }
+        }
 
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
         return urlRequest
