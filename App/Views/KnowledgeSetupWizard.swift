@@ -15,7 +15,7 @@ struct KnowledgeSetupWizard: View {
         VStack(spacing: 20) {
             Image(systemName: "books.vertical")
                 .font(.system(size: 48))
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accentColor)
                 .padding(.top, 32)
                 .accessibilityHidden(true)
 

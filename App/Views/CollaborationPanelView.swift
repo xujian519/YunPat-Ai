@@ -56,7 +56,7 @@ struct CollaborationPanel: View {
                             if let checkpoint = item.checkpoint {
                                 Text(checkpoint)
                                     .font(FontStyle.caption2)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.accentColor)
                             }
                             Text(item.title)
                                 .font(FontStyle.caption)

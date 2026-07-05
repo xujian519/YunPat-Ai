@@ -342,6 +342,15 @@ struct MessageBubble: View {
 
     @State private var typingDotScale: CGFloat = 1.0
 
+    /// 将消息内容解析为 Markdown AttributedString，支持粗体/斜体/代码/链接/列表等
+    private var markdownContent: AttributedString {
+        let raw: String = message.content.isEmpty && isStreaming ? " " : message.content
+        if let parsed = try? AttributedString(markdown: raw) {
+            return parsed
+        }
+        return AttributedString(raw)
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.sm) {
             if message.role == .user { Spacer() }
@@ -352,7 +361,7 @@ struct MessageBubble: View {
             }
 
             VStack(alignment: message.role == .user ? .trailing : .leading, spacing: Spacing.xxs) {
-                Text(message.content.isEmpty && isStreaming ? " " : message.content)
+                Text(markdownContent)
                     .font(FontStyle.body)
                     .padding(.horizontal, Spacing.sm)
                     .padding(.vertical, Spacing.xs)

@@ -118,9 +118,10 @@ struct YunPatApp: App {
 
 struct SettingsTabView: View {
     let modelRouter: ModelRouter
+    @State private var selectedTab: Int = 0
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             ProviderSettingsView(modelRouter: modelRouter)
                 .tabItem { Label("接口", systemImage: "key") }
                 .tag(0)
@@ -138,6 +139,20 @@ struct SettingsTabView: View {
                 .tag(4)
         }
         .padding(.top, Spacing.sm)
+        .onReceive(NotificationCenter.default.publisher(for: .openSettingsTab)) { note in
+            if let idx = note.object as? Int, (0...4).contains(idx) {
+                selectedTab = idx
+            }
+            openSettingsWindow()
+        }
+    }
+
+    private func openSettingsWindow() {
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
 }
 
@@ -209,4 +224,6 @@ extension Notification.Name {
     static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
     static let menuFocusWriting: Notification.Name = Notification.Name("menuFocusWriting")
     static let dropFile: Notification.Name = Notification.Name("dropFile")
+    /// 打开设置页到指定 Tab (object: Int — 0=接口, 1=技能, 2=插件, 3=MCP, 4=知识库)
+    static let openSettingsTab: Notification.Name = Notification.Name("openSettingsTab")
 }

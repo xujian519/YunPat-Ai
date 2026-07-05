@@ -24,7 +24,7 @@ struct FolderTreeView: View {
         VStack(spacing: 0) {
             HStack {
                 Image(systemName: "folder.badge.gearshape")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accentColor)
                 Text("工作目录")
                     .font(FontStyle.headline)
                 Spacer()
@@ -42,7 +42,7 @@ struct FolderTreeView: View {
                 HStack {
                     Image(systemName: "folder")
                         .font(.caption)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.accentColor)
                     Text(path.lastPathComponent)
                         .font(FontStyle.caption)
                         .lineLimit(1)
@@ -54,7 +54,7 @@ struct FolderTreeView: View {
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.blue.opacity(0.05))
+                .background(Color.accentColor.opacity(0.05))
             }
 
             Divider()

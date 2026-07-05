@@ -52,10 +52,10 @@ struct StatusBar: View {
                 action: { appState.leftDockActivePanel = .caseList; appState.leftDockVisible = true }
             )
             StatusBarButton(
-                icon: "tree",
-                help: "文件树",
-                isActive: appState.leftDockActivePanel == .folderTree && appState.leftDockVisible,
-                action: { appState.leftDockActivePanel = .folderTree; appState.leftDockVisible = true }
+                icon: "briefcase",
+                help: "案件工作区",
+                isActive: appState.leftDockActivePanel == .caseWorkspace && appState.leftDockVisible,
+                action: { appState.leftDockActivePanel = .caseWorkspace; appState.leftDockVisible = true }
             )
             StatusBarButton(
                 icon: "books.vertical",

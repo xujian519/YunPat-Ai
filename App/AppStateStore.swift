@@ -5,7 +5,7 @@ import SwiftUI
 
 public enum LeftDockPanel: String, CaseIterable, Codable {
     case caseList
-    case folderTree
+    case caseWorkspace
     case knowledge  // 预留
 }
 
@@ -65,20 +65,8 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
         }
     }
 
-    // ── 旧状态（逐步废弃）──
+    // ── 运行状态 ──
 
-    @available(*, deprecated, message: "改用 leftDockVisible")
-    @Published public var sidebarCollapsed: Bool = false
-    @available(*, deprecated, message: "改用 rightDockVisible")
-    @Published public var collaborationVisible: Bool = false
-    @available(*, deprecated, message: "改用 centerMode == .browser")
-    @Published public var browserVisible: Bool = false
-    @available(*, deprecated, message: "文件树已移入 Left Dock")
-    @Published public var documentSplitVisible: Bool = false
-    @available(*, deprecated, message: "改用 rightDockActivePanel == .caseGraph")
-    @Published public var caseGraphMode: Bool = false
-    @available(*, deprecated, message: "改用 StatusBar 连接指示器")
-    @Published public var connectionStatus: String = "已连接"
     @Published public var isStreaming: Bool = false
 
     // 撤销/重做

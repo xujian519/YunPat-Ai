@@ -72,6 +72,8 @@ enum PanelWidth {
     static let collaborationMax: CGFloat = 360
     static let folderTreeMin: CGFloat = 200
     static let folderTreeIdeal: CGFloat = 260
+    static let caseWorkspaceMin: CGFloat = 260
+    static let caseWorkspaceIdeal: CGFloat = 300
     static let flowPicker: CGFloat = 240
     static let settingsWidth: CGFloat = 520
     static let settingsHeight: CGFloat = 480

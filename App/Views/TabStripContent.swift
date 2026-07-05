@@ -360,13 +360,16 @@ struct ToolManagerPopover: View {
             Divider().padding(.vertical, Spacing.xxs)
             SettingsLinkRow(label: "插件管理…", icon: "puzzlepiece.extension") {
                 isPresented = false
+                NotificationCenter.default.post(name: .openSettingsTab, object: 2)
             }
             SettingsLinkRow(label: "MCP 服务器…", icon: "server.rack") {
                 isPresented = false
+                NotificationCenter.default.post(name: .openSettingsTab, object: 3)
             }
             Divider().padding(.vertical, Spacing.xxs)
             SettingsLinkRow(label: "打开完整设置…", icon: "gearshape") {
                 isPresented = false
+                NotificationCenter.default.post(name: .openSettingsTab, object: 0)
             }
         }
         .frame(width: 220)
@@ -390,13 +393,24 @@ private struct SettingsLinkRow: View {
 }
 
 struct CollaborationToggle: View {
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
+
     var body: some View {
         Button(
-            action: {},
-            label: { Image(systemName: "checklist")
-                .font(.system(size: IconSize.toolbar)) }
+            action: {
+                withAnimation(.easeInOut(duration: AnimationDuration.normal)) {
+                    appState.rightDockVisible.toggle()
+                }
+            },
+            label: {
+                Image(systemName: "checklist")
+                    .font(.system(size: IconSize.toolbar))
+                    .foregroundStyle(appState.rightDockVisible ? Color.accentColor : Color.appTextSecondary)
+            }
         )
         .buttonStyle(.plain)
         .help("协作面板")
+        .accessibilityLabel("协作面板")
+        .accessibilityValue(appState.rightDockVisible ? "已显示" : "已隐藏")
     }
 }

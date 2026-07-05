@@ -25,7 +25,7 @@ struct PluginSettingsView: View {
                     HStack {
                         Image(systemName: "puzzlepiece.extension")
                             .font(.title3)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Color.accentColor)
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(plugin.name)

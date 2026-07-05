@@ -10,7 +10,7 @@ struct CaseGraphView: View {
         VStack(spacing: Spacing.sm) {
             HStack {
                 Image(systemName: "point.topleft.down.curvedto.point.filled")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accentColor)
                 Text("案件关系")
                     .font(FontStyle.headline)
                     .accessibilityAddTraits(.isHeader)
@@ -33,7 +33,7 @@ struct CaseGraphView: View {
                     HStack {
                         Image(systemName: "doc.text.magnifyingglass")
                             .font(.title3)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Color.accentColor)
                         VStack(alignment: .leading) {
                             Text("本案")
                                 .font(FontStyle.caption)
@@ -43,11 +43,11 @@ struct CaseGraphView: View {
                         }
                         Spacer()
                         Circle()
-                            .fill(Color.blue)
+                            .fill(Color.accentColor)
                             .frame(width: 8, height: 8)
                     }
                     .padding(Spacing.xs)
-                    .background(Color.blue.opacity(0.05))
+                    .background(Color.accentColor.opacity(0.05))
                     .cornerRadius(CornerRadius.md)
                     .accessibilityLabel("本案: \(caseId)")
                     .accessibilityAddTraits(.isSummaryElement)

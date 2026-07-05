@@ -5,6 +5,7 @@ import YunPatNetworking
 struct ContentView: View {
     @StateObject private var tabManager: TabManager = TabManager()
     @StateObject private var chatManager: ChatManager
+    @StateObject private var workspaceManager: CaseWorkspaceManager = CaseWorkspaceManager()
     @State private var filePickerOpen: Bool = false
     @State private var showWizard: Bool = false
     @Binding var windowTitle: String
@@ -60,6 +61,17 @@ struct ContentView: View {
             allowsMultipleSelection: true,
             onCompletion: handleFileImport
         )
+        .onChange(of: activeTab?.caseId) { _, newCaseId in
+            workspaceManager.selectedCaseId = newCaseId
+        }
+        .onChange(of: activeTab?.title) { _, newTitle in
+            windowTitle = newTitle ?? "YunPat-Ai"
+        }
+        .task {
+            workspaceManager.selectedCaseId = activeTab?.caseId
+            windowTitle = activeTab?.title ?? "YunPat-Ai"
+        }
+        .withWindowRestoration()
     }
 
     // MARK: - Left Dock
@@ -75,9 +87,9 @@ struct ContentView: View {
                         idealWidth: PanelWidth.sidebarIdeal,
                         maxWidth: PanelWidth.sidebarMax
                     )
-            case .folderTree:
-                FolderTreeView(rootPath: activeTab?.workspacePath)
-                    .frame(minWidth: PanelWidth.folderTreeMin, idealWidth: PanelWidth.folderTreeIdeal)
+            case .caseWorkspace:
+                CaseWorkspaceView(manager: workspaceManager, tabManager: tabManager)
+                    .frame(minWidth: PanelWidth.caseWorkspaceMin, idealWidth: PanelWidth.caseWorkspaceIdeal)
             case .knowledge:
                 EmptyStateView(
                     icon: "books.vertical",

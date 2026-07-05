@@ -122,7 +122,7 @@ struct TabSettingsView: View {
                                 HStack {
                                     Image(systemName: tool.icon)
                                         .font(.caption)
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(Color.accentColor)
                                     VStack(alignment: .leading) {
                                         Text(tool.name).font(.caption)
                                     }

@@ -40,8 +40,8 @@ struct ContentViewModifiers: ViewModifier {
             }
             .onReceive(publisher(for: .menuToggleSplitScreen)) { _ in
                 withAnimation {
-                    appState.leftDockActivePanel = appState.leftDockActivePanel == .folderTree
-                        ? .caseList : .folderTree
+                    appState.leftDockActivePanel = appState.leftDockActivePanel == .caseWorkspace
+                        ? .caseList : .caseWorkspace
                 }
             }
             .onReceive(publisher(for: .menuFocusWriting)) { _ in

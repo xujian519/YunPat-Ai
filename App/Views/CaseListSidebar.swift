@@ -36,7 +36,7 @@ struct CaseListSidebar: View {
     private var header: some View {
         HStack {
             Image(systemName: "folder")
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accentColor)
             Text("案件列表")
                 .font(FontStyle.headline)
             Spacer()
