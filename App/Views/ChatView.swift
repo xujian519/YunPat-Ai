@@ -340,18 +340,36 @@ struct MessageBubble: View {
     let message: ChatMessage
     var isStreaming: Bool = false
 
+    @State private var typingDotScale: CGFloat = 1.0
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: Spacing.sm) {
+        HStack(alignment: .top, spacing: Spacing.sm) {
             if message.role == .user { Spacer() }
-            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 2) {
+
+            if message.role == .assistant {
+                avatarView
+                    .padding(.top, Spacing.xxs)
+            }
+
+            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: Spacing.xxs) {
                 Text(message.content.isEmpty && isStreaming ? " " : message.content)
                     .font(FontStyle.body)
                     .padding(.horizontal, Spacing.sm)
                     .padding(.vertical, Spacing.xs)
-                    .background(message.role == .user
-                        ? Color.accentColor.opacity(0.2)
-                        : Color.secondary.opacity(0.1))
-                    .cornerRadius(CornerRadius.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: CornerRadius.lg)
+                            .fill(message.role == .user ? Color.appBubbleUser : Color.appBubbleAssistant)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: CornerRadius.lg)
+                            .stroke(
+                                message.role == .user
+                                    ? Color.accentColor.opacity(0.18)
+                                    : Color.appSeparator.opacity(0.4),
+                                lineWidth: 0.5
+                            )
+                    )
+                    .foregroundStyle(message.role == .user ? Color.appBubbleUserText : Color.appTextPrimary)
                     .textSelection(.enabled)
                     .animation(.interactiveSpring(duration: AnimationDuration.fast), value: message.content)
                     .accessibilityLabel(buildAccessibilityLabel())
@@ -374,40 +392,51 @@ struct MessageBubble: View {
                 }
 
                 if isStreaming && message.role == .assistant {
-                    HStack(spacing: 3) {
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.7))
-                            .frame(width: 5, height: 5)
-                            .scaleEffect(typingDotScale)
-                            .animation(
-                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true),
-                                value: typingDotScale)
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.5))
-                            .frame(width: 5, height: 5)
-                            .scaleEffect(typingDotScale)
-                            .animation(
-                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true).delay(0.15),
-                                value: typingDotScale)
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.3))
-                            .frame(width: 5, height: 5)
-                            .scaleEffect(typingDotScale)
-                            .animation(
-                                .easeInOut(duration: 0.4).repeatForever(autoreverses: true).delay(0.3),
-                                value: typingDotScale)
-                    }
-                    .padding(.leading, Spacing.sm)
-                    .accessibilityLabel("助手正在输入")
-                    .accessibilityHidden(isStreaming == false)
-                    .onAppear { startTypingAnimation() }
+                    typingIndicator
+                        .padding(.leading, Spacing.sm)
+                        .padding(.top, 2)
                 }
             }
-            if message.role == .assistant { Spacer() }
+
+            if message.role == .user {
+                avatarView
+                    .padding(.top, Spacing.xxs)
+            }
+        }
+        .padding(.horizontal, Spacing.xs)
+        .padding(.vertical, 2)
+    }
+
+    private var avatarView: some View {
+        ZStack {
+            Circle()
+                .fill(message.role == .user ? Color.appBubbleUser : Color.appSurfaceSecondary)
+                .frame(width: IconSize.avatar, height: IconSize.avatar)
+
+            Image(systemName: message.role == .user ? "person.fill" : "sparkles")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(message.role == .user ? Color.appBubbleUserText : .secondary)
         }
     }
 
-    @State private var typingDotScale: CGFloat = 1.0
+    private var typingIndicator: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .fill(Color.accentColor.opacity(0.6 - Double(index) * 0.15))
+                    .frame(width: 5, height: 5)
+                    .scaleEffect(typingDotScale)
+                    .animation(
+                        .easeInOut(duration: 0.45)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(index) * 0.12),
+                        value: typingDotScale
+                    )
+            }
+        }
+        .onAppear { startTypingAnimation() }
+        .accessibilityLabel("助手正在输入")
+    }
 
     private func buildAccessibilityLabel() -> String {
         let role: String = message.role == .user ? "用户" : "助手"

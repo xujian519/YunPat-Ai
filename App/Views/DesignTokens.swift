@@ -10,15 +10,19 @@ enum Spacing {
     static let md: CGFloat = unit * 3
     static let lg: CGFloat = unit * 4
     static let xl: CGFloat = unit * 5
+    static let xxl: CGFloat = unit * 6
 }
 
 // MARK: - CornerRadius
 
 enum CornerRadius {
-    static let sm: CGFloat = 4
-    static let md: CGFloat = 6
-    static let lg: CGFloat = 8
-    static let xl: CGFloat = 12
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 6
+    static let md: CGFloat = 8
+    static let lg: CGFloat = 12
+    static let xl: CGFloat = 16
+    static let xxl: CGFloat = 20
+    static let full: CGFloat = 9999
 }
 
 // MARK: - Font (HIG 语义字体，支持 Dynamic Type)
@@ -35,6 +39,7 @@ enum FontStyle {
     static let callout: Font = .callout
     static let caption: Font = .caption
     static let caption2: Font = .caption2
+    static let footnote: Font = .footnote
 }
 
 // MARK: - Icon Size (SF Symbols 统一尺寸)
@@ -44,6 +49,9 @@ enum IconSize {
     static let sidebar: CGFloat = 14
     static let inlineSmall: CGFloat = 12
     static let caption: CGFloat = 11
+    static let emptyState: CGFloat = 40
+    static let avatar: CGFloat = 28
+    static let messageIcon: CGFloat = 24
 }
 
 // MARK: - Hit Target (HIG 最小触控区域 44pt)
@@ -73,7 +81,7 @@ enum PanelWidth {
     static let bottomDockIdealHeight: CGFloat = 280
 
     // StatusBar
-    static let statusBarHeight: CGFloat = 32
+    static let statusBarHeight: CGFloat = 34
 }
 
 // MARK: - Dock System
@@ -99,6 +107,7 @@ enum AnimationDuration {
     static let normal: CGFloat = 0.2
     static let slow: CGFloat = 0.25
     static let spring: CGFloat = 0.35
+    static let bouncy: CGFloat = 0.45
 }
 
 // MARK: - Semantic Colors
@@ -116,4 +125,24 @@ extension Color {
 
     static let groupBackground: Color = .secondary
     static let interactiveOverlay: Color = .accentColor
+}
+
+// MARK: - Elevation / Shadow
+
+enum AppShadow {
+    static let sm = ShadowStyle(color: Color.black.opacity(0.04), radius: 2, horizontal: 0, vertical: 1)
+    static let md = ShadowStyle(color: Color.black.opacity(0.06), radius: 6, horizontal: 0, vertical: 3)
+    static let lg = ShadowStyle(color: Color.black.opacity(0.08), radius: 12, horizontal: 0, vertical: 6)
+    static let glow = ShadowStyle(color: Color.accentColor.opacity(0.25), radius: 8, horizontal: 0, vertical: 0)
+}
+
+struct ShadowStyle {
+    let color: Color
+    let radius: CGFloat
+    let horizontal: CGFloat
+    let vertical: CGFloat
+
+    func apply<V: View>(_ view: V) -> some View {
+        view.shadow(color: color, radius: radius, x: horizontal, y: vertical)
+    }
 }

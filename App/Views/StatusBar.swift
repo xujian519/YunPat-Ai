@@ -19,7 +19,7 @@ struct StatusBar: View {
 
             Divider()
                 .frame(height: Spacing.md)
-                .padding(.horizontal, Spacing.xxs)
+                .padding(.horizontal, Spacing.xs)
 
             centerSection
 
@@ -33,6 +33,12 @@ struct StatusBar: View {
         .padding(.vertical, Spacing.xxs)
         .frame(height: PanelWidth.statusBarHeight)
         .background(.thickMaterial)
+        .overlay(
+            Rectangle()
+                .frame(height: 0.5)
+                .foregroundStyle(Color.appSeparator.opacity(0.5)),
+            alignment: .top
+        )
     }
 
     // MARK: - Left Section: Left Dock panel switching
@@ -125,17 +131,39 @@ struct StatusBarButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: IconSize.toolbar))
-                .foregroundStyle(isActive ? Color.statusRunning : Color.groupBackground)
+                .font(.system(size: IconSize.toolbar, weight: .medium))
+                .foregroundStyle(foregroundStyle)
+                .frame(width: HitTarget.small, height: HitTarget.small)
+                .background(
+                    RoundedRectangle(cornerRadius: CornerRadius.sm)
+                        .fill(backgroundStyle)
+                )
         }
         .buttonStyle(.plain)
         .help(help)
         .accessibilityLabel(help)
-        .scaleEffect(isHovered ? 1.15 : 1.0)
         .onHover { hovering in
             withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
                 isHovered = hovering
             }
         }
+    }
+
+    private var foregroundStyle: some ShapeStyle {
+        if isActive {
+            return AnyShapeStyle(Color.accentColor)
+        } else if isHovered {
+            return AnyShapeStyle(Color.primary)
+        }
+        return AnyShapeStyle(Color.appTextSecondary)
+    }
+
+    private var backgroundStyle: some ShapeStyle {
+        if isActive {
+            return AnyShapeStyle(Color.accentColor.opacity(0.12))
+        } else if isHovered {
+            return AnyShapeStyle(Color.appSurfaceTertiary)
+        }
+        return AnyShapeStyle(Color.clear)
     }
 }

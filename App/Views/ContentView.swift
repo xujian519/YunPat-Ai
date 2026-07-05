@@ -79,14 +79,12 @@ struct ContentView: View {
                 FolderTreeView(rootPath: activeTab?.workspacePath)
                     .frame(minWidth: PanelWidth.folderTreeMin, idealWidth: PanelWidth.folderTreeIdeal)
             case .knowledge:
-                VStack {
-                    Image(systemName: "books.vertical")
-                        .font(.system(size: 32))
-                        .foregroundStyle(.secondary)
-                    Text("知识库（开发中）")
-                        .font(FontStyle.caption)
-                        .foregroundStyle(.secondary)
-                }
+                EmptyStateView(
+                    icon: "books.vertical",
+                    title: "知识库",
+                    subtitle: "连接 Obsidian Vault 后自动加载法规与判例",
+                    action: nil
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.thickMaterial)
             }
@@ -172,8 +170,8 @@ struct ContentView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: Spacing.sm) {
-                    if let tab = activeTab {
+                if let tab = activeTab, !tab.messages.isEmpty {
+                    LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                         let messages: [ChatMessage] = tab.messages
                         ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
                             let isLast: Bool = index == messages.count - 1
@@ -184,8 +182,16 @@ struct ContentView: View {
                             .id(message.id)
                         }
                     }
+                    .padding()
+                } else {
+                    EmptyStateView(
+                        icon: "bubble.left.and.bubble.right",
+                        title: "开始对话",
+                        subtitle: "发送消息，让 YunPat-Ai 协助你的专利代理工作",
+                        action: nil
+                    )
+                    .padding(.top, Spacing.xl)
                 }
-                .padding()
             }
             .onChange(of: activeTab?.messages.count ?? 0) { _, _ in
                 scrollToLast(proxy)
@@ -276,20 +282,51 @@ struct FocusWritingContent: View {
 struct InputBar: View {
     @ObservedObject var chatManager: ChatManager
     @ObservedObject var tabManager: TabManager
+    @FocusState private var isInputFocused: Bool
 
     var body: some View {
-        HStack {
-            TextField("输入消息...", text: $chatManager.inputText)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit { Task { await chatManager.sendMessage(in: tabManager) } }
+        HStack(spacing: Spacing.sm) {
+            TextField("向 YunPat-Ai 发送消息…", text: $chatManager.inputText, axis: .vertical)
+                .textFieldStyle(.plain)
+                .font(FontStyle.body)
+                .lineLimit(1...6)
+                .focused($isInputFocused)
                 .accessibilityLabel("消息输入框")
-            Button("发送") {
+                .onSubmit {
+                    if !sendDisabled {
+                        Task { await chatManager.sendMessage(in: tabManager) }
+                    }
+                }
+
+            Button {
                 Task { await chatManager.sendMessage(in: tabManager) }
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: IconSize.toolbar, weight: .semibold))
+                    .foregroundStyle(sendDisabled ? AnyShapeStyle(Color.secondary) : AnyShapeStyle(Color.white))
+                    .frame(width: 28, height: 28)
+                    .background(
+                        Circle()
+                            .fill(sendDisabled ? Color.appSurfaceTertiary : Color.accentColor)
+                    )
             }
+            .buttonStyle(.plain)
             .disabled(sendDisabled)
+            .keyboardShortcut(.return, modifiers: [.command])
             .accessibilityLabel("发送消息")
+            .help("⌘ + Enter 发送")
         }
-        .padding()
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs)
+        .background(
+            RoundedRectangle(cornerRadius: CornerRadius.xl)
+                .fill(Color.appInputBarBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: CornerRadius.xl)
+                        .stroke(isInputFocused ? Color.accentColor.opacity(0.5) : Color.appSeparator, lineWidth: 1)
+                )
+        )
+        .padding(Spacing.sm)
     }
 
     private var sendDisabled: Bool {

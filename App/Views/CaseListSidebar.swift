@@ -87,14 +87,28 @@ struct CaseListSidebar: View {
     }
 
     private var tabList: some View {
-        List(selection: $tabManager.activeTabID) {
-            ForEach(filteredTabs) { tab in
-                TabRow(tab: tab)
-                    .tag(tab.id)
-                    .contextMenu { contextMenuItems(for: tab) }
+        Group {
+            if filteredTabs.isEmpty {
+                EmptyStateView(
+                    icon: "tray",
+                    title: filterCategory == .archived ? "暂无归档" : "无会话",
+                    subtitle: filterCategory == .archived
+                        ? "归档的案件将显示在这里"
+                        : "点击上方 + 创建新案件或新对话",
+                    action: nil
+                )
+                .padding(.top, Spacing.lg)
+            } else {
+                List(selection: $tabManager.activeTabID) {
+                    ForEach(filteredTabs) { tab in
+                        TabRow(tab: tab)
+                            .tag(tab.id)
+                            .contextMenu { contextMenuItems(for: tab) }
+                    }
+                }
+                .listStyle(.sidebar)
             }
         }
-        .listStyle(.sidebar)
     }
 
     @ViewBuilder

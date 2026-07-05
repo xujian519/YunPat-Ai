@@ -60,16 +60,12 @@ struct FolderTreeView: View {
             Divider()
 
             if entries.isEmpty {
-                Spacer()
-                VStack(spacing: 8) {
-                    Image(systemName: "folder")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                    Text("点击刷新加载目录")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
+                EmptyStateView(
+                    icon: "folder",
+                    title: "空目录",
+                    subtitle: "点击上方刷新按钮加载工作目录",
+                    action: .init(title: "刷新", icon: "arrow.clockwise") { refreshEntries() }
+                )
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {

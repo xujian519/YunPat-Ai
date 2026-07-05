@@ -75,19 +75,29 @@ struct DocumentWorkspace: View {
 
             Divider()
 
-            TextEditor(text: $documentText)
-                .font(FontStyle.bodyMonospaced)
-                .onChange(of: documentText) { _, newValue in
-                    let result = parser.parse(newValue)
-                    annotations = result.annotations
-                    if !lastSavedText.isEmpty && newValue != lastSavedText {
-                        editCount = abs(newValue.count - lastSavedText.count) / 10
+            if documentText.isEmpty && documentURL == nil {
+                EmptyStateView(
+                    icon: "doc.text",
+                    title: "文档工作区",
+                    subtitle: "在状态栏点击 📎 打开文件，或拖拽文件到窗口",
+                    action: nil
+                )
+                .background(Color.windowBackgroundColor)
+            } else {
+                TextEditor(text: $documentText)
+                    .font(FontStyle.bodyMonospaced)
+                    .onChange(of: documentText) { _, newValue in
+                        let result = parser.parse(newValue)
+                        annotations = result.annotations
+                        if !lastSavedText.isEmpty && newValue != lastSavedText {
+                            editCount = abs(newValue.count - lastSavedText.count) / 10
+                        }
+                        if syncMode == .realtime && !lastSavedText.isEmpty && newValue != lastSavedText {
+                            notifyAgentOfChanges(newValue)
+                        }
                     }
-                    if syncMode == .realtime && !lastSavedText.isEmpty && newValue != lastSavedText {
-                        notifyAgentOfChanges(newValue)
-                    }
-                }
-                .accessibilityLabel("文档编辑器")
+                    .accessibilityLabel("文档编辑器")
+            }
 
             if !annotations.isEmpty {
                 Divider()
