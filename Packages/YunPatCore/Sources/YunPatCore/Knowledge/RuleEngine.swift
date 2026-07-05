@@ -7,9 +7,14 @@ import Foundation
 public actor RuleEngine {
     private let adapter: WikiAdapter
     private let vectorSearch: VectorSearch
-    public init(adapter: WikiAdapter, vectorSearch: VectorSearch = .shared) {
+    private let queryRouter: QueryRouter
+    private let authorityScorer: AuthorityScorer
+    public init(adapter: WikiAdapter, vectorSearch: VectorSearch = .shared,
+                queryRouter: QueryRouter = QueryRouter(), authorityScorer: AuthorityScorer = .shared) {
         self.adapter = adapter
         self.vectorSearch = vectorSearch
+        self.queryRouter = queryRouter
+        self.authorityScorer = authorityScorer
     }
 
     /// 六步检索管道：概念提取 → 索引查询 → 语义兜底 → 全文读取 → 跨源解析 → 组装
@@ -32,11 +37,12 @@ public actor RuleEngine {
         // Step 2: Semantic search fallback (missed concepts)
         let allKeywords = (facts.inventionPoints + [facts.technicalField, facts.problem])
             .filter { !$0.isEmpty }
+        let query: String = allKeywords.joined(separator: " ")
+        let strategy: RetrievalStrategy = await queryRouter.route(query: query)
         if candidates.count < 3 && !allKeywords.isEmpty {
-            let query: String = allKeywords.joined(separator: " ")
             // 优先使用 WikiAdapter 的语义搜索（走 EmbeddingProvider + SemanticIndex）
             let semanticResults: [SearchResultItem] =
-                (try? await adapter.semanticSearchAsync(query: query, topK: 5)) ?? []
+                (try? await adapter.semanticSearchAsync(query: query, topK: min(5, strategy.limit))) ?? []
             if !semanticResults.isEmpty {
                 for hit in semanticResults {
                     let link: String = hit.title
@@ -52,7 +58,7 @@ public actor RuleEngine {
                 let wikiTexts: [String] = try await collectAllWikiSummaries()
                 if !wikiTexts.isEmpty {
                     let topIndices: [(Int, Float)] = await vectorSearch.search(
-                        query: query, candidates: wikiTexts, topK: 5, minScore: 0.25)
+                        query: query, candidates: wikiTexts, topK: min(5, strategy.limit), minScore: 0.25)
                     for (idx, _) in topIndices {
                         let link: String = wikiTexts[idx]
                         if !matchedLinks.contains(link) {
@@ -70,7 +76,7 @@ public actor RuleEngine {
         if candidates.isEmpty {
             for module in [WikiModule.patentPractice, .examinationGuide, .laws] {
                 if let index = try? await adapter.readModuleIndex(module) {
-                    for link in adapter.parseWikilinks(from: index).prefix(10) {
+                    for link in adapter.parseWikilinks(from: index).prefix(strategy.limit) {
                         if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
                             candidates.append(candidate)
                         }
@@ -79,9 +85,9 @@ public actor RuleEngine {
             }
         }
 
-        let resolved: [RuleCandidate] = resolveConflicts(candidates)
+        let ranked: [RuleCandidate] = await reRankByAuthority(candidates, query: query)
         return ApplicableRules(
-            candidates: resolved, constraintSummary: resolved.prefix(3).map(\.title).joined(separator: "、"))
+            candidates: ranked, constraintSummary: ranked.prefix(3).map(\.title).joined(separator: "、"))
     }
 
     /// 解决规则冲突 — 按 sourceLevel 升序（效力高优先）、同级按 score 降序
@@ -129,6 +135,17 @@ public actor RuleEngine {
     }
 
     /// 收集所有 wiki 页面标题作为语义搜索候选集
+    private func reRankByAuthority(_ candidates: [RuleCandidate], query: String) async -> [RuleCandidate] {
+        guard !candidates.isEmpty else { return [] }
+        let ranked: [RankedResult] = candidates.enumerated().map { (i, c) in
+            RankedResult(documentId: c.wikilink, content: c.content, source: .hybrid, score: c.score, rank: i + 1)
+        }
+        let reRanked: [RankedResult] = await authorityScorer.reRank(results: ranked)
+        let order: [String: Int] = Dictionary(
+            uniqueKeysWithValues: reRanked.enumerated().map { ($0.element.documentId, $0.offset) })
+        return candidates.sorted { (order[$0.wikilink] ?? 0) < (order[$1.wikilink] ?? 0) }
+    }
+
     private func collectAllWikiSummaries() async throws -> [String] {
         var links: [String] = []
         for module in [WikiModule.patentPractice, .examinationGuide, .laws] {

@@ -6,12 +6,22 @@ struct DocumentWorkspace: View {
     @State private var editCount: Int = 0
     @State private var lastSavedText: String = ""
     @State private var syncMode: DocumentSyncMode = .explicit
+    @State private var documentURL: URL?
     private let parser = AnnotationParser()
     private let changeDetector = DocumentChangeDetector()
 
     enum DocumentSyncMode: String, CaseIterable {
         case explicit = "手动同步"
         case realtime = "实时同步"
+    }
+
+    /// 加载外部文档文件
+    func loadFile(_ url: URL) {
+        documentURL = url
+        if let data = try? String(contentsOf: url, encoding: .utf8) {
+            documentText = data
+            lastSavedText = data
+        }
     }
 
     var body: some View {
@@ -109,11 +119,17 @@ struct DocumentWorkspace: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.windowBackgroundColor)
+        .onDisappear {
+            Task { await changeDetector.stopWatching() }
+        }
     }
 
     private func saveDocument() {
         lastSavedText = documentText
         editCount = 0
+        if let url = documentURL {
+            try? documentText.write(to: url, atomically: true, encoding: .utf8)
+        }
     }
 
     private func syncToAgent() {
@@ -123,11 +139,11 @@ struct DocumentWorkspace: View {
     }
 
     private func notifyAgentOfChanges(_ newText: String) {
-        // 通过 NotificationCenter 通知 ChatManager 文档已变更
         let changeEvent = DocumentChangeNotification(
             text: newText,
             annotations: annotations,
-            timestamp: Date()
+            timestamp: Date(),
+            documentURL: documentURL
         )
         NotificationCenter.default.post(
             name: .documentChangedNotification,
@@ -140,6 +156,13 @@ struct DocumentChangeNotification {
     let text: String
     let annotations: [DocumentAnnotation]
     let timestamp: Date
+    let documentURL: URL?
+    init(text: String, annotations: [DocumentAnnotation], timestamp: Date, documentURL: URL? = nil) {
+        self.text = text
+        self.annotations = annotations
+        self.timestamp = timestamp
+        self.documentURL = documentURL
+    }
 }
 
 extension Notification.Name {

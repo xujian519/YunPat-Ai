@@ -15,6 +15,18 @@ public final class TraceStore: @unchecked Sendable {
         async throws {
         let dict: [String: Any] = [
             "requestId": requestId.uuidString,
+            "capabilities": capabilities.map { cap in
+                [
+                    "capability": cap.capability, "tool": cap.tool, "latency": cap.latency,
+                    "error": cap.error ?? NSNull()
+                ] as [String: Any]
+            },
+            "prompts": prompts.map { pt in
+                [
+                    "systemPromptHash": pt.systemPromptHash, "cost": pt.cost, "latency": pt.latency,
+                    "model": pt.model
+                ] as [String: Any]
+            },
             "summary": [
                 "totalCost": summary.totalCost, "totalLatency": summary.totalLatency, "toolCount": summary.toolCount,
                 "llmCallCount": summary.llmCallCount

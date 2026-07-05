@@ -214,14 +214,7 @@ struct ContentView: View {
     private var activeTabClarify: ClarifyRequest? { activeTab?.clarifyRequest }
 
     private func syncToAgent() {
-        Task {
-            if let activeID = tabManager.activeTabID {
-                tabManager.appendMessage(
-                    to: activeID,
-                    ChatMessage(role: .user, content: "文档已同步至 Agent")
-                )
-            }
-        }
+        Task { await chatManager.sendDocumentAnnotations(in: tabManager) }
     }
 
     private func handleFileImport(_ result: Result<[URL], Error>) {

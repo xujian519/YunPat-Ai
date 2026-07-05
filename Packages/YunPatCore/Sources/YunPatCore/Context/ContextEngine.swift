@@ -37,7 +37,7 @@ public actor ContextEngine {
 
         // 2. 注入技能匹配结果
         if let skillManager {
-            let matches: [SkillMatch] = await skillManager.match(for: request)
+            let matches: [SkillMatch] = await skillManager.match(for: request, vectorSearch: VectorSearch.shared)
             if !matches.isEmpty {
                 var skillLines: [String] = []
                 for model in matches.prefix(3) {

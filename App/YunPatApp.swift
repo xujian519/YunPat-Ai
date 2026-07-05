@@ -181,6 +181,18 @@ final class AppState: ObservableObject {
                 try? await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
             }
         }
+
+        Task {
+            if let vaultPathStr = UserDefaults.standard.string(forKey: "yunpat.vaultPath"),
+               !vaultPathStr.isEmpty {
+                let vaultPath = URL(filePath: vaultPathStr)
+                do {
+                    try await KnowledgeBaseManager.shared.configure(vaultPath: vaultPath)
+                } catch {
+                    print("[AppState] KnowledgeBaseManager configure failed: \(error)")
+                }
+            }
+        }
     }
 }
 

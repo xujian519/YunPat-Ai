@@ -8,6 +8,8 @@ final class ChatManager: ObservableObject {
     @Published var inputText: String = ""
     @Published var isStreaming: Bool = false
     @Published var clarifying: Bool = false
+    @Published var pendingDocumentQuestions: [String] = []
+    @Published var pendingDocumentAnnotations: [DocumentAnnotation] = []
 
     private let modelRouter: ModelRouter
     private let loopEngine: AgentLoopEngine
@@ -17,11 +19,37 @@ final class ChatManager: ObservableObject {
     /// 待处理的 clarify 请求（由 sendMessage 后的结果触发）
     private var pendingClarify: ClarifyRequestDisplay?
 
+    nonisolated(unsafe) private var docObserver: NSObjectProtocol?
+
     init(modelRouter: ModelRouter, requestQueue: GlobalRequestQueue? = nil) {
         self.modelRouter = modelRouter
         self.loopEngine = AgentLoopEngine(modelRouter: modelRouter)
         self.requestQueue = requestQueue ?? GlobalRequestQueue()
         requestNotificationPermission()
+
+        docObserver = NotificationCenter.default.addObserver(
+            forName: .documentChangedNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            guard let self, let change = note.object as? DocumentChangeNotification else { return }
+            MainActor.assumeIsolated { self.handleDocumentChange(change) }
+        }
+    }
+
+    deinit {
+        if let docObserver { NotificationCenter.default.removeObserver(docObserver) }
+    }
+
+    private func handleDocumentChange(_ change: DocumentChangeNotification) {
+        let questions: [String] = change.annotations
+            .filter { $0.type == .question }
+            .map { "[L\($0.line)] \($0.content)" }
+        if !questions.isEmpty {
+            pendingDocumentQuestions = questions
+        }
+        pendingDocumentAnnotations = change.annotations
+        if !change.annotations.isEmpty {
+            objectWillChange.send()
+        }
     }
 
     private func requestNotificationPermission() {
@@ -65,10 +93,20 @@ final class ChatManager: ObservableObject {
         else { return }
 
         let tab: ChatTab = tabManager.tabs[idx]
-        let userMessage: ChatMessage = ChatMessage(role: .user, content: inputText)
+        var augmentedInput: String = inputText
+
+        if !pendingDocumentQuestions.isEmpty {
+            let docContext: String = pendingDocumentQuestions
+                .map { "- 文档疑问: \($0)" }
+                .joined(separator: "\n")
+            augmentedInput = "【文档标注问题】\n\(docContext)\n\n---\n\n\(inputText)"
+            pendingDocumentQuestions = []
+        }
+
+        let userMessage: ChatMessage = ChatMessage(role: .user, content: augmentedInput)
         tabManager.appendMessage(to: activeID, userMessage)
-        tabManager.tabs[idx].sessionMemory.append(Message(role: .user, content: inputText))
-        let sentText: String = inputText
+        tabManager.tabs[idx].sessionMemory.append(Message(role: .user, content: augmentedInput))
+        let sentText: String = augmentedInput
         inputText = ""
         isStreaming = true
         clarifying = false
@@ -164,7 +202,8 @@ final class ChatManager: ObservableObject {
             await handleLoopResult(result, activeID: tab.id, in: tabManager, streamed: true)
         case .fullAgent:
             let history: [Message] = tabManager.tabs[idx].sessionMemory.messages
-            let result: LoopResult = try await getPatentLoopEngine().run(
+            let engine = await getPatentLoopEngine()
+            let result: LoopResult = try await engine.run(
                 request: UserRequest(content: sentText),
                 flow: .fullAgent,
                 history: history,
@@ -233,6 +272,38 @@ final class ChatManager: ObservableObject {
         tabManager.tabs[idx].clarifyRequest = nil
     }
 
+    /// 将文档标注中的问题作为消息发送给 Agent
+    func sendDocumentAnnotations(in tabManager: TabManager) async {
+        guard tabManager.activeTabID != nil else { return }
+
+        let questions: [String] = pendingDocumentQuestions
+        let annotations: [DocumentAnnotation] = pendingDocumentAnnotations
+        guard !questions.isEmpty || !annotations.isEmpty else { return }
+
+        var parts: [String] = []
+        if !questions.isEmpty {
+            parts.append("【文档标注中的问题】\n" + questions.joined(separator: "\n"))
+        }
+        if !annotations.isEmpty {
+            let summary: String = annotations.map {
+                switch $0.type {
+                case .question: return "[L\($0.line)] 问题: \($0.content)"
+                case .deletion: return "[L\($0.line)] 删除标记: \($0.content)"
+                case .insertion: return "[L\($0.line)] 插入标记: \($0.content)"
+                case .comment: return "[L\($0.line)] 备注: \($0.content)"
+                }
+            }.joined(separator: "\n")
+            parts.append("【标注摘要】\n" + summary)
+        }
+
+        let docContext: String = parts.joined(separator: "\n\n")
+        inputText = docContext
+        pendingDocumentQuestions = []
+        pendingDocumentAnnotations = []
+
+        await sendMessage(in: tabManager)
+    }
+
     /// 为当前 tab 设置 Agent Flow 模式
     func setFlow(_ flow: AgentFlow, in tabManager: TabManager) {
         guard let activeID = tabManager.activeTabID,
@@ -251,12 +322,12 @@ final class ChatManager: ObservableObject {
 
     // MARK: - Patent Engine
 
-    private func getPatentLoopEngine() -> PatentLoopEngine {
+    private func getPatentLoopEngine() async -> PatentLoopEngine {
         if let existing = patentLoopEngine {
             return existing
         }
-        let vaultPath: String = UserDefaults.standard.string(forKey: "yunpat.vaultPath") ?? ""
-        let wiki: WikiAdapter = WikiAdapter(vaultPath: URL(filePath: vaultPath))
+        let wiki: WikiAdapter = await KnowledgeBaseManager.shared.wikiAdapter
+            ?? WikiAdapter(vaultPath: URL(filePath: ""))
         let engine: PatentLoopEngine = PatentLoopEngine(modelRouter: modelRouter, wikiAdapter: wiki)
         patentLoopEngine = engine
         return engine

@@ -348,27 +348,24 @@ enum AnimationDuration {
 - [ ] 专注写作生命周期实现（状态快照/恢复）
 - [ ] `folderTreeVisible` 绑定移除 → 文件树纳入 Left Dock
 
-### Step 3 ⏳ BottomToolbar → StatusBar
+### Step 3 ✅ BottomToolbar → StatusBar
 
-- [ ] 重构 `BottomToolbar` 为三段式 StatusBar
-- [ ] 左段: Left Dock 面板切换按钮组
-- [ ] 右段: Right/Bottom Dock toggle
-- [ ] 废弃旧 `BottomToolbar.swift`
-- [ ] 连接状态常驻右段
+- [x] 重构 `BottomToolbar` 为三段式 StatusBar
+- [x] 左段: Left Dock 面板切换按钮组
+- [x] 右段: Right/Bottom Dock toggle
+- [x] 废弃旧 `BottomToolbar.swift`（已删除）
+- [x] 连接状态常驻右段
 
 ---
 
-## 10. 废弃清理清单
+## 10. 废弃清理状态
 
-| 文件 | 废弃内容 | 清理时机 |
-|------|---------|---------|
-| `BottomToolbar.swift:7` | `@Binding var folderTreeVisible: Bool` | Step 3 |
-| `BottomToolbar.swift:18-19` | folder 按钮 | Step 3 |
-| `ContentView.swift:12` | `@State folderTreeVisible` | Step 2 |
-| `ContentView.swift:81` | `folderTreeVisible: $folderTreeVisible` | Step 2 |
-| `ContentView.swift:13` | `@State caseGraphMode` | Step 2 |
-| `ContentView.swift:115` | `caseGraphMode` 条件判断 | Step 2 |
-| `ContentViewModifiers.swift:8-14` | 所有 `@Binding` 旧状态 | Step 2 |
+| 废弃项 | 状态 | 说明 |
+|--------|------|------|
+| `BottomToolbar.swift` | ✅ 已删除 | 完全替换为 StatusBar |
+| `@Binding var folderTreeVisible` | ✅ 已迁移 | 已纳入 AppStateStore 应用状态面板 |
+| `@State folderTreeVisible` (ContentView) | ✅ 已迁移 | 已删除 |
+| `@State caseGraphMode` (ContentView) | ✅ 已迁移 | 已删除 |
 
 ---
 

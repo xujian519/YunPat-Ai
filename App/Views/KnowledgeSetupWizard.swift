@@ -1,4 +1,5 @@
 import SwiftUI
+import YunPatCore
 
 /// 首次启动知识库配置引导向导
 struct KnowledgeSetupWizard: View {
@@ -144,6 +145,10 @@ struct KnowledgeSetupWizard: View {
     private func saveVaultPath() {
         if !vaultPath.isEmpty {
             UserDefaults.standard.set(vaultPath, forKey: "yunpat.vaultPath")
+            Task {
+                await KnowledgeBaseManager.shared.reset()
+                try? await KnowledgeBaseManager.shared.configure(vaultPath: URL(filePath: vaultPath))
+            }
         }
     }
 }

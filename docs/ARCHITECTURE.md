@@ -60,7 +60,7 @@ Packages/YunPatCore/Sources/YunPatCore/
 └── Utils/          — Utils: DateParser
 
 App/Views/
-├── ChatView, ContentView, Tab, TabBar, BottomToolbar 等
+├── ChatView, ContentView, Tab, TabBar, StatusBar 等
 ├── Settings/       — Views: ProviderSettingsView, SkillSettingsView 等
 └── DocumentWorkspace, AnnotationParser, PatentBrowser 等
 ```
@@ -120,22 +120,22 @@ App/Views/
 ## 五、当前合规状态
 
 ### 已修复
-| 文件 | 原类型 | 现类型 |
-|---|---|---|
-| `ContextEngine.swift` | `@unchecked Sendable` class | `actor` ✅ |
-| `CapabilityRegistry.swift` | `@unchecked Sendable` class | `actor` ✅ |
+| 文件 | 原类型 | 现类型 | 日期 |
+|---|---|---|---|
+| `ContextEngine.swift` | `@unchecked Sendable` class | `actor` | ✅ |
+| `CapabilityRegistry.swift` | `@unchecked Sendable` class | `actor` | ✅ |
+| `SystemPromptService.swift` | `@unchecked Sendable` class | `actor` | ✅ |
+| `SkillParser.swift` | class | `struct`（无状态解析器） | ✅ |
+| `HooksService.swift` | class | `actor` | ✅ |
+| `FactBlackboard.swift` | class (NSLock) | `actor` | ✅ |
+| `LegalStateMachine.swift` | class (NSLock) | `actor` | ✅ |
 
-### 待修复
-| 文件 | 当前类型 | 应迁移为 |
-|---|---|---|
-| `SystemPromptService.swift` | `@unchecked Sendable` class | `actor` |
-| `SkillParser.swift` | class | `struct`（无状态解析器） |
-| `VaultObserver.swift` | class | `actor` |
-| `HooksService.swift` | class | `actor` |
-| `FactBlackboard.swift` | class (NSLock) | `actor` |
-| `LegalStateMachine.swift` | class (NSLock) | `actor` |
+### 特例（长期 @unchecked Sendable）
+| 文件 | 说明 |
+|---|---|
+| `VaultObserver.swift` | FSEventStreamRef (OpaquePointer) 不可 Sendable，C callback 需 Unmanaged 指针传递。actor 无法解决这些底层 C 互操作约束。 |
 
-> 迁移原则：新代码 100% 合规；旧代码在有充分测试覆盖和回归验证时逐项迁移。
+> 迁移原则：新代码 100% 合规。特例需在文件头注明理由并加上 `// swiftlint:disable:next`。
 
 ## 六、验证
 

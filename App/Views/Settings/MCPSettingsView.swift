@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct MCPSettingsView: View {
-    @State private var servers: [MCPServerConfig] = [
-        MCPServerConfig(name: "Playwright", command: "npx", args: "@playwright/mcp", enabled: true)
-    ]
+    @State private var servers: [MCPServerConfig] = []
     @State private var showAddSheet: Bool = false
+    @State private var newName: String = ""
+    @State private var newCommand: String = ""
+    @State private var newArgs: String = ""
 
     struct MCPServerConfig: Identifiable {
         let id = UUID()
@@ -117,24 +118,40 @@ struct MCPSettingsView: View {
                 .padding(.top)
 
             Form {
-                TextField("名称", text: .constant(""))
-                TextField("命令", text: .constant(""))
-                TextField("参数", text: .constant(""))
+                TextField("名称", text: $newName)
+                TextField("命令", text: $newCommand)
+                TextField("参数", text: $newArgs)
             }
             .padding(.horizontal)
 
             HStack {
-                Button("取消") { showAddSheet = false }
-                    .buttonStyle(.bordered)
+                Button("取消") {
+                    newName = ""; newCommand = ""; newArgs = ""
+                    showAddSheet = false
+                }
+                .buttonStyle(.bordered)
                 Button("添加") {
+                    let trimmedName = newName.trimmingCharacters(in: .whitespaces)
+                    if !trimmedName.isEmpty {
+                        servers.append(MCPServerConfig(
+                            name: trimmedName,
+                            command: newCommand.trimmingCharacters(in: .whitespaces),
+                            args: newArgs.trimmingCharacters(in: .whitespaces),
+                            enabled: true
+                        ))
+                    }
+                    newName = ""; newCommand = ""; newArgs = ""
                     showAddSheet = false
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .padding(.bottom)
         }
         .frame(width: 360, height: 260)
     }
 
-    private func refreshServers() {}
+    private func refreshServers() {
+        servers = servers
+    }
 }

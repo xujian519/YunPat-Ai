@@ -100,6 +100,27 @@ struct PluginSettingsView: View {
     private func refreshPlugins() {
         isLoading = true
         defer { isLoading = false }
-        plugins = []
+        let knownDirs: [URL] = [
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".agents/skills"),
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/opencode/skills"),
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/skills")
+        ]
+        var discovered: [PluginInfo] = []
+        for dir in knownDirs where FileManager.default.fileExists(atPath: dir.path) {
+            if let contents = try? FileManager.default.contentsOfDirectory(
+                at: dir, includingPropertiesForKeys: nil
+            ) {
+                for item in contents {
+                    let isDir = (try? item.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+                    if isDir {
+                        let pluginName = item.lastPathComponent
+                        discovered.append(PluginInfo(
+                            name: pluginName, version: "1.0", enabled: true
+                        ))
+                    }
+                }
+            }
+        }
+        plugins = discovered
     }
 }
