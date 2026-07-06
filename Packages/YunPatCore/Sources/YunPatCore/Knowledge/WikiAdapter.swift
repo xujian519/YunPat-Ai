@@ -60,7 +60,7 @@ public actor WikiAdapter {
         try FileManager.default.moveItem(at: original, to: deprecated)
     }
     public func semanticSearch(query: String) throws -> [SearchResultItem] {
-        try keywordFallbackSearch(query: query)
+        keywordFallbackSearch(query: query)
     }
 
     /// 异步语义搜索 — 优先使用 EmbeddingProvider + SemanticIndex，回退到关键词
@@ -80,7 +80,7 @@ public actor WikiAdapter {
                 }
             }
         }
-        return try keywordFallbackSearch(query: query)
+        return keywordFallbackSearch(query: query)
     }
 
     private func keywordFallbackSearch(query: String) -> [SearchResultItem] {

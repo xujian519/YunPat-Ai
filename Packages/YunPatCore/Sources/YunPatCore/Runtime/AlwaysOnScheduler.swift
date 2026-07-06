@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import os
 
@@ -45,6 +46,14 @@ public actor AlwaysOnScheduler {
     private var lastRun: [AlwaysOnTaskKind: Date] = [:]
     private let logger = Logger(subsystem: "com.yunpat", category: "AlwaysOn")
     private var continuations: [UUID: AsyncStream<AlwaysOnTaskStatus>.Continuation] = [:]
+
+    // ── Clipboard 状态 ──
+    private var lastClipboardChangeCount: Int = -1
+    private var clipboardHistory: [String] = []
+    private let clipboardHistoryMax: Int = 10
+
+    // ── File Watcher 状态 ──
+    private var watchedPaths: [String: (enabled: Bool, lastSnapshot: [String: Date])] = [:]
 
     public init(consolidator: MemoryConsolidator = .shared) {
         self.consolidator = consolidator
@@ -113,6 +122,28 @@ public actor AlwaysOnScheduler {
         }
     }
 
+    /// 注册要监视的文件/目录路径，fileWatcher 将检测这些路径下的变化
+    public func watchPaths(_ paths: [String]) {
+        for path in paths {
+            if watchedPaths[path] == nil {
+                let snapshot = buildSnapshot(for: path)
+                watchedPaths[path] = (enabled: true, lastSnapshot: snapshot)
+            } else {
+                watchedPaths[path]?.enabled = true
+            }
+        }
+    }
+
+    /// 停止监视指定路径
+    public func unwatchPath(_ path: String) {
+        watchedPaths[path]?.enabled = false
+    }
+
+    /// 获取剪贴板历史
+    public func recentClipboardContent() -> [String] {
+        Array(clipboardHistory)
+    }
+
     // MARK: - Private
 
     private func registerContinuation(_ id: UUID, _ cont: AsyncStream<AlwaysOnTaskStatus>.Continuation) {
@@ -145,12 +176,14 @@ public actor AlwaysOnScheduler {
         lastRun[kind] = Date()
         do {
             switch kind {
+            case .clipboard:
+                runClipboardCheck()
+            case .fileWatcher:
+                runFileWatcherCheck()
             case .periodicSummary:
                 try await runPeriodicSummary()
             case .memoryConsolidation:
                 await consolidator.run()
-            case .clipboard, .fileWatcher:
-                break
             }
             tasks[kind] = .running
         } catch {
@@ -158,6 +191,71 @@ public actor AlwaysOnScheduler {
             logger.error("AlwaysOn \(kind.rawValue) failed: \(error.localizedDescription)")
         }
         emit(kind)
+    }
+
+    /// 检查剪贴板变化 — 比较 NSPasteboard changeCount
+    private func runClipboardCheck() {
+        let pasteboard: NSPasteboard = NSPasteboard.general
+        let currentChange: Int = pasteboard.changeCount
+        guard currentChange != lastClipboardChangeCount else { return }
+        lastClipboardChangeCount = currentChange
+
+        guard let content: String = pasteboard.string(forType: .string)
+            ?? pasteboard.string(forType: .rtf) else { return }
+        let trimmed: String = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        // 去重：和最近一条相同则跳过
+        if clipboardHistory.last == trimmed { return }
+        clipboardHistory.append(trimmed)
+        if clipboardHistory.count > clipboardHistoryMax {
+            clipboardHistory.removeFirst()
+        }
+        logger.debug("Clipboard changed: \(trimmed.prefix(80))")
+    }
+
+    /// 检查已注册路径下的文件变化 — 比较 mtime
+    private func runFileWatcherCheck() {
+        for (path, config) in watchedPaths where config.enabled {
+            let currentSnapshot: [String: Date] = buildSnapshot(for: path)
+            let oldSnapshot: [String: Date] = config.lastSnapshot
+            #if DEBUG
+            // 找出新增或修改的文件
+            var changes: [String] = []
+            for (file, mtime) in currentSnapshot {
+                if oldSnapshot[file] == nil {
+                    changes.append("+\(file)")
+                } else if oldSnapshot[file] != mtime {
+                    changes.append("~\(file)")
+                }
+            }
+            for file in oldSnapshot.keys where currentSnapshot[file] == nil {
+                changes.append("-\(file)")
+            }
+            if !changes.isEmpty {
+                logger.debug("File changes in \(path): \(changes.joined(separator: ", "))")
+            }
+            #endif
+            watchedPaths[path]?.lastSnapshot = currentSnapshot
+        }
+    }
+
+    /// 构建目录下文件的 mtime 快照
+    private func buildSnapshot(for path: String) -> [String: Date] {
+        let fileManager: FileManager = FileManager.default
+        var snapshot: [String: Date] = [:]
+        guard let enumerator: FileManager.DirectoryEnumerator
+            = fileManager.enumerator(atPath: path) else { return snapshot }
+        while let relativePath: String = enumerator.nextObject() as? String {
+            let fullPath: String = (path as NSString).appendingPathComponent(relativePath)
+            guard let attrs: [FileAttributeKey: Any] = try? fileManager.attributesOfItem(atPath: fullPath),
+                  let fileType: FileAttributeType = attrs[.type] as? FileAttributeType,
+                  fileType == .typeRegular,
+                  let mtime: Date = attrs[.modificationDate] as? Date
+            else { continue }
+            snapshot[relativePath] = mtime
+        }
+        return snapshot
     }
 
     private func runPeriodicSummary() async throws {
