@@ -11,6 +11,15 @@ Packages/*/.build/
 
 # macOS
 .DS_Store
+**/.DS_Store
+
+# Local agent / tool caches
+.codebuddy/
+.workbuddy/
+.xiao-nuo/
+.codegraph/
+.session-memory-shm
+.session-memory-wal
 
 # Derived data
 DerivedData/
