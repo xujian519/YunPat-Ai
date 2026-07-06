@@ -138,8 +138,7 @@ struct ShortcutButton: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, Spacing.xs)
                 .padding(.vertical, 2)
-                .background(Color.appSurfaceSecondary)
-                .cornerRadius(CornerRadius.sm)
+                .appSurface(cornerRadius: CornerRadius.sm, surface: Color.appSurfaceSecondary)
         }
         .padding()
         .frame(minWidth: 160)

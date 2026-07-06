@@ -155,8 +155,7 @@ struct CaseWorkspaceView: View {
                 .disabled(tagsDraft == workspace.tags.joined(separator: ", "))
             }
             .padding(Spacing.xs)
-            .background(Color.appSurfaceSecondary)
-            .cornerRadius(CornerRadius.md)
+            .appSurface(cornerRadius: CornerRadius.md, surface: Color.appSurfaceSecondary)
         }
     }
 

@@ -146,10 +146,32 @@ extension Color {
 // MARK: - Elevation / Shadow
 
 enum AppShadow {
-    static let sm = ShadowStyle(color: Color.black.opacity(0.04), radius: 2, horizontal: 0, vertical: 1)
-    static let md = ShadowStyle(color: Color.black.opacity(0.06), radius: 6, horizontal: 0, vertical: 3)
-    static let lg = ShadowStyle(color: Color.black.opacity(0.08), radius: 12, horizontal: 0, vertical: 6)
-    static let glow = ShadowStyle(color: Color.accentColor.opacity(0.25), radius: 8, horizontal: 0, vertical: 0)
+    static let sm = ShadowPair(
+        light: ShadowStyle(color: Color.black.opacity(0.04), radius: 2, horizontal: 0, vertical: 1),
+        dark: ShadowStyle(color: Color.black.opacity(0.45), radius: 6, horizontal: 0, vertical: 3)
+    )
+    static let md = ShadowPair(
+        light: ShadowStyle(color: Color.black.opacity(0.06), radius: 6, horizontal: 0, vertical: 3),
+        dark: ShadowStyle(color: Color.black.opacity(0.5), radius: 10, horizontal: 0, vertical: 5)
+    )
+    static let lg = ShadowPair(
+        light: ShadowStyle(color: Color.black.opacity(0.08), radius: 12, horizontal: 0, vertical: 6),
+        dark: ShadowStyle(color: Color.black.opacity(0.55), radius: 16, horizontal: 0, vertical: 8)
+    )
+    static let glow = ShadowPair(
+        light: ShadowStyle(color: Color.accentColor.opacity(0.25), radius: 8, horizontal: 0, vertical: 0),
+        dark: ShadowStyle(color: Color.accentColor.opacity(0.3), radius: 10, horizontal: 0, vertical: 0)
+    )
+}
+
+/// 浅色 / 深色双套投影：深色下纯黑投影几乎不可见，改用更重的黑色 + 略大半径制造柔和暗晕。
+struct ShadowPair {
+    let light: ShadowStyle
+    let dark: ShadowStyle
+
+    func resolve(for scheme: ColorScheme) -> ShadowStyle {
+        scheme == .dark ? dark : light
+    }
 }
 
 struct ShadowStyle {

@@ -42,3 +42,32 @@
 
 ## 验证
 - 通过 `swift build --product YunPatAi` 编译校验（见对话构建结果）。
+
+---
+
+## 迭代二（深色高程 + 嵌入式表面）
+
+### 背景
+原 `AppShadow` 使用 `Color.black.opacity(...)`。浅色主题下投影柔和可见；但**深色主题下卡片表面（`appSurfacePrimary`）本就偏暗，纯黑投影几乎不可见**，导致卡片在深色模式「看起来还是扁平的」，与浅色体验不一致。
+
+### 改动
+1. **`DesignTokens.swift`：`AppShadow` → `ShadowPair(light:/dark:)`**
+   - 浅色沿用原值；深色改用更重黑色 + 略大半径制造柔和暗晕：sm `0.45/6pt`、md `0.5/10pt`、lg `0.55/16pt`、glow 用 accent。
+   - 新增 `ShadowPair.resolve(for: ColorScheme) -> ShadowStyle`。
+2. **`SurfaceModifiers.swift`：`appCard` 改为 `_AppCard: ViewModifier`**
+   - 读取 `@Environment(\.colorScheme)`，按主题选 `ShadowPair`；深色下发丝描边加强（`appSeparator` 0.5 → 0.9）以维持边界分离。
+   - 注意：返回类型必须 `self.modifier(_AppCard(...))`，直接返回 `ViewModifier` 实例会报 "requires conform to View"。
+3. **`appSurface(cornerRadius:surface:)` 增加 `surface` 参数**，并铺到嵌入式区块：
+   - `CaseWorkspaceView` 标签 / 备注 / 路径输入框 → `appSurface(cornerRadius:.md, surface:.appSurfaceSecondary)`
+   - `AlwaysOnDashboardView` 快捷键徽章 → `appSurface(cornerRadius:.sm, surface:.appSurfaceSecondary)`
+   - 设置侧栏（180pt 整列）保持扁平填充，不加浮起描边（侧栏用分隔线而非浮起边框）。
+
+### 验证
+- 二次 `swift build --product YunPatAi` **0 error**，产品构建完整通过（首轮被 `YunPatCore` 并发改写引发的构建竞态已自行消除）。
+
+### 可复用方法论（SwiftUI 令牌一致性打磨）
+1. 审计 `DesignTokens` / 颜色扩展，找出**已定义但 0 引用**的令牌系统（如 `AppShadow`）。
+2. 用 View 扩展（修饰符）集中激活，绑定「背景 + 圆角 + 发丝描边 + 投影」。
+3. 扫描 `Color.*.opacity(...)`、原始 `NSColor` 硬编码，替换为软状态令牌（`appStatus*Soft`）。
+4. 用 `ShadowPair`（light/dark）解决深色模式投影不可见问题。
+5. 每个改动后 `swift build --product <app>` 增量校验；`ViewModifier` 需经 `self.modifier(...)` 返回。
