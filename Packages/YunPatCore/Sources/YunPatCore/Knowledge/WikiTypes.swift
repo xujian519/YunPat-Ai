@@ -1,7 +1,7 @@
 import Foundation
 
 /// 知识库模块枚举 — 对应 Wiki 知识库中的不同领域模块
-public enum WikiModule: String, CaseIterable {
+public enum WikiModule: String, CaseIterable, Sendable {
     case patentPractice = "专利实务"
     case examinationGuide = "审查指南"
     case patentInfringement = "专利侵权"

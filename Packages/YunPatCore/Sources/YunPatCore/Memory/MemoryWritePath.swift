@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 异步写路径：bufferTurn（单次 SQL insert / JSON append）→ 防抖 → flush（单次 LLM 蒸馏）
 ///
@@ -9,6 +10,7 @@ import Foundation
 /// 崩溃恢复时可完整恢复信号队列而非哑信号。
 public actor MemoryWritePath {
     public static let shared: MemoryWritePath = MemoryWritePath()
+    private let logger = Logger(subsystem: "com.yunpat", category: "MemoryWritePath")
     private let store: MemoryStore
     private var pendingSignals: [PendingSignal] = []
     private var debounceTask: Task<Void, Never>?
@@ -20,11 +22,7 @@ public actor MemoryWritePath {
     private static let persistenceURL: URL = {
         let home: URL = FileManager.default.homeDirectoryForCurrentUser
         let dir = home.appendingPathComponent(".yunpat/memory")
-        do {
-            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        } catch {
-            print("[MemoryWritePath] Failed to create persistence directory: \(error)")
-        }
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("pending_signals.json")
     }()
 
@@ -90,7 +88,9 @@ public actor MemoryWritePath {
                     do {
                         try await store.saveCaseContext(context)
                     } catch {
-                        print("[MemoryWritePath] Failed to save case context for \(caseId): \(error)")
+                        logger.error(
+                            "Failed to save case context for \(caseId, privacy: .public): \(error, privacy: .public)"
+                        )
                     }
                 }
                 retryCount = 0
@@ -103,10 +103,7 @@ public actor MemoryWritePath {
                     try? await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
                     await flush(caseId: caseId)
                 } else {
-                    print(
-                        "[MemoryWritePath] Distillation failed after"
-                            + " \(maxRetries) retries, dropping \(signals.count) signals"
-                    )
+                    logger.error("Distill fail after \(self.maxRetries) tries, dropping \(signals.count) signals")
                     retryCount = 0
                 }
             }
@@ -127,7 +124,7 @@ public actor MemoryWritePath {
         do {
             decoded = try JSONDecoder().decode([PendingSignal].self, from: data)
         } catch {
-            print("[MemoryWritePath] Failed to decode pending signals: \(error)")
+            logger.error("Failed to decode pending signals: \(error, privacy: .public)")
             return
         }
         guard !decoded.isEmpty else { return }
@@ -155,13 +152,13 @@ public actor MemoryWritePath {
         do {
             data = try JSONEncoder().encode(pendingSignals)
         } catch {
-            print("[MemoryWritePath] Failed to encode pending signals: \(error)")
+            logger.error("Failed to encode pending signals: \(error, privacy: .public)")
             return
         }
         do {
             try data.write(to: Self.persistenceURL, options: .atomic)
         } catch {
-            print("[MemoryWritePath] Failed to write pending signals: \(error)")
+            logger.error("Failed to write pending signals: \(error, privacy: .public)")
         }
     }
 
@@ -171,13 +168,13 @@ public actor MemoryWritePath {
         do {
             data = try JSONEncoder().encode(empty)
         } catch {
-            print("[MemoryWritePath] Failed to encode empty signal list: \(error)")
+            logger.error("Failed to encode empty signal list: \(error, privacy: .public)")
             return
         }
         do {
             try data.write(to: Self.persistenceURL, options: .atomic)
         } catch {
-            print("[MemoryWritePath] Failed to clear persisted signals: \(error)")
+            logger.error("Failed to clear persisted signals: \(error, privacy: .public)")
         }
     }
 }

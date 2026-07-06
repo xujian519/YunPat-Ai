@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 // MARK: - LLM-Accessible Memory Store
 
@@ -14,6 +15,7 @@ import Foundation
 /// 无需专门的 memory tool 即可操作。
 public final class LLMMemoryStore: @unchecked Sendable {
     public static let shared: LLMMemoryStore = LLMMemoryStore()
+    private let logger = Logger(subsystem: "com.yunpat", category: "LLMMemoryStore")
     private let lock: NSRecursiveLock = NSRecursiveLock()
     /// 记忆目录
     public static let memoryDir: URL = {
@@ -39,7 +41,7 @@ public final class LLMMemoryStore: @unchecked Sendable {
             do {
                 try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
             } catch {
-                print("[LLMMemoryStore] Failed to create directory \(dir.path): \(error)")
+                logger.error("Failed to create directory \(dir.path, privacy: .public): \(error, privacy: .public)")
             }
         }
     }
@@ -102,7 +104,7 @@ public final class LLMMemoryStore: @unchecked Sendable {
             try content.write(to: url, atomically: true, encoding: .utf8)
             success = true
         } catch {
-            print("[LLMMemoryStore] Failed to save \(entry.id): \(error)")
+            logger.error("Failed to save \(entry.id, privacy: .public): \(error, privacy: .public)")
         }
         lock.unlock()
         if success { rebuildIndex() }
@@ -118,7 +120,7 @@ public final class LLMMemoryStore: @unchecked Sendable {
             try FileManager.default.removeItem(at: url)
             success = true
         } catch {
-            print("[LLMMemoryStore] Failed to delete \(id): \(error)")
+            logger.error("Failed to delete \(id, privacy: .public): \(error, privacy: .public)")
         }
         lock.unlock()
         if success { rebuildIndex() }
@@ -164,7 +166,7 @@ public final class LLMMemoryStore: @unchecked Sendable {
         do {
             try lines.joined(separator: "\n").write(to: Self.indexPath, atomically: true, encoding: .utf8)
         } catch {
-            print("[LLMMemoryStore] Failed to rebuild index: \(error)")
+            logger.error("Failed to rebuild index: \(error, privacy: .public)")
         }
     }
 

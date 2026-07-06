@@ -1,7 +1,7 @@
 import Foundation
 
 /// 追踪持久化存储 — 按日期分目录保存追踪记录到 ~/.yunpat/traces/
-public final class TraceStore: @unchecked Sendable {
+public actor TraceStore {
     private let tracesDir: URL
     public init() {
         let formatter = DateFormatter()

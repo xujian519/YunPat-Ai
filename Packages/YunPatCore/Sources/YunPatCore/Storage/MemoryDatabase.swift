@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SQLite3
 
 /// SQLite 持久化 — 替代 JSON 文件的 MemoryStore
@@ -7,6 +8,7 @@ import SQLite3
 /// 使用系统 SQLite3 库（无外部依赖），线程安全 actor 封装。
 public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
     public static let shared: MemoryDatabase = MemoryDatabase()
+    private let logger = Logger(subsystem: "com.yunpat", category: "MemoryDatabase")
     private nonisolated(unsafe) var db: OpaquePointer?
     private let dbPath: URL
     private let fileManager: FileManager
@@ -34,7 +36,7 @@ public actor MemoryDatabase {  // swiftlint:disable:this type_body_length
                 SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX,
                 nil) == SQLITE_OK
         else {
-            print("[MemoryDatabase] Failed to open: \(String(cString: sqlite3_errmsg(db)))")
+            logger.error("Failed to open: \(String(cString: sqlite3_errmsg(self.db)), privacy: .public)")
             return
         }
         exec("PRAGMA journal_mode=WAL")

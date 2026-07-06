@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 // MARK: - Enhanced Hook Events
 
@@ -87,6 +88,7 @@ public struct ToolInput: @unchecked Sendable {
 /// 所有 mutable 状态由 actor 串行队列保护，无需显式锁。
 public actor HooksService {
     public static let shared: HooksService = HooksService()
+    private let logger = Logger(subsystem: "com.yunpat", category: "HooksService")
     private(set) var rules: [HookRule] = []
     private let fileURL: URL
 
@@ -96,14 +98,14 @@ public actor HooksService {
         do {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         } catch {
-            print("[HooksService] Failed to create hooks directory: \(error)")
+            logger.error("Failed to create hooks directory: \(error, privacy: .public)")
         }
         self.fileURL = dir.appendingPathComponent("hooks.json")
         if let data = try? Data(contentsOf: fileURL) {
             do {
                 self.rules = try JSONDecoder().decode([HookRule].self, from: data)
             } catch {
-                print("[HooksService] Failed to decode hooks.json: \(error)")
+                logger.error("Failed to decode hooks.json: \(error, privacy: .public)")
                 self.rules = []
             }
         }
@@ -247,13 +249,13 @@ public actor HooksService {
         do {
             data = try JSONEncoder().encode(rules)
         } catch {
-            print("[HooksService] Failed to encode rules: \(error)")
+            logger.error("Failed to encode rules: \(error, privacy: .public)")
             return
         }
         do {
             try data.write(to: fileURL, options: .atomic)
         } catch {
-            print("[HooksService] Failed to save hooks.json: \(error)")
+            logger.error("Failed to save hooks.json: \(error, privacy: .public)")
         }
     }
 }

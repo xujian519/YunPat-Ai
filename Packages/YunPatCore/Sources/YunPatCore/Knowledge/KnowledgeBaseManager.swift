@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 知识库生命周期管理器 — 统一管理 MLXEmbeddingProvider + LegacySemanticIndex 的初始化、接线与清理
 ///
@@ -15,6 +16,7 @@ import Foundation
 /// }
 /// ```
 public actor KnowledgeBaseManager {
+    private let logger = Logger(subsystem: "com.yunpat", category: "KnowledgeBaseManager")
 
     public static let shared = KnowledgeBaseManager()
 
@@ -65,11 +67,11 @@ public actor KnowledgeBaseManager {
 
         // 4. 设置 VectorSearch.shared.embedHandler → 使用 MLXEmbeddingProvider
         let providerRef: MLXEmbeddingProvider = embedder
-        await VectorSearch.shared.setEmbedHandler { [providerRef] texts in
+        await VectorSearch.shared.setEmbedHandler { [self, providerRef] texts in
             do {
                 return try await providerRef.embed(texts)
             } catch {
-                print("[KnowledgeBaseManager] VectorSearch embed failed: \(error)")
+                logger.error("VectorSearch embed failed: \(error, privacy: .public)")
                 return nil
             }
         }

@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let frameworkEngineLogger = Logger(subsystem: "com.yunpat", category: "FrameworkEngine")
 
 // MARK: - Article Step Definition
 
@@ -297,7 +300,9 @@ public actor FrameworkEngine {
                 let framework: ArticleFramework = try decoder.decode(ArticleFramework.self, from: data)
                 frameworks[framework.articleId] = framework
             } catch {
-                print("[FrameworkEngine] Failed to decode \(fileURL.lastPathComponent): \(error)")
+                frameworkEngineLogger.error(
+                    "Failed to decode \(fileURL.lastPathComponent, privacy: .public): \(error, privacy: .public)"
+                )
             }
         }
 
@@ -360,13 +365,7 @@ public actor FrameworkEngine {
         )
     }
 
-    // MARK: - Prompt Building
-
-    private func buildPrompt(
-        framework: ArticleFramework,
-        step: ArticleStepDefinition,
-        facts: [String]
-    ) -> String {
+    private func buildPrompt(framework: ArticleFramework, step: ArticleStepDefinition, facts: [String]) -> String {
         let factsSection: String = facts.enumerated()
             .map { "  \($0.offset + 1). \($0.element)" }
             .joined(separator: "\n")

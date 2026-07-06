@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 跨案件引用类型 — 设计 §6: 优先权链 + 对比文件链
 public enum CaseRelationType: String, Sendable, Codable {
@@ -45,6 +46,7 @@ public struct CaseRelation: Sendable, Codable, Identifiable {
 /// 支持正向查询（本案的优先权/分案/对比文件）和反向查询（某对比文件在哪些案件中用过）
 public actor CaseRelationStore {
     public static let shared = CaseRelationStore()
+    private let logger = Logger(subsystem: "com.yunpat", category: "CaseRelationStore")
     private let defaults: UserDefaults
     private let key: String = "yunpat.case.relations"
     private let encoder: JSONEncoder = JSONEncoder()
@@ -111,7 +113,7 @@ public actor CaseRelationStore {
         do {
             return try decoder.decode([CaseRelation].self, from: data)
         } catch {
-            print("[CaseRelationStore] Failed to decode relations: \(error)")
+            logger.error("Failed to decode relations: \(error, privacy: .public)")
             return []
         }
     }

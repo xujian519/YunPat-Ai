@@ -27,6 +27,9 @@ public actor GooglePatentsClient {
 
     /// 获取专利完整信息
     public func fetchPatent(_ number: String) async throws -> PatentInfo {
+        guard !number.trimmingCharacters(in: .whitespaces).isEmpty else {
+            throw PatentClientError.invalidPatentNumber("专利号不能为空")
+        }
         let url: String = patentURL(number)
         let html: String = try await fetchHTML(url)
         return try parsePatentHTML(html, patentNumber: number, url: url)

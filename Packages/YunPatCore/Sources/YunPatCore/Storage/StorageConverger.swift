@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 存储收敛策略 — 检测 FileVault 状态，决定 SQLite 加密姿势
 ///
@@ -13,6 +14,7 @@ import Foundation
 /// fileVaultEnabled 使用 nonisolated(unsafe) 避免 NSLock 在 async context 的编译问题。
 public final class StorageConverger: @unchecked Sendable {
     public static let shared: StorageConverger = StorageConverger()
+    private let logger = Logger(subsystem: "com.yunpat", category: "StorageConverger")
     /// FileVault 状态缓存（由 checkFileVaultStatus 异步更新）
     public nonisolated(unsafe) private(set) var fileVaultEnabled: Bool?
 
@@ -30,7 +32,7 @@ public final class StorageConverger: @unchecked Sendable {
         let pipe: Pipe = Pipe()
         task.standardOutput = pipe
         do { try task.run() } catch {
-            print("[StorageConverger] fdesetup failed: \(error)")
+            logger.error("fdesetup failed: \(error, privacy: .public)")
             fileVaultEnabled = false
             return false
         }
@@ -56,14 +58,14 @@ public final class StorageConverger: @unchecked Sendable {
     }
 }
 
-  /// 存储姿态 — 升迁（migrate）或降级（degrade）
-  public enum StoragePosture: Sendable {
+/// 存储姿态 — 升迁（migrate）或降级（degrade）
+public enum StoragePosture: Sendable {
     case plaintext
     case encryptedRecommended
 }
 
-  /// 数据库配置 — 包含标识符和文件路径
-  public struct DatabaseConfig: Sendable {
+/// 数据库配置 — 包含标识符和文件路径
+public struct DatabaseConfig: Sendable {
     public let name: String
     public let displayName: String
     public let path: String

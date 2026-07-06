@@ -12,7 +12,7 @@ public protocol AXorcistProvider: Sendable {
 }
 
 /// 基础实现（macOS Accessibility API）
-public final class AppKitAXorcist: AXorcistProvider, @unchecked Sendable {
+public actor AppKitAXorcist: AXorcistProvider {
 
     public init() {}
 

@@ -1,10 +1,12 @@
 import AppKit
+import os
 import SwiftUI
 import YunPatCore
 import YunPatNetworking
 
 @main
 struct YunPatApp: App {
+    private let logger = Logger(subsystem: "com.yunpat", category: "App")
     @StateObject private var appState: AppState = AppState()
     @State private var activeTabTitle: String = "YunPat-Ai"
 
@@ -232,7 +234,7 @@ final class AppState: ObservableObject {
         Task {
             let converger: StorageConverger = StorageConverger.shared
             let fvEnabled: Bool = await converger.checkFileVaultStatus()
-            if !fvEnabled { print("[Storage] FileVault is OFF") }
+            if !fvEnabled { logger.warning("FileVault is OFF — recommend enabling for data protection") }
         }
 
         AXorcistBridge.register()
@@ -252,7 +254,7 @@ final class AppState: ObservableObject {
                 do {
                     try await KnowledgeBaseManager.shared.configure(vaultPath: vaultPath)
                 } catch {
-                    print("[AppState] KnowledgeBaseManager configure failed: \(error)")
+                    logger.error("KnowledgeBaseManager configure failed: \(error, privacy: .public)")
                 }
             }
         }

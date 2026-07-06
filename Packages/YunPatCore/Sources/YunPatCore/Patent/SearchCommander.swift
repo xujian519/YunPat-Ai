@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let searchCommanderLogger = Logger(subsystem: "com.yunpat", category: "SearchCommander")
 
 /// 检索源标识
 public enum SearchSource: String, Sendable {
@@ -136,7 +139,7 @@ public actor SearchCommander {
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return [] }
             return parseGooglePatentsXHR(data: data)
         } catch {
-            print("[SearchCommander] Google Patents HTTP failed: \(error.localizedDescription)")
+            searchCommanderLogger.error("Google Patents HTTP failed: \(error.localizedDescription, privacy: .public)")
             return []
         }
     }

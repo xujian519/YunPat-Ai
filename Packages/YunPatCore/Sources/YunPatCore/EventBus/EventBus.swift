@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 // MARK: - AgentEvent
 
@@ -60,7 +61,7 @@ private final class SubscriberEntry: @unchecked Sendable {
 /// 弱引用存储避免 handler 闭包捕获 self 导致内存泄漏。
 public actor EventBus {
     public static let shared: EventBus = EventBus()
-
+    private let logger = Logger(subsystem: "com.yunpat", category: "EventBus")
     private var entries: [SubscriberEntry] = []
     private let handlerTimeoutSeconds: Double = 30
 
@@ -110,7 +111,7 @@ public actor EventBus {
 
             for await result in group {
                 if case .timedOut = result {
-                    print("[EventBus] Handler timed out after \(self.handlerTimeoutSeconds)s")
+                    logger.warning("Handler timed out after \(self.handlerTimeoutSeconds)s")
                 }
             }
         }

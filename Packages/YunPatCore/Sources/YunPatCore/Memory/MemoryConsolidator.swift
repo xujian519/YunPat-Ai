@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 后台记忆维护：指数衰减 → 合并 → promote → evict → prune
 ///
@@ -12,6 +13,7 @@ import Foundation
 /// 避免重复序列化/反序列化开销。
 public actor MemoryConsolidator {
     public static let shared: MemoryConsolidator = MemoryConsolidator()
+    private let logger = Logger(subsystem: "com.yunpat", category: "MemoryConsolidator")
     private let store: MemoryStore
     private var lastRun: Date?
     private var isPaused: Bool = false
@@ -80,7 +82,7 @@ public actor MemoryConsolidator {
         do {
             try await store.saveLongTermMemory(ltm)
         } catch {
-            print("[MemoryConsolidator] consolidateLTM save failed: \(error)")
+            logger.error("consolidateLTM save failed: \(error, privacy: .public)")
         }
     }
 

@@ -93,8 +93,7 @@ public final class SecureCredentialStore: @unchecked Sendable {
         var keyRef: CFTypeRef?
         guard SecItemCopyMatching(query as CFDictionary, &keyRef) == errSecSuccess,
               let result = keyRef,
-              // swiftlint:disable:next force_cast
-              let publicKey = SecKeyCopyPublicKey(result as! SecKey) else {
+              let publicKey = SecKeyCopyPublicKey(unsafeDowncast(result, to: SecKey.self)) else {
             throw CredentialError.keyGenFailed("Case key not found for \(caseId)")
         }
         guard let encrypted = SecKeyCreateEncryptedData(

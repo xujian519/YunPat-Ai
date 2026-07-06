@@ -1,5 +1,5 @@
 import Foundation
-public final class WikiAdapter: @unchecked Sendable {
+public actor WikiAdapter {
     public let vaultPath: URL
     public var embeddingProvider: EmbeddingProvider?
     public var semanticIndex: SemanticIndex?
@@ -23,7 +23,7 @@ public final class WikiAdapter: @unchecked Sendable {
         guard FileManager.default.fileExists(atPath: url.path) else { return "" }
         return try String(contentsOf: url, encoding: .utf8)
     }
-    public func parseWikilinks(from indexContent: String) -> [String] {
+    nonisolated public func parseWikilinks(from indexContent: String) -> [String] {
         let pattern: String = #"\[\[([^\]]+)\]\]"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
         let nsRange = NSRange(indexContent.startIndex..., in: indexContent)

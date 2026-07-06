@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 案件级规则文件系统
 ///
@@ -6,6 +7,7 @@ import Foundation
 /// 优先级：案件级 > 客户级 > 事务所级 > 知识库
 public actor CaseRuleLoader {
     public static let shared = CaseRuleLoader()
+    private let logger = Logger(subsystem: "com.yunpat", category: "CaseRuleLoader")
     private var cache: [String: [CaseRule]] = [:]
     private var watchedPaths: Set<String> = []
 
@@ -28,7 +30,9 @@ public actor CaseRuleLoader {
                 do {
                     content = try String(contentsOf: file, encoding: .utf8)
                 } catch {
-                    print("[CaseRuleLoader] Failed to read \(file.lastPathComponent): \(error)")
+                    logger.error(
+                        "Failed to read \(file.lastPathComponent, privacy: .public): \(error, privacy: .public)"
+                    )
                     continue
                 }
                 let fileName = file.deletingPathExtension().lastPathComponent
@@ -50,7 +54,7 @@ public actor CaseRuleLoader {
                     ))
             }
         } catch {
-            print("[CaseRuleLoader] Failed to load rules from \(rulesDir.path): \(error)")
+            logger.error("Failed to load rules from \(rulesDir.path, privacy: .public): \(error, privacy: .public)")
         }
 
         rules.sort { $0.priority < $1.priority }

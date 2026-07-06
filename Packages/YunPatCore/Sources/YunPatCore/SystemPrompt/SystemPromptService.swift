@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// 管理可编辑的系统提示词文件，存储于 ~/Documents/YunPat/system/
 ///
@@ -11,6 +12,7 @@ import Foundation
 /// 线程安全: 从 class + NSLock 迁移为 actor，利用 Swift 6 原生并发隔离。
 /// 所有 public 方法在 actor 上下文中串行执行，无需显式锁。
 public actor SystemPromptService {
+    private let logger = Logger(subsystem: "com.yunpat", category: "SystemPrompt")
     public static let shared: SystemPromptService = SystemPromptService()
 
     /// 系统提示词目录
@@ -156,7 +158,7 @@ public actor SystemPromptService {
             do {
                 try versioned.write(to: url, atomically: true, encoding: .utf8)
             } catch {
-                print("[SystemPrompt] Failed to write \(url.lastPathComponent): \(error)")
+                logger.error("Failed to write \(url.lastPathComponent, privacy: .public): \(error, privacy: .public)")
             }
         }
     }
@@ -209,7 +211,7 @@ public actor SystemPromptService {
         do {
             try versioned.write(to: url, atomically: true, encoding: .utf8)
         } catch {
-            print("[SystemPrompt] Failed to save template: \(error)")
+            logger.error("Failed to save template: \(error, privacy: .public)")
         }
     }
 
@@ -221,7 +223,7 @@ public actor SystemPromptService {
         do {
             try versioned.write(to: url, atomically: true, encoding: .utf8)
         } catch {
-            print("[SystemPrompt] Failed to reset: \(error)")
+            logger.error("Failed to reset: \(error, privacy: .public)")
         }
     }
 

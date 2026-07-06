@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Hook 触发点枚举 — 定义在 Agent 执行流程的哪些阶段触发 Hook
 public enum HookPoint: String, Sendable {
@@ -37,6 +38,7 @@ public struct HookContext: Sendable {
 
 /// Hook 链 — 管理注册的 AgentHook，在指定点顺序执行
 public actor HookChain {
+    private let logger = Logger(subsystem: "com.yunpat", category: "HookChain")
     private var hooks: [any AgentHook] = []
 
     /// 注册一个 Hook 到链中
@@ -50,7 +52,9 @@ public actor HookChain {
             do {
                 try await hook.execute(context: context)
             } catch {
-                print("[HookChain] Hook '\(type(of: hook))' at point '\(point)' failed: \(error)")
+                logger.error(
+                    "Hook '\(type(of: hook))' at point '\(point.rawValue)' failed: \(error, privacy: .public)"
+                )
             }
         }
     }

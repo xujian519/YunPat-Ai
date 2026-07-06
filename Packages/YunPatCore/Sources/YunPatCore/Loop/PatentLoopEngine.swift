@@ -1,4 +1,5 @@
 import Foundation
+import os
 import YunPatNetworking
 
 // swiftlint:disable file_length type_body_length
@@ -13,6 +14,7 @@ import YunPatNetworking
 ///
 /// 支持三路并行分析（新颖性 / 创造性 / 侵权判定）。
 public actor PatentLoopEngine: LoopEngine {
+    private let logger = Logger(subsystem: "com.yunpat", category: "PatentLoopEngine")
     public var state: LoopState = .idle
     private let modelRouter: ModelRouter
     private let provider: ModelProvider
@@ -213,7 +215,7 @@ public actor PatentLoopEngine: LoopEngine {
                         )
                     )
                 } catch {
-                    print("[PatentLoopEngine] Failed to finish trace: \(error)")
+                    logger.error("Failed to finish trace: \(error, privacy: .public)")
                 }
 
                 if review.verdict {
@@ -230,7 +232,7 @@ public actor PatentLoopEngine: LoopEngine {
                         do {
                             try await memory.saveCaseContext(context)
                         } catch {
-                            print("[PatentLoopEngine] Failed to save case context: \(error)")
+                            logger.error("Failed to save case context: \(error, privacy: .public)")
                         }
                     }
                     state = .idle
@@ -468,11 +470,11 @@ public actor PatentLoopEngine: LoopEngine {
         do {
             output = try await strategy.execute(context: context)
         } catch {
-            print("[PatentLoopEngine] Reasoning strategy execution failed: \(error)")
+            logger.error("Reasoning strategy execution failed: \(error, privacy: .public)")
             return ""
         }
         guard let output else {
-            print("[PatentLoopEngine] Reasoning strategy returned nil")
+            logger.warning("Reasoning strategy returned nil")
             return ""
         }
 

@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let fileToolsLogger = Logger(subsystem: "com.yunpat", category: "execute_shell")
 
 // MARK: - File Tools 注册 & 处理
 
@@ -235,7 +238,7 @@ extension ToolDispatch {
         do {
             try process.run()
         } catch {
-            print("[execute_shell] Failed to run process: \(error)")
+            fileToolsLogger.error("Failed to run process: \(error, privacy: .public)")
             return "Error: \(error.localizedDescription)"
         }
         process.waitUntilExit()

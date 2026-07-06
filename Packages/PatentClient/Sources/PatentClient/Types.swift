@@ -208,7 +208,7 @@ public struct PssPatentDetail: Codable, Sendable {
 
 // MARK: - 错误类型
 
-public enum PatentClientError: Error, Sendable, LocalizedError {
+public enum PatentClientError: Error, Sendable, LocalizedError, Equatable {
     case networkError(String)
     case parseError(String)
     case notFound(String)
