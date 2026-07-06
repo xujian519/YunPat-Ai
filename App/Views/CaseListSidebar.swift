@@ -191,7 +191,7 @@ struct TabRow: View {
             .foregroundStyle(.secondary)
             .padding(.horizontal, Spacing.xxs)
             .padding(.vertical, 2)
-            .background(Color.secondary.opacity(0.1))
+            .background(Color.appStatusNeutralSoft)
             .cornerRadius(CornerRadius.sm)
     }
 

@@ -31,7 +31,6 @@ public struct FallbackEntry: Codable, Identifiable, Sendable {
 /// - 成功时记录，连续失败数触发切换
 ///
 /// 线程安全: @unchecked Sendable + NSLock 保护可变状态
-@MainActor
 public final class FallbackChainService: @unchecked Sendable {
     public static let shared: FallbackChainService = FallbackChainService()
     private let lock: NSLock = NSLock()

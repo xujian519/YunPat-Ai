@@ -42,4 +42,11 @@ extension Color {
     static let appStatusSuccessSoft: Color = Color.green.opacity(0.12)
     static let appStatusWarningSoft: Color = Color.orange.opacity(0.12)
     static let appStatusRunningSoft: Color = Color.blue.opacity(0.12)
+
+    /// 中性软背景：用于无语义强调的徽章/标签（如流程标签）。
+    static let appStatusNeutralSoft: Color = Color.secondary.opacity(0.12)
+    /// 破坏性操作软背景。
+    static let appStatusDestructiveSoft: Color = Color.red.opacity(0.12)
+    /// 强调色软背景：用于强调色按钮/指示器（如模型选择器）。
+    static let appAccentSoft: Color = Color.accentColor.opacity(0.1)
 }

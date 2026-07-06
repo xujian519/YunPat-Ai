@@ -35,7 +35,7 @@ struct RoutingEngineTests {
 
     @Test
     func route_balanced_defaultProvider() async {
-        let engine: RoutingEngine = RoutingEngine()
+        let engine: RoutingEngine = RoutingEngine(fallbackService: FallbackChainService.shared)
         let request: RoutingRequest = RoutingRequest(content: "撰写权利要求")
         let decision: RoutingDecision = await engine.route(request)
 
@@ -48,7 +48,7 @@ struct RoutingEngineTests {
 
     @Test
     func route_cheapPrefersCheaperModel() async {
-        let engine: RoutingEngine = RoutingEngine()
+        let engine: RoutingEngine = RoutingEngine(fallbackService: FallbackChainService.shared)
         let request: RoutingRequest = RoutingRequest(
             content: "总结这段专利摘要",
             constraints: RoutingConstraints(strategy: .cheap)
@@ -61,7 +61,7 @@ struct RoutingEngineTests {
 
     @Test
     func route_localOnly_whenNoLocalProvider() async {
-        let engine: RoutingEngine = RoutingEngine()
+        let engine: RoutingEngine = RoutingEngine(fallbackService: FallbackChainService.shared)
         let request: RoutingRequest = RoutingRequest(
             content: "随便聊聊",
             constraints: RoutingConstraints(strategy: .localOnly)
@@ -73,7 +73,7 @@ struct RoutingEngineTests {
 
     @Test
     func route_preferredProvider_respected() async {
-        let engine: RoutingEngine = RoutingEngine()
+        let engine: RoutingEngine = RoutingEngine(fallbackService: FallbackChainService.shared)
         let request: RoutingRequest = RoutingRequest(
             content: "分析侵权风险",
             constraints: RoutingConstraints(preferredProvider: .openai)
@@ -94,7 +94,7 @@ struct RoutingEngineTests {
             perCaseUsd: 10
         )
         let service: TokenBudgetService = TokenBudgetService(config: config)
-        let engine: RoutingEngine = RoutingEngine(budgetService: service)
+        let engine: RoutingEngine = RoutingEngine(budgetService: service, fallbackService: FallbackChainService.shared)
 
         await service.recordUsage(
             caseId: "case-1",
@@ -116,7 +116,7 @@ struct RoutingEngineTests {
 
     @Test
     func reportUsage_updatesBudget() async {
-        let engine: RoutingEngine = RoutingEngine()
+        let engine: RoutingEngine = RoutingEngine(fallbackService: FallbackChainService.shared)
         let usage: Usage = Usage(promptTokens: 100, completionTokens: 50, totalTokens: 150)
         await engine.reportUsage(
             caseId: "case-a",

@@ -1,9 +1,8 @@
 import SwiftUI
 import YunPatCore
 
-/// 常驻任务 Dashboard：监听、快捷动作、后台工具
 struct AlwaysOnDashboardView: View {
-    @State private var isListening: Bool = false
+    @StateObject private var manager = AlwaysOnManager()
 
     var body: some View {
         ScrollView {
@@ -11,32 +10,17 @@ struct AlwaysOnDashboardView: View {
                 header
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 220))], spacing: Spacing.md) {
-                    AlwaysOnCard(
-                        title: "剪贴板监听",
-                        subtitle: isListening ? "运行中" : "已暂停",
-                        icon: "doc.on.clipboard",
-                        isActive: isListening
-                    ) {
-                        isListening.toggle()
+                    ForEach(AlwaysOnTaskKind.allCases, id: \.self) { kind in
+                        let status = manager.status(for: kind)
+                        AlwaysOnCard(
+                            title: title(for: kind),
+                            subtitle: subtitle(for: status),
+                            icon: icon(for: kind),
+                            isActive: status.state == .running
+                        ) {
+                            manager.toggle(kind)
+                        }
                     }
-                    AlwaysOnCard(
-                        title: "屏幕截图",
-                        subtitle: "⌘⇧5 触发",
-                        icon: "camera.viewfinder",
-                        isActive: false
-                    ) {}
-                    AlwaysOnCard(
-                        title: "文件监听",
-                        subtitle: "工作目录",
-                        icon: "folder.badge.gear",
-                        isActive: true
-                    ) {}
-                    AlwaysOnCard(
-                        title: "定时总结",
-                        subtitle: "每 6 小时",
-                        icon: "timer",
-                        isActive: true
-                    ) {}
                 }
 
                 shortcutSection
@@ -44,6 +28,7 @@ struct AlwaysOnDashboardView: View {
             .padding(Spacing.lg)
         }
         .background(Color.appBackground)
+        .task { await manager.subscribe() }
     }
 
     private var header: some View {
@@ -66,6 +51,39 @@ struct AlwaysOnDashboardView: View {
                 ShortcutButton(title: "新建速记", icon: "square.and.pencil", shortcut: "⌘⇧N")
                 ShortcutButton(title: "截图提问", icon: "camera", shortcut: "⌘⇧5")
             }
+        }
+    }
+
+    private func title(for kind: AlwaysOnTaskKind) -> String {
+        switch kind {
+        case .clipboard: return "剪贴板监听"
+        case .fileWatcher: return "文件监听"
+        case .periodicSummary: return "定时总结"
+        case .memoryConsolidation: return "记忆整理"
+        }
+    }
+
+    private func subtitle(for status: AlwaysOnTaskStatus) -> String {
+        switch status.state {
+        case .running:
+            if let last = status.lastRun {
+                let elapsed = Int(-last.timeIntervalSinceNow)
+                return "运行中 · \(elapsed)s 前执行"
+            }
+            return "运行中"
+        case .paused:
+            return "已暂停"
+        case .error(let msg):
+            return "错误: \(msg)"
+        }
+    }
+
+    private func icon(for kind: AlwaysOnTaskKind) -> String {
+        switch kind {
+        case .clipboard: return "doc.on.clipboard"
+        case .fileWatcher: return "folder.badge.gear"
+        case .periodicSummary: return "timer"
+        case .memoryConsolidation: return "brain.head.profile"
         }
     }
 }
@@ -97,8 +115,7 @@ struct AlwaysOnCard: View {
             }
             .padding()
             .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
-            .background(Color.appSurfacePrimary)
-            .cornerRadius(CornerRadius.lg)
+            .appCard()
         }
         .buttonStyle(.plain)
     }
@@ -126,12 +143,29 @@ struct ShortcutButton: View {
         }
         .padding()
         .frame(minWidth: 160)
-        .background(Color.appSurfacePrimary)
-        .cornerRadius(CornerRadius.lg)
+        .appCard()
     }
 }
 
-#Preview {
-    AlwaysOnDashboardView()
-        .frame(width: 900, height: 600)
+@MainActor
+final class AlwaysOnManager: ObservableObject {
+    @Published var statuses: [AlwaysOnTaskKind: AlwaysOnTaskStatus] = [:]
+
+    func subscribe() async {
+        let scheduler: AlwaysOnScheduler = AlwaysOnScheduler.shared
+        for kind in AlwaysOnTaskKind.allCases {
+            statuses[kind] = await scheduler.status(for: kind)
+        }
+        for await status in scheduler.statusStream() {
+            statuses[status.kind] = status
+        }
+    }
+
+    func status(for kind: AlwaysOnTaskKind) -> AlwaysOnTaskStatus {
+        statuses[kind] ?? AlwaysOnTaskStatus(kind: kind, state: .paused, lastRun: nil, nextRun: nil, errorMessage: nil)
+    }
+
+    func toggle(_ kind: AlwaysOnTaskKind) {
+        Task { await AlwaysOnScheduler.shared.toggle(kind) }
+    }
 }

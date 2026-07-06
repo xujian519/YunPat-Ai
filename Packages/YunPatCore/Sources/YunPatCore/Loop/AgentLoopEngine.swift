@@ -24,7 +24,9 @@ public actor AgentLoopEngine: LoopEngine {
     ) {
         self.modelRouter = modelRouter
         self.defaultProvider = provider
-        self.routingEngine = routingEngine ?? RoutingEngine()
+        self.routingEngine = routingEngine ?? RoutingEngine(
+            fallbackService: FallbackChainService.shared
+        )
         self.loop = PatentToolLoop()
         self.contextEngine = ContextEngine()
 

@@ -39,7 +39,7 @@ struct RoutingIndicator: View {
             }
             .padding(.horizontal, Spacing.xs)
             .padding(.vertical, 3)
-            .background(Color.green.opacity(0.08))
+            .background(Color.appStatusSuccessSoft)
             .cornerRadius(CornerRadius.sm)
         }
         .buttonStyle(.plain)
@@ -64,7 +64,7 @@ struct ModelPickerButton: View {
             }
             .padding(.horizontal, Spacing.xs)
             .padding(.vertical, 3)
-            .background(Color.accentColor.opacity(0.08))
+            .background(Color.appAccentSoft)
             .cornerRadius(CornerRadius.sm)
         }
         .buttonStyle(.plain)
@@ -251,7 +251,7 @@ struct ModelPickerPopover: View {
                     .padding(.vertical, 3)
                     .background(
                         activeModel == model.name
-                            ? Color.accentColor.opacity(0.08)
+                            ? Color.appAccentSoft
                             : Color.clear
                     )
                     .cornerRadius(CornerRadius.sm)

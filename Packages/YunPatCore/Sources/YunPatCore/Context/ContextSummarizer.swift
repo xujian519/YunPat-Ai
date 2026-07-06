@@ -31,8 +31,6 @@ public actor ContextSummarizer {
         let context = messages.map { "\($0.role.rawValue): \($0.content.prefix(300))" }.joined(separator: "\n")
         let prompt: String = "请用1-2句中文简要总结以下对话的核心内容：\n\n\(context)"
 
-
-
         let request = ChatRequest(
             model: provider.defaultModel,
             messages: [Message(role: .user, content: prompt)],

@@ -272,32 +272,93 @@ extension ToolDispatch {
 
     // MARK: - Dispatch with Hooks
 
-    /// 带 Hooks 分派: 先执行 preToolUse hooks (可 block)，再执行工具，最后 postToolUse hooks
+    /// 带 Hooks + 审计 分派: preToolUse hooks (可 block) → 执行 → postToolUse hooks → 审计记录
     public func dispatchWithHooks(
         name: String,
         input: [String: JSONValue],
         ctx: ToolContext
     ) async -> ToolHandlerResult {
+        let startTime: Date = Date()
+
         let (decision, hookMessage): (HookDecision, String?) = await HooksService.shared
             .runPreToolHooks(toolName: name, input: ToolInput(input))
         if decision == .block {
             let message: String = hookMessage ?? "Blocked by hook"
+            let duration: TimeInterval = Date().timeIntervalSince(startTime)
+            await ToolAuditRecorder.shared.recordToolCall(
+                toolName: name, duration: duration,
+                inputSummary: summarizeInput(input),
+                resultSummary: message, isError: true,
+                permissionDecision: "block",
+                sessionId: ctx.toolId
+            )
             return .handled(message)
         }
 
         guard let handler: ToolHandler = handler(for: name) else {
+            let duration: TimeInterval = Date().timeIntervalSince(startTime)
+            await ToolAuditRecorder.shared.recordToolCall(
+                toolName: name, duration: duration,
+                inputSummary: summarizeInput(input),
+                resultSummary: "Unknown tool: \(name)", isError: true,
+                permissionDecision: "allow",
+                sessionId: ctx.toolId
+            )
             return .notHandled
         }
         let result: ToolHandlerResult = await handler(name, input, ctx)
 
+        let duration: TimeInterval = Date().timeIntervalSince(startTime)
+
         if case .handled(let output) = result {
+            let finalOutput: String
             if let transformed = await HooksService.shared.runPostToolHooks(
                 toolName: name, input: ToolInput(input), output: output
             ) {
-                return .handled(transformed)
+                finalOutput = transformed
+            } else {
+                finalOutput = output
             }
+
+            await ToolAuditRecorder.shared.recordToolCall(
+                toolName: name, duration: duration,
+                inputSummary: summarizeInput(input),
+                resultSummary: summarizeResult(finalOutput),
+                isError: false,
+                permissionDecision: "allow",
+                sessionId: ctx.toolId
+            )
+            return .handled(finalOutput)
+        }
+
+        if case .taskComplete(let summary) = result {
+            await ToolAuditRecorder.shared.recordToolCall(
+                toolName: name, duration: duration,
+                inputSummary: summarizeInput(input),
+                resultSummary: "task_complete: \(summary.prefix(100))",
+                isError: false,
+                permissionDecision: "allow",
+                sessionId: ctx.toolId
+            )
+            return result
         }
 
         return result
+    }
+
+    /// 对输入参数做安全摘要（隐藏敏感值、限制长度）
+    private func summarizeInput(_ input: [String: JSONValue]) -> String {
+        let keys: [String] = Array(input.keys)
+        let preview: String = keys.prefix(5).joined(separator: ", ")
+        if keys.count > 5 {
+            return "\(keys.count) params [\(preview), ...]"
+        }
+        return preview.isEmpty ? "no params" : "\(keys.count) params [\(preview)]"
+    }
+
+    /// 对结果做摘要（限制长度，用于审计展示）
+    private func summarizeResult(_ text: String) -> String {
+        if text.count <= 200 { return text }
+        return String(text.prefix(200)) + "…"
     }
 }

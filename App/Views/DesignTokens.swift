@@ -82,6 +82,9 @@ enum PanelWidth {
     static let costDashboardIdeal: CGFloat = 300
     static let memoryAuditMin: CGFloat = 260
     static let memoryAuditIdeal: CGFloat = 320
+
+    static let toolAuditMin: CGFloat = 280
+    static let toolAuditIdeal: CGFloat = 360
     static let flowPicker: CGFloat = 240
     static let welcomeMax: CGFloat = 640
     static let suggestionCardMin: CGFloat = 200

@@ -85,7 +85,7 @@ struct WikiAdapterTests {
 
     // MARK: - Semantic Search
 
-    @Test func semanticSearch_returnsMatchingFiles() throws {
+    @Test func semanticSearch_returnsMatchingFiles() async throws {
         let vault = try createTempVault()
         defer { try? FileManager.default.removeItem(at: vault) }
 
@@ -98,14 +98,14 @@ struct WikiAdapterTests {
         try "# 新颖性判断\n\n单独对比原则是判断新颖性的基础。"
             .write(to: wikiDir.appendingPathComponent("新颖性判断.md"), atomically: true, encoding: .utf8)
 
-        let results = try adapter.semanticSearch(query: "创造性")
+        let results = try await adapter.semanticSearch(query: "创造性")
 
         #expect(!results.isEmpty)
         #expect(results.first?.title == "创造性判断")
         #expect((results.first?.score ?? 0) > 0)
     }
 
-    @Test func semanticSearch_ignoresIndexFiles() throws {
+    @Test func semanticSearch_ignoresIndexFiles() async throws {
         let vault = try createTempVault()
         defer { try? FileManager.default.removeItem(at: vault) }
 
@@ -118,11 +118,11 @@ struct WikiAdapterTests {
             .write(to: wikiDir.appendingPathComponent("真实页面.md"), atomically: true, encoding: .utf8)
 
         // "index content" does not appear in "真实页面.md", so results should be empty
-        let results = try adapter.semanticSearch(query: "index content")
+        let results = try await adapter.semanticSearch(query: "index content")
         #expect(results.isEmpty)
     }
 
-    @Test func semanticSearch_noMatch_returnsEmpty() throws {
+    @Test func semanticSearch_noMatch_returnsEmpty() async throws {
         let vault = try createTempVault()
         defer { try? FileManager.default.removeItem(at: vault) }
 
@@ -132,7 +132,7 @@ struct WikiAdapterTests {
 
         try "# 创造性判断\n\n三步法。".write(to: wikiDir.appendingPathComponent("创造性判断.md"), atomically: true, encoding: .utf8)
 
-        let results = try adapter.semanticSearch(query: "新颖性")
+        let results = try await adapter.semanticSearch(query: "新颖性")
         #expect(results.isEmpty)
     }
 

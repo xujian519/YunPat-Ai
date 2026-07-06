@@ -80,8 +80,7 @@ struct RoutingDashboardView: View {
                 Toggle("代码任务优先 DeepSeek", isOn: .constant(false))
             }
             .padding()
-            .background(Color.appSurfacePrimary)
-            .cornerRadius(CornerRadius.lg)
+            .appCard()
         }
     }
 
@@ -119,15 +118,14 @@ struct ProviderStatusCard: View {
         }
         .padding()
         .frame(minWidth: 120)
-        .background(Color.appSurfacePrimary)
-        .cornerRadius(CornerRadius.lg)
+        .appCard()
     }
 
     private var color: Color {
         switch status {
-        case .healthy: return .green
-        case .degraded: return .orange
-        case .offline: return .red
+        case .healthy: return Color.statusSuccess
+        case .degraded: return Color.statusWarning
+        case .offline: return Color.statusDestructive
         }
     }
 }

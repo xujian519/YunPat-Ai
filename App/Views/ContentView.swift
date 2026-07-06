@@ -142,6 +142,9 @@ struct ContentView: View {
             case .memoryAudit:
                 MemoryAuditView()
                     .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+            case .toolAudit:
+                ToolAuditView()
+                    .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             }
         }
     }

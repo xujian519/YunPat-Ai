@@ -125,6 +125,10 @@ public struct PatentLoopHooks: Sendable {
     public typealias OnTodoUpdate = @Sendable (String) async -> Void
     public typealias OnClarify = @Sendable (ClarifyRequest) async -> String
     public typealias OnStreamChunk = @Sendable (String) async -> Void
+    public typealias LifecycleHook = @Sendable () async -> Void
+    public typealias PreModelHook = @Sendable () async -> Bool
+    public typealias PostModelHook = @Sendable (String) async -> Void
+    public typealias SessionEndHook = @Sendable (LoopExit) async -> Void
 
     public let buildMessages: BuildMessages
     public let modelStep: ModelStep?
@@ -135,6 +139,12 @@ public struct PatentLoopHooks: Sendable {
     public let onClarify: OnClarify?
     public let onStreamChunk: OnStreamChunk?
 
+    // 生命周期钩子
+    public let onSessionStart: LifecycleHook?
+    public let onPreModelCall: PreModelHook?
+    public let onPostModelCall: PostModelHook?
+    public let onSessionEnd: SessionEndHook?
+
     public init(
         buildMessages: @escaping BuildMessages,
         modelStep: ModelStep? = nil,
@@ -143,7 +153,11 @@ public struct PatentLoopHooks: Sendable {
         executeBatch: @escaping ExecuteBatch,
         onTodoUpdate: OnTodoUpdate? = nil,
         onClarify: OnClarify? = nil,
-        onStreamChunk: OnStreamChunk? = nil
+        onStreamChunk: OnStreamChunk? = nil,
+        onSessionStart: LifecycleHook? = nil,
+        onPreModelCall: PreModelHook? = nil,
+        onPostModelCall: PostModelHook? = nil,
+        onSessionEnd: SessionEndHook? = nil
     ) {
         self.buildMessages = buildMessages
         self.modelStep = modelStep
@@ -153,6 +167,10 @@ public struct PatentLoopHooks: Sendable {
         self.onTodoUpdate = onTodoUpdate
         self.onClarify = onClarify
         self.onStreamChunk = onStreamChunk
+        self.onSessionStart = onSessionStart
+        self.onPreModelCall = onPreModelCall
+        self.onPostModelCall = onPostModelCall
+        self.onSessionEnd = onSessionEnd
     }
 }
 
@@ -295,7 +313,9 @@ public struct ClarifyRequest: Sendable {
 public actor PatentToolLoop {
 
     private var taskState: PatentHarnessTaskState = PatentHarnessTaskState()
-    private var compactionWatermark: CompactionWatermark = CompactionWatermark()
+    private var compactionWatermark: CompactionWatermark
+    private var compactionPolicy: CompactionPolicy
+    private var fullCompactor: FullCompactor?
     private var manifest: CapabilityManifest?
     private let batchExecutor: ToolBatchExecutor = .shared
     private var stuckGuard: StuckGuard = StuckGuard()
@@ -304,7 +324,29 @@ public actor PatentToolLoop {
     /// 当前会话的工具交互历史（assistant 工具调用 + tool 结果），跨迭代轮次累积
     private var toolConversation: [Message] = []
 
-    public init() {}
+    public init(
+        policy: CompactionPolicy = .balanced,
+        fullCompactor: FullCompactor? = nil
+    ) {
+        self.compactionWatermark = CompactionWatermark(
+            protectedRecentPairs: policy.protectedRecentPairs
+        )
+        self.compactionPolicy = policy
+        self.fullCompactor = fullCompactor
+    }
+
+    /// 更新压缩策略（运行时调整，如切换 flow type）
+    public func updateCompactionPolicy(_ policy: CompactionPolicy) {
+        compactionPolicy = policy
+        compactionWatermark = CompactionWatermark(
+            protectedRecentPairs: policy.protectedRecentPairs
+        )
+    }
+
+    /// 设置全量压缩器
+    public func setFullCompactor(_ compactor: FullCompactor?) {
+        fullCompactor = compactor
+    }
 
     /// 设置 session 的 Capability manifest（首次迭代注入到 system message）
     public func setManifest(_ manifest: CapabilityManifest) {
@@ -336,6 +378,9 @@ public actor PatentToolLoop {
         taskState.beginMessage()
         toolConversation.removeAll()
         let budget: ContextBudget = ContextBudget(capabilities: provider.defaultCapabilities)
+
+        await hooks.onSessionStart?()
+        await HooksService.shared.runSessionStartHooks()
 
         while iteration < policy.maxIterations {
             iteration += 1
@@ -370,13 +415,18 @@ public actor PatentToolLoop {
             // 追加工具交互历史（跨迭代轮次累积，供 LLM 看到上一轮工具结果）
             messages.append(contentsOf: toolConversation)
 
-            // 3. Compact history if needed
-            let compacted: CompactResult = compactionWatermark.compact(
+            // 3. Multi-level compact history if needed
+            let compactor: FullCompactor? = compactionPolicy.enableFullCompact ? fullCompactor : nil
+            let compacted: CompactResult = await compactionWatermark.compact(
                 messages: messages, request: ChatRequest(model: "", messages: messages),
-                budget: budget, provider: provider
+                budget: budget, provider: provider,
+                fullCompactor: compactor
             )
             if compacted.overBudget {
-                return .overBudget("Context window exceeded even after compaction.")
+                let exit = LoopExit.overBudget("Context window exceeded even after compaction.")
+                await hooks.onSessionEnd?(exit)
+                await HooksService.shared.runSessionEndHooks(summary: exit.summary)
+                return exit
             }
             if compacted.messages.count < messages.count {
                 messages = compacted.messages
@@ -385,7 +435,13 @@ public actor PatentToolLoop {
                 }
             }
 
-            // 4. Model step（优先流式 modelStream，回退 modelStep）
+            // 4. Pre-model lifecycle hook
+            let proceed: Bool = await hooks.onPreModelCall?() ?? true
+            if !proceed {
+                return .finalResponse("Blocked by pre-model lifecycle hook")
+            }
+            _ = await HooksService.shared.runPreModelHooks()
+            // 5. Model step（优先流式 modelStream，回退 modelStep）
             let tools: [ToolSpec] = registeredTools()
 
             if let modelStream = hooks.modelStream {
@@ -393,72 +449,40 @@ public actor PatentToolLoop {
                     let stream: AsyncThrowingStream<ModelStepChunk, Error> = try await modelStream(messages, tools)
                     var fullText: String = ""
                     var hadToolCalls: Bool = false
+                    var streamExit: LoopExit?
                     for try await chunk in stream {
                         switch chunk {
                         case .textDelta(let text):
                             fullText += text
                             await hooks.onStreamChunk?(text)
                         case .done:
-                            if hadToolCalls { break }
-                            return .finalResponse(fullText.isEmpty ? "No response" : fullText)
+                            if !hadToolCalls {
+                                streamExit = .finalResponse(fullText.isEmpty ? "No response" : fullText)
+                            }
                         case .toolCall(let call):
                             hadToolCalls = true
-                            let ctx: ToolContext = ToolContext(
-                                toolId: call.id, projectFolder: "",
-                                selectedProvider: provider
-                            )
-                            let (results, updatedState): ([ToolEnvelope], PatentHarnessTaskState) =
-                                await batchExecutor.execute(
-                                    calls: [call], ctx: ctx,
-                                    stateSnapshot: taskState,
-                                    executor: hooks.executeTool,
-                                    permissionGate: { _ in true },
-                                    preExecutionGate: { _ in .allow },
-                                    onIntercept: { [hooks] call, env async -> InterceptAction in
-                                        if interceptNames.contains(call.name), !env.isError {
-                                            if call.name == "todo" {
-                                                await hooks.onTodoUpdate?(env.content)
-                                                return .continue
-                                            }
-                                            if call.name == "complete" || call.name == "task_complete" {
-                                                guard AgentLoopTools.validate(summary: env.content)
-                                                else { return .continue }
-                                                return .endRun
-                                            }
-                                            if call.name == "clarify" || call.name == "ask_user" { return .endRun }
-                                        }
-                                        return .continue
-                                    }
+                            // swiftlint:disable:next large_tuple
+                            let (updated, msgs, exit): (PatentHarnessTaskState, [Message], LoopExit?) =
+                                await processStreamToolCall(
+                                    call: call, provider: provider, hooks: hooks,
+                                    interceptNames: interceptNames, policy: policy,
+                                    fullText: fullText,
+                                    batchExecutor: batchExecutor, taskState: taskState
                                 )
-                            taskState = updatedState
-                            invalidateCachesAfterWrite(calls: [call])
-                            // 追加 assistant 工具调用 + tool 结果到交互历史
-                            toolConversation.append(Message(role: .assistant, content: fullText))
-                            for (index, callItem) in [call].enumerated() {
-                                guard index < results.count else { continue }
-                                toolConversation.append(Message(
-                                    role: .tool, content: results[index].content,
-                                    toolCallID: callItem.id, name: callItem.name
-                                ))
-                                guard !results[index].isError else { continue }
-                                if callItem.name == "complete" || callItem.name == "task_complete" {
-                                    return .endedBySurface(
-                                        EndedBySurface(kind: .complete, summary: results[index].content)
-                                    )
-                                }
-                                if callItem.name == "clarify" || callItem.name == "ask_user" {
-                                    return .endedBySurface(
-                                        EndedBySurface(kind: .clarify, summary: results[index].content)
-                                    )
-                                }
-                            }
-                            if results.contains(where: { $0.isError }) && policy.stopOnToolRejection {
-                                return .toolRejected("Tool rejected by user or system")
-                            }
+                            taskState = updated
+                            streamExit = exit
+                            toolConversation.append(contentsOf: msgs)
                         case .error(let error):
-                            return .finalResponse("Error: \(error)")
+                            streamExit = .finalResponse("Error: \(error)")
+                        }
+                        if let exit = streamExit {
+                            await hooks.onPostModelCall?(fullText)
+                            await HooksService.shared.runPostModelHooks(output: fullText)
+                            return exit
                         }
                     }
+                    await hooks.onPostModelCall?(fullText)
+                    await HooksService.shared.runPostModelHooks(output: fullText)
                     if hadToolCalls {
                         taskState.beginMessage()
                         continue
@@ -484,74 +508,22 @@ public actor PatentToolLoop {
                 return .finalResponse(text)
 
             case .toolCalls(let calls):
-                // 5. Batch execute via ToolBatchExecutor
-                let ctx: ToolContext = ToolContext(toolId: "", projectFolder: "", selectedProvider: provider)
-                let (results, updatedState): ([ToolEnvelope], PatentHarnessTaskState) = await batchExecutor.execute(
-                    calls: calls, ctx: ctx,
-                    stateSnapshot: taskState,
-                    executor: hooks.executeTool,
-                    permissionGate: { _ in true },
-                    preExecutionGate: { _ in .allow },
-                    onIntercept: { [hooks] (call: ToolCall, env: ToolEnvelope) async -> InterceptAction in
-                        if interceptNames.contains(call.name), !env.isError {
-                            if call.name == "todo" {
-                                await hooks.onTodoUpdate?(env.content)
-                                return InterceptAction.continue
-                            }
-                            if call.name == "complete" || call.name == "task_complete" {
-                                guard AgentLoopTools.validate(summary: env.content) else {
-                                    return InterceptAction.continue
-                                }
-                                return InterceptAction.endRun
-                            }
-                            if call.name == "clarify" || call.name == "ask_user" {
-                                return InterceptAction.endRun  // clarify → endedBySurface(clarify)
-                            }
-                        }
-                        return InterceptAction.continue
-                    }
-                )
-                taskState = updatedState
-                invalidateCachesAfterWrite(calls: calls)
-
-                // 追加 assistant 工具调用 + tool 结果到交互历史
-                toolConversation.append(Message(role: .assistant, content: ""))
-                for (index, call) in calls.enumerated() {
-                    guard index < results.count else { continue }
-                    toolConversation.append(Message(
-                        role: .tool, content: results[index].content,
-                        toolCallID: call.id, name: call.name
-                    ))
-                }
-
-                // 6. Check intercept in results (simplified — executor already handled)
-                for (index, call) in calls.enumerated() {
-                    guard index < results.count, !results[index].isError else { continue }
-                    if call.name == "complete" || call.name == "task_complete" {
-                        return .endedBySurface(EndedBySurface(kind: .complete, summary: results[index].content))
-                    }
-                    if call.name == "clarify" || call.name == "ask_user" {
-                        return .endedBySurface(EndedBySurface(kind: .clarify, summary: results[index].content))
-                    }
-                }
-
-                // 7. StuckGuard — 检测连续编辑失败
-                for (index, call) in calls.enumerated() where index < results.count {
-                    guard let nudge = stuckGuard.check(
-                        toolName: call.name,
-                        filePath: extractFilePath(from: call),
-                        result: results[index].content
-                    ) else { continue }
-                    messages.append(Message(role: .system, content: nudge.message))
-                    if nudge.resetAfter { stuckGuard.reset(filePath: nudge.path) }
-                }
-
-                // 8. Track consecutive reads
-                let hasWrite = calls.contains { !loopGuard_readTools.contains($0.name) }
-                if hasWrite { consecutiveReads = 0 } else { consecutiveReads += calls.count }
-
-                // 9. Check for rejection
-                let rejected: Bool = results.contains { $0.isError }
+                // swiftlint:disable:next large_tuple
+                let batchResult: (PatentHarnessTaskState, [Message], Int, LoopExit?, Bool, StuckGuard) =
+                    await processBatchToolResults(
+                        calls: calls, hooks: hooks, interceptNames: interceptNames,
+                        provider: provider, policy: policy,
+                        messages: &messages,
+                        batchExecutor: batchExecutor, taskState: taskState,
+                        stuckGuard
+                    )
+                // swiftlint:disable:next explicit_type_interface
+                let (updated, msgs, reads, exit, rejected, updatedGuard) = batchResult
+                taskState = updated
+                stuckGuard = updatedGuard
+                toolConversation.append(contentsOf: msgs)
+                consecutiveReads = reads
+                if let exitValue = exit { return exitValue }
                 if rejected && policy.stopOnToolRejection {
                     return .toolRejected("Tool rejected by user or system")
                 }
@@ -563,34 +535,172 @@ public actor PatentToolLoop {
             taskState.beginMessage()
         }
 
-        return .iterationCapReached("Reached max iterations (\(policy.maxIterations))")
+        let exit = LoopExit.iterationCapReached("Reached max iterations (\(policy.maxIterations))")
+        await hooks.onSessionEnd?(exit)
+        await HooksService.shared.runSessionEndHooks(summary: exit.summary)
+        return exit
     }
+}
 
-    // MARK: - Helpers
+// MARK: - Free helpers (no actor isolation needed)
 
-    private func registeredTools() -> [ToolSpec] {
-        ToolDispatch.shared.allToolSpecs
-    }
+private func registeredTools() -> [ToolSpec] {
+    ToolDispatch.shared.allToolSpecs
+}
 
-    private func extractFilePath(from call: ToolCall) -> String? {
-        call.arguments["file_path"] ?? call.arguments["path"]
-    }
+// swiftlint:disable function_parameter_count large_tuple function_body_length
 
-    /// 写操作后使相关缓存失效
-    private func invalidateCachesAfterWrite(calls: [ToolCall]) {
-        for call in calls {
-            guard isWriteTool(call.name), let path = extractFilePath(from: call) else { continue }
-            let canon: String = PatentHarnessTaskState.canonicalPath(path)
-            FileSnapshotStore.shared.invalidateDiffs(for: canon)
+private func processStreamToolCall(
+    call: ToolCall, provider: ModelProvider, hooks: PatentLoopHooks,
+    interceptNames: Set<String>, policy: PatentLoopPolicy, fullText: String,
+    batchExecutor: ToolBatchExecutor, taskState: PatentHarnessTaskState
+) async -> (updatedState: PatentHarnessTaskState, toolMessages: [Message], exit: LoopExit?) {
+    let ctx: ToolContext = ToolContext(
+        toolId: call.id, projectFolder: "",
+        selectedProvider: provider
+    )
+    let (results, updatedState): ([ToolEnvelope], PatentHarnessTaskState) =
+        await batchExecutor.execute(
+            calls: [call], ctx: ctx,
+            stateSnapshot: taskState,
+            executor: hooks.executeTool,
+            permissionGate: { _ in true },
+            preExecutionGate: { _ in .allow },
+            onIntercept: { [hooks] call, env async -> InterceptAction in
+                if interceptNames.contains(call.name), !env.isError {
+                    if call.name == "todo" {
+                        await hooks.onTodoUpdate?(env.content)
+                        return .continue
+                    }
+                    if call.name == "complete" || call.name == "task_complete" {
+                        guard AgentLoopTools.validate(summary: env.content)
+                        else { return .continue }
+                        return .endRun
+                    }
+                    if call.name == "clarify" || call.name == "ask_user" { return .endRun }
+                }
+                return .continue
+            }
+        )
+    invalidateCachesAfterWrite(calls: [call])
+    var toolMessages: [Message] = [Message(role: .assistant, content: fullText)]
+    var exit: LoopExit?
+    for (index, callItem) in [call].enumerated() {
+        guard index < results.count else { continue }
+        toolMessages.append(Message(
+            role: .tool, content: results[index].content,
+            toolCallID: callItem.id, name: callItem.name
+        ))
+        guard !results[index].isError else { continue }
+        if callItem.name == "complete" || callItem.name == "task_complete" {
+            exit = .endedBySurface(
+                EndedBySurface(kind: .complete, summary: results[index].content)
+            )
+        }
+        if callItem.name == "clarify" || callItem.name == "ask_user" {
+            exit = .endedBySurface(
+                EndedBySurface(kind: .clarify, summary: results[index].content)
+            )
         }
     }
-
-    /// 判断工具是否为写操作
-    private func isWriteTool(_ name: String) -> Bool {
-        name == "write_file" || name == "file_write"
-            || name == "edit_file" || name == "file_edit"
-            || name == "delete_file" || name == "file_delete"
+    if results.contains(where: { $0.isError }) && policy.stopOnToolRejection {
+        exit = .toolRejected("Tool rejected by user or system")
     }
+    return (updatedState, toolMessages, exit)
+}
+
+private func processBatchToolResults(
+    calls: [ToolCall], hooks: PatentLoopHooks, interceptNames: Set<String>,
+    provider: ModelProvider, policy: PatentLoopPolicy, messages: inout [Message],
+    batchExecutor: ToolBatchExecutor, taskState: PatentHarnessTaskState,
+    _ stuckGuard: consuming StuckGuard
+) async -> (
+    updatedState: PatentHarnessTaskState, toolMessages: [Message],
+    consecutiveReads: Int, exit: LoopExit?, rejected: Bool,
+    updatedStuckGuard: StuckGuard
+) {
+    let ctx: ToolContext = ToolContext(toolId: "", projectFolder: "", selectedProvider: provider)
+    let (results, updatedState): ([ToolEnvelope], PatentHarnessTaskState) = await batchExecutor.execute(
+        calls: calls, ctx: ctx,
+        stateSnapshot: taskState,
+        executor: hooks.executeTool,
+        permissionGate: { _ in true },
+        preExecutionGate: { _ in .allow },
+        onIntercept: { [hooks] (call: ToolCall, env: ToolEnvelope) async -> InterceptAction in
+            if interceptNames.contains(call.name), !env.isError {
+                if call.name == "todo" {
+                    await hooks.onTodoUpdate?(env.content)
+                    return InterceptAction.continue
+                }
+                if call.name == "complete" || call.name == "task_complete" {
+                    guard AgentLoopTools.validate(summary: env.content) else {
+                        return InterceptAction.continue
+                    }
+                    return InterceptAction.endRun
+                }
+                if call.name == "clarify" || call.name == "ask_user" {
+                    return InterceptAction.endRun
+                }
+            }
+            return InterceptAction.continue
+        }
+    )
+    invalidateCachesAfterWrite(calls: calls)
+    await hooks.onPostModelCall?("tool_calls")
+    await HooksService.shared.runPostModelHooks(output: "tool_calls")
+    var toolMessages: [Message] = [Message(role: .assistant, content: "")]
+    for (index, call) in calls.enumerated() {
+        guard index < results.count else { continue }
+        toolMessages.append(Message(
+            role: .tool, content: results[index].content,
+            toolCallID: call.id, name: call.name
+        ))
+    }
+    var exit: LoopExit?
+    for (index, call) in calls.enumerated() {
+        guard index < results.count, !results[index].isError else { continue }
+        if call.name == "complete" || call.name == "task_complete" {
+            exit = .endedBySurface(EndedBySurface(kind: .complete, summary: results[index].content))
+            break
+        }
+        if call.name == "clarify" || call.name == "ask_user" {
+            exit = .endedBySurface(EndedBySurface(kind: .clarify, summary: results[index].content))
+            break
+        }
+    }
+    for (index, call) in calls.enumerated() where index < results.count {
+        guard let nudge = stuckGuard.check(
+            toolName: call.name,
+            filePath: extractFilePath(from: call),
+            result: results[index].content
+        ) else { continue }
+        messages.append(Message(role: .system, content: nudge.message))
+        if nudge.resetAfter { stuckGuard.reset(filePath: nudge.path) }
+    }
+    let hasWrite = calls.contains { !loopGuard_readTools.contains($0.name) }
+    let consecutive: Int = hasWrite ? 0 : calls.count
+    let rejected: Bool = results.contains { $0.isError }
+    return (updatedState, toolMessages, consecutive, exit, rejected, stuckGuard)
+}
+
+// swiftlint:enable function_parameter_count large_tuple function_body_length
+
+private func extractFilePath(from call: ToolCall) -> String? {
+    call.arguments["file_path"] ?? call.arguments["path"]
+}
+
+private func invalidateCachesAfterWrite(calls: [ToolCall]) {
+    for call in calls {
+        guard isWriteTool(call.name), let path = extractFilePath(from: call) else { continue }
+        let canon: String = PatentHarnessTaskState.canonicalPath(path)
+        FileSnapshotStore.shared.invalidateDiffs(for: canon)
+    }
+}
+
+private func isWriteTool(_ name: String) -> Bool {
+    name == "write_file" || name == "file_write"
+        || name == "edit_file" || name == "file_edit"
+        || name == "delete_file" || name == "file_delete"
 }
 
 private let loopGuard_readTools: Set<String> = [

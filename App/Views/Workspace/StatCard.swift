@@ -28,8 +28,7 @@ struct StatCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
-        .background(Color.appSurfacePrimary)
-        .cornerRadius(CornerRadius.lg)
+        .appCard()
     }
 }
 

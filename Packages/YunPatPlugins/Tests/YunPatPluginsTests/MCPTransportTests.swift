@@ -10,7 +10,7 @@ final class MCPTransportTests: XCTestCase {
         await server.registerTool(
             MCPToolDefinition(name: "echo", description: "Echo input")
         ) { args in
-            "Echo: \(args["message"] ?? "")"
+            .string("Echo: \(args.objectValue?["message"]?.stringValue ?? "")")
         }
 
         let transport = InProcessMCPTransport(server: server)
@@ -24,9 +24,9 @@ final class MCPTransportTests: XCTestCase {
 
     func test_multipleTools_listAll() async throws {
         let server = MCPServer()
-        await server.registerTool(MCPToolDefinition(name: "a", description: "A tool")) { _ in "A" }
-        await server.registerTool(MCPToolDefinition(name: "b", description: "B tool")) { _ in "B" }
-        await server.registerTool(MCPToolDefinition(name: "c", description: "C tool")) { _ in "C" }
+        await server.registerTool(MCPToolDefinition(name: "a", description: "A tool")) { _ in .string("A") }
+        await server.registerTool(MCPToolDefinition(name: "b", description: "B tool")) { _ in .string("B") }
+        await server.registerTool(MCPToolDefinition(name: "c", description: "C tool")) { _ in .string("C") }
 
         let request = MCPRequest(method: "tools/list", id: 1)
         let transport = InProcessMCPTransport(server: server)
@@ -41,7 +41,7 @@ final class MCPTransportTests: XCTestCase {
 
     func test_toolNotFound_throwsError() async throws {
         let server = MCPServer()
-        let request = MCPRequest(method: "tools/call", id: 1, params: ["name": "ghost"])
+        let request = MCPRequest(method: "tools/call", id: 1, params: .object(["name": .string("ghost")]))
         let transport = InProcessMCPTransport(server: server)
         let responseData = try await transport.send(try JSONEncoder().encode(request))
         let response = try JSONDecoder().decode(MCPResponse.self, from: responseData)
@@ -65,7 +65,7 @@ final class MCPTransportTests: XCTestCase {
             throw MCPError(message: "Handler exploded")
         }
 
-        let request = MCPRequest(method: "tools/call", id: 1, params: ["name": "boom"])
+        let request = MCPRequest(method: "tools/call", id: 1, params: .object(["name": .string("boom")]))
         let transport = InProcessMCPTransport(server: server)
         let responseData = try await transport.send(try JSONEncoder().encode(request))
         let response = try JSONDecoder().decode(MCPResponse.self, from: responseData)

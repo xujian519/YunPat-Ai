@@ -57,6 +57,8 @@ struct PromptCard: View {
     let suggestion: PromptSuggestion
     let action: () -> Void
 
+    @State private var isHovering: Bool = false
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: Spacing.sm) {
@@ -78,10 +80,15 @@ struct PromptCard: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(Spacing.sm)
-            .background(Color.appSurfacePrimary)
-            .cornerRadius(CornerRadius.lg)
+            .background(isHovering ? Color.appSurfaceSecondary : Color.appSurfacePrimary)
         }
         .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+                isHovering = hovering
+            }
+        }
+        .appCard()
     }
 }
 

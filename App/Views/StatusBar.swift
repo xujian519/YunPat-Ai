@@ -88,6 +88,12 @@ struct StatusBar: View {
                 action: { appState.rightDockActivePanel = .memoryAudit; appState.rightDockVisible = true }
             )
             StatusBarButton(
+                icon: "list.bullet.clipboard",
+                help: "工具审计",
+                isActive: appState.rightDockActivePanel == .toolAudit && appState.rightDockVisible,
+                action: { appState.rightDockActivePanel = .toolAudit; appState.rightDockVisible = true }
+            )
+            StatusBarButton(
                 icon: "checklist",
                 help: "协作面板",
                 isActive: appState.rightDockActivePanel == .collaboration && appState.rightDockVisible,

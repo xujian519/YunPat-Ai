@@ -121,8 +121,7 @@ struct MemoryEntryRow: View {
             Spacer()
         }
         .padding()
-        .background(Color.appSurfacePrimary)
-        .cornerRadius(CornerRadius.md)
+        .appCard(cornerRadius: CornerRadius.md)
     }
 }
 

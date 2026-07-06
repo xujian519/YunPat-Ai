@@ -211,6 +211,7 @@ struct SettingsTabView: View {
 @MainActor
 final class AppState: ObservableObject {
     let modelRouter: ModelRouter
+    private let logger = Logger(subsystem: "com.yunpat", category: "AppState")
 
     init() {
         let router: ModelRouter = ModelRouter()

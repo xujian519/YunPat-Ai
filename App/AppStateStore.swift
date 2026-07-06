@@ -12,6 +12,7 @@ public enum RightDockPanel: String, CaseIterable, Codable {
     case caseGraph
     case costDashboard
     case memoryAudit
+    case toolAudit
 }
 
 /// 顶部主导航模块，与 PilotDeck 对齐

@@ -39,7 +39,7 @@ struct ModernSettingsView: View {
             Spacer()
         }
         .frame(width: 180)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.appSurfacePrimary)
     }
 
     private func categoryRow(_ category: SettingsCategory) -> some View {
@@ -94,7 +94,7 @@ struct ModernSettingsView: View {
             .padding(Spacing.lg)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.appBackground)
     }
 
     private var appearanceSection: some View {
@@ -148,12 +148,7 @@ struct ModernSettingsView: View {
             }
         }
         .padding(Spacing.md)
-        .background(Color(NSColor.controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: CornerRadius.lg)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-        )
+        .appCard()
     }
 }
 

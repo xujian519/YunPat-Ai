@@ -75,20 +75,34 @@ public struct RoutingDecision: Sendable {
     public let estimatedInputTokens: Int
     public let estimatedCostUsd: Double
     public let reason: String
+    /// 是否经过回退链
+    public let didFallback: Bool
+    /// 回退链跳转次数
+    public let fallbackDepth: Int
 
     public init(
         provider: ModelProvider,
         model: String,
         estimatedInputTokens: Int,
         estimatedCostUsd: Double,
-        reason: String
+        reason: String,
+        didFallback: Bool = false,
+        fallbackDepth: Int = 0
     ) {
         self.provider = provider
         self.model = model
         self.estimatedInputTokens = estimatedInputTokens
         self.estimatedCostUsd = estimatedCostUsd
         self.reason = reason
+        self.didFallback = didFallback
+        self.fallbackDepth = fallbackDepth
     }
+}
+
+/// 回退链通知 — 向 FallbackChainService 报告成功/失败
+public enum FallbackReport: Sendable {
+    case success
+    case failure(Error)
 }
 
 // MARK: - ModelScore
@@ -107,19 +121,26 @@ private struct ModelScore: Sendable {
 /// 智能路由引擎 — 基于任务分类、模型能力、成本预算做动态模型选择
 ///
 /// 对标 PilotDeck「smart routing」：在 YunPat-Ai 中按案件预算与任务类型自动选择模型。
+/// 集成 FallbackChainService：主 provider 失败时自动依次回退至链中下一个启用的 provider。
 public actor RoutingEngine {
 
-    public static let shared: RoutingEngine = RoutingEngine()
+    public static let shared: RoutingEngine = RoutingEngine(
+        fallbackService: FallbackChainService.shared
+    )
 
     private let budgetService: TokenBudgetService
     private let pricing: PricingTable
+    private let fallbackService: FallbackChainService
+    private var depth: Int = 0
 
     public init(
         budgetService: TokenBudgetService = TokenBudgetService(),
-        pricing: PricingTable = PricingTable()
+        pricing: PricingTable = PricingTable(),
+        fallbackService: FallbackChainService
     ) {
         self.budgetService = budgetService
         self.pricing = pricing
+        self.fallbackService = fallbackService
     }
 
     /// 基于请求内容做任务分类（沿用 SmartModelRouter 关键词规则）
@@ -219,6 +240,11 @@ public actor RoutingEngine {
             budgetStrategy: request.constraints.strategy
         )
 
+        // 回退链：仅非 localOnly 策略时启用，当首选 provider 无可用候选时尝试
+        if request.constraints.strategy != .localOnly, sorted.isEmpty {
+            return await fallbackRoute(category: category, estimatedInput: estimatedInput, request: request)
+        }
+
         let reason: String = buildReason(
             category: category, strategy: request.constraints.strategy,
             score: chosen, withinBudget: chosen.estimatedCost <= (request.constraints.maxCostUsd ?? .infinity)
@@ -231,6 +257,16 @@ public actor RoutingEngine {
             estimatedCostUsd: chosen.estimatedCost,
             reason: reason
         )
+    }
+
+    /// 报告调用成功/失败以更新 FallbackChainService 状态
+    public func reportFallback(_ report: FallbackReport) {
+        switch report {
+        case .success:
+            fallbackService.recordSuccess()
+        case .failure:
+            _ = fallbackService.recordFailure()
+        }
     }
 
     /// 当前预算快照（透传 budgetService）
@@ -279,8 +315,12 @@ public actor RoutingEngine {
     }
 
     // MARK: - Scoring
+}
 
-    private func capabilityScore(
+// MARK: - Private Extensions
+
+private extension RoutingEngine {
+    func capabilityScore(
         provider: ModelProvider,
         model: String,
         category: SmartModelRouter.TaskCategory,
@@ -309,12 +349,12 @@ public actor RoutingEngine {
         return max(0, score)
     }
 
-    private func normalizeCostScore(_ cost: Double) -> Double {
+    func normalizeCostScore(_ cost: Double) -> Double {
         let reference: Double = 1.0
         return 1.0 / (1.0 + cost / reference)
     }
 
-    private static func rank(
+    static func rank(
         candidates: [ModelScore],
         strategy: RoutingStrategy
     ) -> [ModelScore] {
@@ -340,10 +380,50 @@ public actor RoutingEngine {
             return candidates.sorted { $0.capabilityScore > $1.capabilityScore }
         }
     }
+}
 
-    // MARK: - Budget
+private extension RoutingEngine {
+    func fallbackRoute(
+        category: SmartModelRouter.TaskCategory,
+        estimatedInput: Int,
+        request: RoutingRequest
+    ) async -> RoutingDecision {
+        var depth: Int = 0
+        while let provider = fallbackService.currentProvider {
+            let models: [String] = Self.candidateModels(for: category, provider: provider)
+            guard let model = models.first else {
+                _ = fallbackService.switchToNext()
+                depth += 1
+                continue
+            }
+            let cost: Double = pricing.cost(
+                usage: Usage(promptTokens: estimatedInput, completionTokens: estimatedInput / 2, totalTokens: 0),
+                model: model
+            )
+            let score = ModelScore(
+                provider: provider, model: model,
+                capabilityScore: 0.5, costScore: normalizeCostScore(cost), estimatedCost: cost
+            )
+            let reason = buildReason(
+                category: category, strategy: request.constraints.strategy,
+                score: score, withinBudget: cost <= (request.constraints.maxCostUsd ?? .infinity)
+            )
+            return RoutingDecision(
+                provider: provider, model: model,
+                estimatedInputTokens: estimatedInput,
+                estimatedCostUsd: cost, reason: reason,
+                didFallback: depth > 0, fallbackDepth: depth
+            )
+        }
+        return RoutingDecision(
+            provider: .deepseek, model: ProviderDefinition.definition(for: .deepseek).defaultModel,
+            estimatedInputTokens: estimatedInput, estimatedCostUsd: 0,
+            reason: "fallback chain exhausted",
+            didFallback: true, fallbackDepth: depth
+        )
+    }
 
-    private func selectWithinBudget(
+    func selectWithinBudget(
         sorted: [ModelScore],
         caseId: String?,
         budgetStrategy: RoutingStrategy
@@ -362,16 +442,13 @@ public actor RoutingEngine {
             }
         }
 
-        // 全部超预算：若策略允许降级，返回最便宜的候选；否则返回最佳候选（调用方负责熔断）
         if budgetStrategy == .caseBudget || budgetStrategy == .cheap {
             return sorted.min { $0.estimatedCost < $1.estimatedCost } ?? sorted.first ?? Self.fallbackScore()
         }
         return sorted.first ?? Self.fallbackScore()
     }
 
-    // MARK: - Reason
-
-    private func buildReason(
+    func buildReason(
         category: SmartModelRouter.TaskCategory,
         strategy: RoutingStrategy,
         score: ModelScore,
@@ -380,8 +457,10 @@ public actor RoutingEngine {
         let budgetNote: String = withinBudget ? "预算内" : "预算紧张/超支"
         return "任务:\(category) | 策略:\(strategy) | 模型:\(score.provider.rawValue)/\(score.model) | \(budgetNote)"
     }
+}
 
-    private static func fallbackScore() -> ModelScore {
+private extension RoutingEngine {
+    static func fallbackScore() -> ModelScore {
         ModelScore(
             provider: .deepseek,
             model: ProviderDefinition.definition(for: .deepseek).defaultModel,
