@@ -414,8 +414,7 @@ public actor PatentToolLoop {
                                     executor: hooks.executeTool,
                                     permissionGate: { _ in true },
                                     preExecutionGate: { _ in .allow },
-                                    onIntercept: {
-                                        [hooks] (call: ToolCall, env: ToolEnvelope) async -> InterceptAction in
+                                    onIntercept: { [hooks] call, env async -> InterceptAction in
                                         if interceptNames.contains(call.name), !env.isError {
                                             if call.name == "todo" {
                                                 await hooks.onTodoUpdate?(env.content)

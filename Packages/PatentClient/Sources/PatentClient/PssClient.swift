@@ -21,7 +21,7 @@ public actor PssClient {
     private static let userAgent: String = [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
         "AppleWebKit/537.36 (KHTML, like Gecko)",
-        "Chrome/120.0.0.0 Safari/537.36",
+        "Chrome/120.0.0.0 Safari/537.36"
     ].joined(separator: " ")
 
     public init(baseURL: String = "https://pss-system.cponline.cnipa.gov.cn", session: URLSession = .shared) {

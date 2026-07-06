@@ -90,11 +90,11 @@ public actor LegalStateMachine {
 
 public struct TransitionRecord: Sendable {
     public let from: LegalState
-    public let to: LegalState
+    public let toState: LegalState
     public let reason: String
-    public init(from: LegalState, to: LegalState, reason: String) {
+    public init(from: LegalState, to toState: LegalState, reason: String) {
         self.from = from
-        self.to = to
+        self.toState = toState
         self.reason = reason
     }
 }

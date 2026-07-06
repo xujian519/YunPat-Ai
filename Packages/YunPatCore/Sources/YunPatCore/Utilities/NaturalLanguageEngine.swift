@@ -34,8 +34,10 @@ public actor NaturalLanguageEngine {
         var entities: [Entity] = []
         let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
 
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: options) {
-            tag, range in
+        tagger.enumerateTags(
+            in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType,
+            options: options
+        ) { tag, range in
             if let tag = tag {
                 let value = String(text[range])
                 entities.append(Entity(type: tag.rawValue, value: value, range: range))
@@ -100,9 +102,9 @@ public actor NaturalLanguageEngine {
     }
 
     /// 文本相似度（基于词汇重叠+embedding 混合）
-    public func similarity(_ a: String, _ b: String) -> Double {
-        let tokensA = Set(tokenize(a.lowercased()))
-        let tokensB = Set(tokenize(b.lowercased()))
+    public func similarity(_ firstText: String, _ secondText: String) -> Double {
+        let tokensA = Set(tokenize(firstText.lowercased()))
+        let tokensB = Set(tokenize(secondText.lowercased()))
         guard !tokensA.isEmpty, !tokensB.isEmpty else { return 0 }
 
         let intersection = tokensA.intersection(tokensB)

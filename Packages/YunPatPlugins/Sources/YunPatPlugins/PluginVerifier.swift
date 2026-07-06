@@ -6,7 +6,7 @@ public actor PluginVerifier {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
         guard compareVersions(appVersion, manifest.minAppVersion) >= 0 else { return false }
         guard let bundleURL = bundle.bundleURL as CFURL? else { return false }
-        var staticCode: SecStaticCode? = nil
+        var staticCode: SecStaticCode?
         guard SecStaticCodeCreateWithPath(bundleURL, [], &staticCode) == errSecSuccess, let code = staticCode else {
             return false
         }

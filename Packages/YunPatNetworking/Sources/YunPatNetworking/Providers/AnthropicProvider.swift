@@ -40,7 +40,9 @@ public final class AnthropicProvider: ModelBackend {
 
                 do {
                     let urlRequest = try buildRequest(request)
-                    let (bytes, response): (URLSession.AsyncBytes, URLResponse) = try await session.bytes(for: urlRequest)
+                    let (bytes, response): (URLSession.AsyncBytes, URLResponse) = try await session.bytes(
+                        for: urlRequest
+                    )
 
                     guard let httpResponse = response as? HTTPURLResponse else {
                         continuation.finish(throwing: ProviderError.invalidResponse)

@@ -4,7 +4,12 @@ public actor MCPServer {
     private var toolRegistry: [String: (MCPToolDefinition, (([String: String]) async throws -> String))] = [:]
     public init() {}
 
-    public func registerTool(_ tool: MCPToolDefinition, handler: @escaping (([String: String]) async throws -> String)) { toolRegistry[tool.name] = (tool, handler) }
+    public func registerTool(
+        _ tool: MCPToolDefinition,
+        handler: @escaping (([String: String]) async throws -> String)
+    ) {
+        toolRegistry[tool.name] = (tool, handler)
+    }
 
     /// 处理单个 JSON-RPC 请求，返回编码后的响应 Data
     public func handleRequest(_ payload: Data) async throws -> Data {
@@ -42,7 +47,7 @@ public actor MCPServer {
             guard let data = line.data(using: .utf8) else { continue }
             let responseData: Data = try await handleRequest(data)
             stdout.write(responseData)
-            stdout.write("\n".data(using: .utf8)!)
+            stdout.write(Data("\n".utf8))
         }
     }
 }

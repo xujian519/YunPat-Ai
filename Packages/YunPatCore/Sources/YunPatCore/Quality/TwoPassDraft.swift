@@ -55,7 +55,7 @@ public actor TwoPassDraft {
     public func evaluate(
         draft: String, inputFacts: [FactMarker], scope: TabooScope = .claims
     ) async -> DraftEvaluation {
-        let d = await diagnose(draft: draft, inputFacts: inputFacts, scope: scope)
-        return DraftEvaluation(diagnosis: d, verdict: d.verdict)
+        let diagnosis = await diagnose(draft: draft, inputFacts: inputFacts, scope: scope)
+        return DraftEvaluation(diagnosis: diagnosis, verdict: diagnosis.verdict)
     }
 }

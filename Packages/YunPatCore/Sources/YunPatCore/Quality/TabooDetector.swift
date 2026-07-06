@@ -61,12 +61,12 @@ public actor TabooDetector {
 
     public func detect(in text: String, scope: TabooScope = .claims) -> [TabooMatch] {
         var matches: [TabooMatch] = []
-        for (i, line) in text.components(separatedBy: .newlines).enumerated() {
+        for (lineIndex, line) in text.components(separatedBy: .newlines).enumerated() {
             for rule in rules where line.contains(rule.pattern) {
                 matches.append(
                     TabooMatch(
                         rule: rule,
-                        line: i + 1,
+                        line: lineIndex + 1,
                         matchedText: line.trimmingCharacters(in: .whitespaces)
                     ))
             }
@@ -75,14 +75,15 @@ public actor TabooDetector {
     }
 
     public func report(for text: String, scope: TabooScope = .claims) -> String {
-        let m = detect(in: text, scope: scope)
-        if m.isEmpty { return "✅ 未检测到禁用词" }
+        let matches = detect(in: text, scope: scope)
+        if matches.isEmpty { return "✅ 未检测到禁用词" }
         var lines = ["## 禁用词检测", "", "| 行 | 禁用词 | 严重度 | 建议 |", "|----|--------|--------|------|"]
-        for x in m {
-            lines.append("| \(x.line) | `\(x.rule.pattern)` | \(x.rule.severity.rawValue) | \(x.rule.suggestion) |")
+        for match in matches {
+            let severity = match.rule.severity.rawValue
+            lines.append("| \(match.line) | `\(match.rule.pattern)` | \(severity) | \(match.rule.suggestion) |")
         }
         lines.append("")
-        lines.append("**共 \(m.count) 处**")
+        lines.append("**共 \(matches.count) 处**")
         return lines.joined(separator: "\n")
     }
 }

@@ -54,10 +54,10 @@ public enum CredentialError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .keychainError(let s): "Keychain 错误 (OSStatus: \(s))"
-        case .storeFailed(let s): "Keychain 存储失败 (OSStatus: \(s))"
-        case .biometricsUnavailable(let m): m ?? "生物识别不可用"
-        case .keyGenFailed(let m): m ?? "密钥生成失败"
+        case .keychainError(let status): "Keychain 错误 (OSStatus: \(status))"
+        case .storeFailed(let status): "Keychain 存储失败 (OSStatus: \(status))"
+        case .biometricsUnavailable(let message): message ?? "生物识别不可用"
+        case .keyGenFailed(let message): message ?? "密钥生成失败"
         case .decryptFailed: "解密失败"
         }
     }

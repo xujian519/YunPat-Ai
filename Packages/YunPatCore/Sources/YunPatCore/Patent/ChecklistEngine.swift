@@ -107,9 +107,9 @@ public actor ChecklistEngine {
     }
 
     public func summary(_ results: [CheckResult]) -> String {
-        let p = results.filter(\.passed).count
-        let f = results.filter { !$0.passed }.count
-        return "通过: \(p), 未通过: \(f)"
+        let passedCount = results.filter(\.passed).count
+        let failedCount = results.filter { !$0.passed }.count
+        return "通过: \(passedCount), 未通过: \(failedCount)"
     }
 
     public func execute(caseType: String, content: String) -> [CheckResult] {

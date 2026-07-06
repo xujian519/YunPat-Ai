@@ -1,7 +1,5 @@
 import Foundation
 
-// swiftlint:disable function_parameter_count
-
 // 并行工具批处理器 — 权限串行审批 + TaskGroup 并行执行，支持 intercept 和 dedup
 //
 // 两阶段设计：
@@ -24,8 +22,8 @@ public struct ToolBatchExecutor: Sendable {
 
     private init() {}
 
-    /// 执行一批工具调用（非 inout 版本，返回结果和状态更新）
-    // swiftlint:disable:next function_body_length
+    // 执行一批工具调用（非 inout 版本，返回结果和状态更新）
+    // swiftlint:disable:next function_parameter_count function_body_length
     public func execute(
         calls: [ToolCall],
         ctx: ToolContext,
@@ -118,7 +116,8 @@ public struct ToolBatchExecutor: Sendable {
         return (results.sorted { $0.0 < $1.0 }.map { $0.1 }, taskState)
     }
 
-    /// 串行执行（含 intercept 检测）
+    // 串行执行（含 intercept 检测）
+    // swiftlint:disable:next function_parameter_count
     private func executeSerial(
         calls: [ToolCall],
         taskState: inout PatentHarnessTaskState,

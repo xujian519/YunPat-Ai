@@ -10,7 +10,7 @@ public final class OMLXBackend: ModelBackend, @unchecked Sendable {
     private let modelsDir: URL
     private let fileManager: FileManager
     private let processQueue: DispatchQueue = DispatchQueue(label: "yunpat.omlx.process", qos: .default)
-    private var loadedModel: String? = nil
+    private var loadedModel: String?
 
     public init(modelsDir: URL? = nil) {
         self.fileManager = FileManager.default
