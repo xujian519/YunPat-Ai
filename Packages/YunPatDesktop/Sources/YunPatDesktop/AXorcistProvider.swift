@@ -11,8 +11,17 @@ public protocol AXorcistProvider: Sendable {
     func screenshot(app: String?, region: CGRect?) async throws -> Data
 }
 
-/// 基础实现（macOS Accessibility API）
+/// 基础实现（macOS Accessibility API），带 AX→CGEvent→HID 三级降级路由链
+///
+/// 路由链：
+///   1. AXUIElementPerformAction / AXUIElementSetAttributeValue（纯后台）
+///   2. CGEvent.postToPid（不移动光标）
+///   3. CGEvent.post(tap: .cghidEventTap)（移动光标，最后手段）
 public actor AppKitAXorcist: AXorcistProvider {
+
+    public private(set) var lastRoute: InputRoute = .accessibility
+
+    public var lastRouteDescription: String { lastRoute.rawValue }
 
     public init() {}
 
@@ -23,7 +32,30 @@ public actor AppKitAXorcist: AXorcistProvider {
         guard let axEl = findElement(in: axApp, label: element) else {
             throw AXorcistError.elementNotFound(app: app, element: element)
         }
-        AXUIElementPerformAction(axEl, kAXPressAction as CFString)
+
+        // Level 1: AXPress
+        let pressResult = AXUIElementPerformAction(axEl, kAXPressAction as CFString)
+        if pressResult == .success {
+            lastRoute = .accessibility
+            return
+        }
+
+        // Level 2 & 3: fallback to CGEvent
+        guard let position = getElementScreenCenter(axEl), let pid = pidOfAXElement(axEl) else {
+            throw AXorcistError.elementNotInteractive(app: app, element: element)
+        }
+
+        let cgResult = BackgroundRouter.shared.click(point: position, pid: pid)
+        if cgResult.success {
+            lastRoute = cgResult.route
+            return
+        }
+
+        let hidResult = BackgroundRouter.shared.clickHID(point: position)
+        lastRoute = hidResult.route
+        if !hidResult.success {
+            throw AXorcistError.clickFailed(app: app, element: element)
+        }
     }
 
     public func type(app: String, text: String, target: String) async throws {
@@ -33,10 +65,27 @@ public actor AppKitAXorcist: AXorcistProvider {
         guard let axEl = findElement(in: axApp, label: target) else {
             throw AXorcistError.elementNotFound(app: app, element: target)
         }
-        AXUIElementSetAttributeValue(axEl, kAXValueAttribute as CFString, text as CFString)
+
+        // Level 1: AXSetAttributeValue
+        let setResult = AXUIElementSetAttributeValue(axEl, kAXValueAttribute as CFString, text as CFString)
+        if setResult == .success {
+            lastRoute = .accessibility
+            return
+        }
+
+        // Level 2 & 3: fallback to CGEvent keyboard per-pid
+        guard let pid = pidOfAXElement(axEl) else {
+            throw AXorcistError.elementNotInteractive(app: app, element: target)
+        }
+        let result = BackgroundRouter.shared.type(text: text, pid: pid)
+        lastRoute = result.route
+        if !result.success {
+            throw AXorcistError.typeFailed(app: app, element: target)
+        }
     }
 
     public func read(app: String, element: String) async throws -> String {
+        lastRoute = .accessibility
         guard let axApp = findApp(app) else {
             throw AXorcistError.elementNotFound(app: app, element: element)
         }
@@ -106,7 +155,6 @@ public actor AppKitAXorcist: AXorcistProvider {
         return AXUIElementCreateApplication(pid)
     }
 
-    /// 递归搜索 AX 树，匹配 title/value/description 包含 label 的元素
     private func findElement(in axApp: AXUIElement, label: String) -> AXUIElement? {
         searchAXTree(axApp, target: label, depth: 0, maxDepth: 8)
     }
@@ -114,7 +162,6 @@ public actor AppKitAXorcist: AXorcistProvider {
     private func searchAXTree(_ element: AXUIElement, target: String, depth: Int, maxDepth: Int) -> AXUIElement? {
         if depth > maxDepth { return nil }
 
-        // 检查当前元素属性是否匹配
         for attr in [kAXTitleAttribute, kAXDescriptionAttribute, kAXValueAttribute, kAXHelpAttribute] {
             var value: CFTypeRef?
             let result = AXUIElementCopyAttributeValue(element, attr as CFString, &value)
@@ -125,7 +172,6 @@ public actor AppKitAXorcist: AXorcistProvider {
             }
         }
 
-        // 递归搜索子元素
         var children: CFTypeRef?
         let result = AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &children)
         guard result == .success, let childArray = children as? [AXUIElement] else { return nil }
@@ -143,6 +189,34 @@ public actor AppKitAXorcist: AXorcistProvider {
         return running.first(where: { $0.localizedName?.localizedCaseInsensitiveContains(name) == true })?
             .processIdentifier
     }
+
+    /// 获取 AX 元素的屏幕中心点
+    private func getElementScreenCenter(_ element: AXUIElement) -> CGPoint? {
+        var positionRef: CFTypeRef?
+        AXUIElementCopyAttributeValue(element, kAXPositionAttribute as CFString, &positionRef)
+        // swiftlint:disable:next force_cast
+        let positionValue: AXValue? = positionRef as! AXValue?
+        guard let posVal = positionValue else { return nil }
+        var point: CGPoint = .zero
+        guard AXValueGetValue(posVal, .cgPoint, &point) else { return nil }
+
+        var sizeRef: CFTypeRef?
+        AXUIElementCopyAttributeValue(element, kAXSizeAttribute as CFString, &sizeRef)
+        // swiftlint:disable:next force_cast
+        let sizeValue: AXValue? = sizeRef as! AXValue?
+        guard let sizeVal = sizeValue else { return point }
+        var size: CGSize = .zero
+        guard AXValueGetValue(sizeVal, .cgSize, &size) else { return point }
+
+        return CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
+    }
+
+    /// 获取 AX 元素的进程 ID
+    private func pidOfAXElement(_ element: AXUIElement) -> pid_t? {
+        var pid: pid_t = -1
+        let result = AXUIElementGetPid(element, &pid)
+        return result == .success ? pid : nil
+    }
 }
 
 public enum AXorcistError: Error, LocalizedError {
@@ -150,6 +224,9 @@ public enum AXorcistError: Error, LocalizedError {
     case readFailed(element: String)
     case screenshotFailed
     case appNotAllowed(String)
+    case elementNotInteractive(app: String, element: String)
+    case clickFailed(app: String, element: String)
+    case typeFailed(app: String, element: String)
 
     public var errorDescription: String? {
         switch self {
@@ -157,6 +234,9 @@ public enum AXorcistError: Error, LocalizedError {
         case .readFailed(let element): "读取 \(element) 失败"
         case .screenshotFailed: "截图失败"
         case .appNotAllowed(let name): "\(name) 不在白名单中"
+        case .elementNotInteractive(let app, let element): "\(app) 中的 \(element) 无法获取交互坐标"
+        case .clickFailed(let app, let element): "\(app) 中的 \(element) 点击失败（所有路由均失败）"
+        case .typeFailed(let app, let element): "\(app) 中的 \(element) 输入文本失败（所有路由均失败）"
         }
     }
 }

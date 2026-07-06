@@ -119,7 +119,7 @@ public actor SandboxManager: SandboxProvider {
 
 // MARK: - Errors
 
-public enum SandboxError: Error, LocalizedError {
+public enum SandboxError: Error, LocalizedError, Equatable {
     case unsupported
     case vmCreationFailed(String)
 

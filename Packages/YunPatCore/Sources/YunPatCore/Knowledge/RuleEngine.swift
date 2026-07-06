@@ -74,8 +74,7 @@ public actor RuleEngine {
 
         // Step 3: Module index breadth fallback (when both concept and semantic miss)
         if candidates.isEmpty {
-            let modules: [WikiModule] = [.patentPractice, .examinationGuide, .laws]
-            for module in modules {
+            for module in [WikiModule.patentPractice, .examinationGuide, .laws] {
                 if let index = try? await adapter.readModuleIndex(module) {
                     for link in adapter.parseWikilinks(from: index).prefix(strategy.limit) {
                         if let candidate: RuleCandidate = try? await readCandidate(wikilink: link) {
@@ -151,8 +150,7 @@ public actor RuleEngine {
 
     private func collectAllWikiSummaries() async throws -> [String] {
         var links: [String] = []
-        let modules: [WikiModule] = [.patentPractice, .examinationGuide, .laws]
-        for module in modules {
+        for module in [WikiModule.patentPractice, .examinationGuide, .laws] {
             if let index = try? await adapter.readModuleIndex(module) {
                 links.append(contentsOf: adapter.parseWikilinks(from: index))
             }

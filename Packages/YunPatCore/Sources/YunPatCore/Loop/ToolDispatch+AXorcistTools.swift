@@ -81,7 +81,8 @@ extension ToolDispatch {
                 "action": .string("click"),
                 "app": .string(app),
                 "element": .string(element),
-                "success": .bool(true)
+                "success": .bool(true),
+                "route_used": .string(provider.lastRouteDescription)
             ])).jsonString())
         } catch {
             return .handled(ToolResponse.errResp(
@@ -113,7 +114,8 @@ extension ToolDispatch {
                 "app": .string(app),
                 "target": .string(target),
                 "length": .number(Double(text.count)),
-                "success": .bool(true)
+                "success": .bool(true),
+                "route_used": .string(provider.lastRouteDescription)
             ])).jsonString())
         } catch {
             return .handled(ToolResponse.errResp(

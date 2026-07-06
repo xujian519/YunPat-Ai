@@ -1,0 +1,250 @@
+{
+  "generated" : "2026-07-06T10:00:01Z",
+  "toolCount" : 22,
+  "tools" : [
+    {
+      "name" : "ax_click",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_find_element",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_get_properties",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_list_windows",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_read",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_screenshot",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "name" : "ax_type",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "description" : "Search enabled capabilities by keyword — use before capabilities_load to find the exact capability name.",
+      "name" : "capabilities_discover",
+      "source" : "builtin",
+      "triggers" : [
+        "Exploring which capabilities are currently enabled in the session.",
+        "Finding the exact capability `name` required by `capabilities_load`.",
+        "Checking whether a specific feature (e.g. \"shell\", \"file\", \"knowledge\") is available."
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Call with a broad keyword (or omit `query` to list all capabilities)."
+      ]
+    },
+    {
+      "description" : "Load a capability into the current session — the capability's tools become callable immediately.",
+      "name" : "capabilities_load",
+      "source" : "builtin",
+      "triggers" : [
+        "Activating a capability discovered via `capabilities_discover`.",
+        "Enabling a feature mid-session that was not loaded at session start.",
+        "Dynamically extending the tool set based on user needs."
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Run `capabilities_discover` to find the target capability's exact `name`."
+      ]
+    },
+    {
+      "description" : "Pause the agent loop and ask the user a blocking question. Provide optional choices to constrain the response. Use only for genuinely blocking ambiguity — make reasonable defaults for minor uncertainties.",
+      "name" : "clarify",
+      "source" : "builtin",
+      "triggers" : [
+        "The technical disclosure is ambiguous on a critical feature needed to draft valid claims",
+        "Multiple legal interpretations are possible and the choice materially affects the OA strategy",
+        "The user's request is underspecified (e.g., \"analyze this patent\" without specifying novelty vs. infringement)",
+        "The user's instruction contradicts known patent law and needs clarification"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Detect a genuine ambiguity that prevents forward progress."
+      ]
+    },
+    {
+      "description" : "End the current task and deliver a verified summary. The summary must be ≥30 characters of meaningful prose describing what was actually done and how it was verified — placeholders like 'done', 'ok', '已完成' are rejected.",
+      "name" : "complete",
+      "source" : "builtin",
+      "triggers" : [
+        "The agent has finished all requested work and verified the output",
+        "The patent draft \/ OA response \/ infringement analysis is complete and self-consistent",
+        "The user explicitly asked to stop or wrap up",
+        "The agent hits an unrecoverable dead-end and must report the result anyway"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Verify all checklist items in `todo` are marked `[x]`."
+      ]
+    },
+    {
+      "description" : "Execute a shell command. Requires user approval before running. Integrates with HooksService for pre\/post-execution interception.",
+      "name" : "execute_shell",
+      "source" : "builtin",
+      "triggers" : [
+        "Running a single binary or a short pipeline to gather facts (e.g., `git status`, `wc -l`, `diff`, `swift test --list`)",
+        "Invoking project build tools, formatters, or linters where no higher-level tool exists",
+        "Inspecting system state: environment variables, disk usage, process listings"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Construct the command — prefer a single binary call or a short (≤2 pipe stages) fact-computing pipeline."
+      ]
+    },
+    {
+      "description" : "View the session's file operation log — every write_file and edit_file invocation with timestamps, undo status, and content metadata.",
+      "name" : "file_operation_history",
+      "source" : "builtin",
+      "triggers" : [
+        "Inspecting what file operations occurred so far in the current session",
+        "Finding the `operation_id` needed to undo a specific operation via file_undo",
+        "Auditing which files were modified, when, and by what kind of operation",
+        "Determining whether an operation is still undoable (↩️ = yes, ➡️ = no)"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Call file_operation_history with no parameters to view the full log"
+      ]
+    },
+    {
+      "description" : "Undo file operations (write_file, edit_file) within the current session. Supports undo by operation ID, by file path, or last N operations.",
+      "name" : "file_undo",
+      "source" : "builtin",
+      "triggers" : [
+        "Reverting a mistaken write_file or edit_file immediately after invocation",
+        "Undoing all changes to a specific file path via the `path` parameter",
+        "Rolling back the last N file operations in FIFO order via `count`",
+        "Recovery from accidental overwrites — relies on before-content captured by FileOperationLog"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Optionally call file_operation_history to inspect recent operations"
+      ]
+    },
+    {
+      "description" : "在宝宸专利知识库中检索法规、审查指南和判例文献",
+      "name" : "knowledge_search",
+      "source" : "builtin",
+      "version" : "1.0.0"
+    },
+    {
+      "description" : "查询中国专利法律状态与事务记录 — 接入 CNIPA 公布公告系统，返回当前状态及事件时间线",
+      "name" : "legal_status_query",
+      "source" : "builtin",
+      "triggers" : [
+        "用户询问某件中国专利的\"法律状态\"、\"是否授权\"、\"是否有效\"",
+        "需要了解专利经历了哪些审查节点（实质审查生效、驳回、撤回等）",
+        "对方提供专利号后想快速判断该专利的当前实务状态",
+        "其他工具返回了专利号，需要进一步核实其法律效力"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "确认用户提供的专利号，补全国别前缀（如 `CN`）和校验位"
+      ]
+    },
+    {
+      "description" : "Lists files matching a glob pattern within a directory tree. Use to discover project structure, find files by extension, or verify file existence before reading.",
+      "name" : "list_files",
+      "source" : "builtin",
+      "triggers" : [
+        "You need to discover what files exist in a directory before reading them.",
+        "You want to find all files matching a pattern (e.g. `*.swift`, `**\/Tests\/**`).",
+        "You need to verify a file path exists without triggering a read error."
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Determine the glob pattern and optional base path."
+      ]
+    },
+    {
+      "description" : "在 CNIPA、Google Patents、SooPAT 中检索专利文献，支持布尔检索式、IPC 分类号、日期过滤。",
+      "name" : "patent_search",
+      "source" : "builtin",
+      "triggers" : [
+        "用户要求\"检索专利\"、\"查找相关专利\"、\"搜索现有技术\"",
+        "专利查新、FTO 检索、无效检索等业务场景的前置步骤",
+        "根据技术特征构建检索式后验证命中情况",
+        "对比不同数据源（CNIPA \/ Google Patents）的返回结果"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "从技术交底书或权利要求中提取核心检索要素（技术领域、技术问题、关键特征词）"
+      ]
+    },
+    {
+      "description" : "Reads file content with line range support, or lists directory contents.",
+      "name" : "read_file",
+      "source" : "builtin",
+      "triggers" : [
+        "Read a known file path to inspect its content.",
+        "Peek at a directory to discover files before reading.",
+        "Read only a portion of a large file via line range selectors."
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "If unsure about file location, call `list_files` or `search_files` first."
+      ]
+    },
+    {
+      "description" : "Searches file contents using ripgrep-style regex matching. Use to find symbol references, string occurrences, or patterns across a codebase.",
+      "name" : "search_files",
+      "source" : "builtin",
+      "triggers" : [
+        "You need to find where a symbol, string, or pattern appears in the codebase.",
+        "You want to locate all call sites of a function or uses of a type.",
+        "You need to search for error messages, log strings, or configuration keys."
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Craft a regex pattern that matches your target."
+      ]
+    },
+    {
+      "description" : "Write or replace a task checklist during an agent workflow. Each invocation replaces the entire list. Use Markdown format with `- [ ]` for pending and `- [x]` for completed items.",
+      "name" : "todo",
+      "source" : "builtin",
+      "triggers" : [
+        "Breaking a complex patent drafting task into sequential checkpoints (claims → description → drawings → abstract)",
+        "Tracking OA response sub-tasks (parse → compare → draft response → review)",
+        "Recording progress through a multi-source patent search",
+        "Keeping the user informed of what the agent has done and what remains"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "After receiving a multi-step request, plan the steps and write them as a checklist."
+      ]
+    },
+    {
+      "description" : "Create or overwrite files with UTF-8 content. Integrates with FileOperationLog for undo.",
+      "name" : "write_file",
+      "source" : "builtin",
+      "triggers" : [
+        "Creating a new file or overwriting an entire existing file",
+        "Writing generated output, configuration, or scaffolded code",
+        "Restoring a file to a known-good state (combined with undo)"
+      ],
+      "version" : "1.0.0",
+      "workflow" : [
+        "Call with `dry_run: true` to preview the outcome (path, byte size)"
+      ]
+    }
+  ]
+}

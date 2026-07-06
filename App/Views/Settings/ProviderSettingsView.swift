@@ -144,11 +144,8 @@ struct ProviderSettingsView: View {
             return OpenAICompatProvider(apiKey: key, baseURL: url, provider: provider)
         }
     }
-    private static let fallbackURL: URL = {
-        let urlString: String = "https://api.openai.com/v1"
-        guard let url = URL(string: urlString) else { preconditionFailure("Invalid URL: \(urlString)") }
-        return url
-    }()
+    // swiftlint:disable:next force_unwrapping
+    private static let fallbackURL: URL = URL(string: "https://api.openai.com/v1")!
 
     private func urlForProvider(_ provider: ModelProvider, def: ProviderDefinition) -> URL {
         let urlString: String = baseURLs[provider] ?? def.defaultBaseURL

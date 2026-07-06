@@ -19,6 +19,8 @@ public final class FileSnapshotStore: @unchecked Sendable {
         let home: URL = FileManager.default.homeDirectoryForCurrentUser
         return home.appendingPathComponent("Documents/YunPat/snapshots")
     }()
+    /// 默认 TTL：7 天（参考 Agent! FileBackupService）
+    public static let defaultTTL: TimeInterval = 7 * 24 * 3600
 
     /// diff 存储: [UUID: (diff: String, source: String)]
     private var diffs: [UUID: DiffEntry] = [:]
@@ -26,9 +28,14 @@ public final class FileSnapshotStore: @unchecked Sendable {
     private var appliedDiffs: [String: [UUID]] = [:]
     /// 文件路径 → 原始内容 (编辑前快照)
     private var originalContents: [String: String] = [:]
+    /// 哈希 → 创建时间
+    private var snapshotTimestamps: [String: Date] = [:]
+    /// snapshot 调用计数器（惰性清理触发用）
+    private var snapshotCallCount: Int = 0
 
     private init() {
         try? FileManager.default.createDirectory(at: Self.snapshotDir, withIntermediateDirectories: true)
+        cleanupExpired(olderThan: Self.defaultTTL)
     }
 
     // MARK: - Snapshot (Auto-backup before write)
@@ -39,10 +46,17 @@ public final class FileSnapshotStore: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
 
+        // 10% 概率惰性触发过期清理
+        snapshotCallCount += 1
+        if snapshotCallCount % 10 == 0 {
+            cleanupExpired(olderThan: Self.defaultTTL)
+        }
+
         guard let content = try? String(contentsOfFile: filePath, encoding: .utf8) else { return nil }
 
         // 计算内容哈希作为快照标识
         let hash = stableHash(content)
+        let now = Date()
 
         // 保存到快照目录
         let snapshotPath: String = Self.snapshotDir
@@ -54,8 +68,11 @@ public final class FileSnapshotStore: @unchecked Sendable {
             try? content.write(toFile: snapshotPath, atomically: true, encoding: .utf8)
         }
 
-        // 记录原始内容 (每个文件只保留最后一次快照前的内容)
+        // 记录原始内容与快照时间
         originalContents[filePath] = content
+        if snapshotTimestamps[hash] == nil {
+            snapshotTimestamps[hash] = now
+        }
 
         return snapshotPath
     }
@@ -133,6 +150,43 @@ public final class FileSnapshotStore: @unchecked Sendable {
         diffs.removeAll()
         appliedDiffs.removeAll()
         originalContents.removeAll()
+        snapshotTimestamps.removeAll()
+    }
+
+    /// 清理超过指定时间的过期快照
+    public func cleanupExpired(olderThan ttl: TimeInterval = defaultTTL) {
+        let cutoff = Date().addingTimeInterval(-ttl)
+
+        // 清理内存中过期的快照引用
+        let expiredHashes: [String] = snapshotTimestamps.filter { $0.value < cutoff }.map { $0.key }
+        for hash in expiredHashes {
+            let snapshotPath: String = Self.snapshotDir
+                .appendingPathComponent(hash)
+                .appendingPathExtension("snapshot")
+                .path
+            try? FileManager.default.removeItem(atPath: snapshotPath)
+            snapshotTimestamps.removeValue(forKey: hash)
+        }
+
+        // 清理不受内存追踪的磁盘残存快照（如 app 重启后）
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: Self.snapshotDir, includingPropertiesForKeys: [.creationDateKey]
+        ) else { return }
+        for fileURL in files where fileURL.pathExtension == "snapshot" {
+            let hash: String = fileURL.deletingPathExtension().lastPathComponent
+            if snapshotTimestamps[hash] != nil { continue }
+            guard let attrs = try? fileURL.resourceValues(forKeys: [.creationDateKey]),
+                  let creationDate = attrs.creationDate, creationDate < cutoff
+            else {
+                // 无创建日期则用内容修改日期
+                guard let modAttrs = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]),
+                      let modDate = modAttrs.contentModificationDate, modDate < cutoff
+                else { continue }
+                try? FileManager.default.removeItem(at: fileURL)
+                continue
+            }
+            try? FileManager.default.removeItem(at: fileURL)
+        }
     }
 
     /// 获取文件当前是否有快照

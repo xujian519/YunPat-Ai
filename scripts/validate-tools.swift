@@ -78,20 +78,31 @@ for name in toolNames.sorted() {
     if !FileManager.default.fileExists(atPath: docPath.path) {
         if fixMode {
             // Create a placeholder TOOL.md
-            let placeholder = """
-            ---
-            name: \(name)
-            description: TODO - AI guidance for the \(name) tool
-            version: "1.0"
-            author: YunPat Team
-            ---
+            let templatePath = repoRoot
+                .appendingPathComponent("Packages/YunPatCore/Sources/YunPatCore/Tools/Docs/TOOL_TEMPLATE.md")
+            if FileManager.default.fileExists(atPath: templatePath.path),
+               let template = try? String(contentsOf: templatePath, encoding: .utf8) {
+                let filled = template
+                    .replacingOccurrences(of: "<tool_name>", with: name)
+                    .replacingOccurrences(of: "<one-line summary of what this tool does and when to use it>", with: "Auto-generated placeholder for \(name)")
+                try? filled.write(to: docPath, atomically: true, encoding: .utf8)
+                print("📝 Created from template: \(name).md")
+            } else {
+                let placeholder = """
+                ---
+                name: \(name)
+                description: Auto-generated placeholder for \(name)
+                version: "1.0"
+                author: YunPat Team
+                ---
 
-            # \(name)
+                # \(name)
 
-            TODO: Document this tool's usage, parameters, return values, and tips.
-            """
-            try? placeholder.write(to: docPath, atomically: true, encoding: .utf8)
-            print("📝 Created placeholder: \(name).md")
+                Refer to TOOL_TEMPLATE.md for documentation structure.
+                """
+                try? placeholder.write(to: docPath, atomically: true, encoding: .utf8)
+                print("📝 Created placeholder: \(name).md")
+            }
         } else {
             missingDocs.append(name)
             warningCount += 1

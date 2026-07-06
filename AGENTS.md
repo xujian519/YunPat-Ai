@@ -32,11 +32,11 @@ bash scripts/package-app.sh                  # 产出 .build/YunPatAi.app
 | `YunPatNetworking` | 模型路由 (OpenAI/Anthropic/DeepSeek/GLM) + Keychain | ✅ |
 | `YunPatCore` | AgentLoop / 知识库 / 记忆 / 专利引擎 / 隐私过滤 / 桌面工具 | ✅ |
 | `PatentClient` | Google Patents + PSS 客户端 (依赖 SwiftSoup) | ✅ |
-| `YunPatPlugins` | 插件系统 (ClaimDrafting/Infringement/MCP 等) | ❌ 引用不到根包 |
-| `YunPatDesktop` | 桌面自动化 (AppleScript/AXorcist/Shell) | ❌ 引用不到根包 |
-| `YunPatSandbox` | 沙箱 Provider | ❌ 引用不到根包 |
+| `YunPatPlugins` | 插件系统 (ClaimDrafting/Infringement/MCP 等) | ✅ |
+| `YunPatDesktop` | 桌面自动化 (AppleScript/AXorcist/Shell) | ✅ |
+| `YunPatSandbox` | 沙箱 Provider | ✅ |
 
-仅前三个包可执行目标依赖。App entrypoint: `App/YunPatApp.swift`。
+全部 6 个包均可执行目标调用。App entrypoint: `App/YunPatApp.swift`。
 
 ## 六层架构规则（SwiftLint 强制执行）
 

@@ -431,6 +431,7 @@ public actor PatentToolLoop {
                                     }
                                 )
                             taskState = updatedState
+                            invalidateCachesAfterWrite(calls: [call])
                             // 追加 assistant 工具调用 + tool 结果到交互历史
                             toolConversation.append(Message(role: .assistant, content: fullText))
                             for (index, callItem) in [call].enumerated() {
@@ -511,6 +512,7 @@ public actor PatentToolLoop {
                     }
                 )
                 taskState = updatedState
+                invalidateCachesAfterWrite(calls: calls)
 
                 // 追加 assistant 工具调用 + tool 结果到交互历史
                 toolConversation.append(Message(role: .assistant, content: ""))
@@ -572,6 +574,22 @@ public actor PatentToolLoop {
 
     private func extractFilePath(from call: ToolCall) -> String? {
         call.arguments["file_path"] ?? call.arguments["path"]
+    }
+
+    /// 写操作后使相关缓存失效
+    private func invalidateCachesAfterWrite(calls: [ToolCall]) {
+        for call in calls {
+            guard isWriteTool(call.name), let path = extractFilePath(from: call) else { continue }
+            let canon: String = PatentHarnessTaskState.canonicalPath(path)
+            FileSnapshotStore.shared.invalidateDiffs(for: canon)
+        }
+    }
+
+    /// 判断工具是否为写操作
+    private func isWriteTool(_ name: String) -> Bool {
+        name == "write_file" || name == "file_write"
+            || name == "edit_file" || name == "file_edit"
+            || name == "delete_file" || name == "file_delete"
     }
 }
 

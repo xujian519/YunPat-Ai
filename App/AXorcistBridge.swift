@@ -1,60 +1,37 @@
 import AppKit
 import ScreenCaptureKit
 import YunPatCore
+import YunPatDesktop
 
 /// AppKitAXorcistBridge — 桥接 YunPatDesktop 的 AXorcist 到 YunPatCore 的 DesktopAutomationProvider
 ///
 /// 在 App 启动时调用 AXorcistBridge.register() 注入
 final class AXorcistBridge: DesktopAutomationProvider, @unchecked Sendable {
+    private let axorcist: AppKitAXorcist = AppKitAXorcist()
+    private var _lastRoute: InputRoute = .accessibility
 
     static func register() {
         AXorcistToolRegistry.setProvider(AXorcistBridge())
     }
 
+    var lastRouteDescription: String { _lastRoute.rawValue }
+
     func click(app: String, element: String) async throws {
-        guard let pid = pidOfApp(app) else {
-            throw AXorcistBridgeError.appNotFound(app)
-        }
-        let axApp = AXUIElementCreateApplication(pid)
-        guard let axEl = findElement(in: axApp, label: element) else {
-            throw AXorcistBridgeError.elementNotFound(app: app, element: element)
-        }
-        AXUIElementPerformAction(axEl, kAXPressAction as CFString)
+        try await axorcist.click(app: app, element: element)
+        _lastRoute = await axorcist.lastRoute
     }
 
     func type(app: String, text: String, target: String) async throws {
-        guard let pid = pidOfApp(app) else {
-            throw AXorcistBridgeError.appNotFound(app)
-        }
-        let axApp = AXUIElementCreateApplication(pid)
-        guard let axEl = findElement(in: axApp, label: target) else {
-            throw AXorcistBridgeError.elementNotFound(app: app, element: target)
-        }
-        AXUIElementSetAttributeValue(axEl, kAXValueAttribute as CFString, text as CFString)
+        try await axorcist.type(app: app, text: text, target: target)
+        _lastRoute = await axorcist.lastRoute
     }
 
     func read(app: String, element: String) async throws -> String {
-        guard let pid = pidOfApp(app) else {
-            throw AXorcistBridgeError.appNotFound(app)
-        }
-        let axApp = AXUIElementCreateApplication(pid)
-        guard let axEl = findElement(in: axApp, label: element) else {
-            throw AXorcistBridgeError.elementNotFound(app: app, element: element)
-        }
-        var value: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(axEl, kAXValueAttribute as CFString, &value)
-        guard result == .success, let string = value as? String else {
-            throw AXorcistBridgeError.readFailed(element)
-        }
-        return string
+        try await axorcist.read(app: app, element: element)
     }
 
     func screenshot(app: String?, region: CGRect?) async throws -> Data {
-        if let appName = app, let pid = pidOfApp(appName) {
-            return try await captureWindow(pid: pid)
-        } else {
-            return try await captureScreen()
-        }
+        try await axorcist.screenshot(app: app, region: region)
     }
 
     func listWindows() async throws -> [WindowInfo] {
@@ -96,7 +73,7 @@ final class AXorcistBridge: DesktopAutomationProvider, @unchecked Sendable {
         return findElement(in: axApp, label: query) != nil
     }
 
-    // MARK: - Private Helpers
+    // MARK: - AX Tree Helpers (only for getProperties/findElement)
 
     private func findElement(in axApp: AXUIElement, label: String) -> AXUIElement? {
         searchAXTree(axApp, target: label, depth: 0, maxDepth: 8)
@@ -126,39 +103,6 @@ final class AXorcistBridge: DesktopAutomationProvider, @unchecked Sendable {
         NSWorkspace.shared.runningApplications.first {
             $0.localizedName?.localizedCaseInsensitiveContains(name) == true
         }?.processIdentifier
-    }
-
-    private func captureWindow(pid: pid_t) async throws -> Data {
-        let scContent: SCShareableContent = try await SCShareableContent.current
-        guard let window: SCWindow = scContent.windows.first(where: { $0.owningApplication?.processID == pid }) else {
-            return try await captureScreen()
-        }
-        let filter = SCContentFilter(desktopIndependentWindow: window)
-        return try await captureWithFilter(filter)
-    }
-
-    private func captureScreen() async throws -> Data {
-        let scContent: SCShareableContent = try await SCShareableContent.current
-        guard let display: SCDisplay = scContent.displays.first else {
-            throw AXorcistBridgeError.screenshotFailed
-        }
-        let filter = SCContentFilter(display: display, excludingWindows: [])
-        return try await captureWithFilter(filter)
-    }
-
-    private func captureWithFilter(_ filter: SCContentFilter) async throws -> Data {
-        let config: SCStreamConfiguration = SCStreamConfiguration()
-        config.width = 1920
-        config.height = 1080
-        let image: CGImage = try await SCScreenshotManager.captureImage(
-            contentFilter: filter,
-            configuration: config
-        )
-        let rep: NSBitmapImageRep = NSBitmapImageRep(cgImage: image)
-        guard let data = rep.representation(using: .png, properties: [:]) else {
-            throw AXorcistBridgeError.screenshotFailed
-        }
-        return data
     }
 }
 

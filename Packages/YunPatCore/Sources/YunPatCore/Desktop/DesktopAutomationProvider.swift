@@ -12,6 +12,8 @@ public protocol DesktopAutomationProvider: Sendable {
     func listWindows() async throws -> [WindowInfo]
     func getProperties(app: String, element: String) async throws -> [String: String]
     func findElement(app: String, query: String) async throws -> Bool
+    /// 上次操作使用的路由级别（用于遥测）
+    var lastRouteDescription: String { get }
 }
 
 /// 窗口信息 — 应用名称、窗口标题和进程 ID

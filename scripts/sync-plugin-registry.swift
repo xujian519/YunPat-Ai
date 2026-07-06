@@ -14,26 +14,36 @@ let repoRoot = URL(fileURLWithPath: #filePath)
 
 let checkOnly = CommandLine.arguments.contains("--check")
 
-// MARK: - 1. Extract tools from ToolDispatch.swift
-let dispatchPath = repoRoot
-    .appendingPathComponent("Packages/YunPatCore/Sources/YunPatCore/Loop/ToolDispatch.swift")
+// MARK: - 1. Extract tools from all ToolDispatch*.swift files
+let loopDir = repoRoot
+    .appendingPathComponent("Packages/YunPatCore/Sources/YunPatCore/Loop")
 
-guard FileManager.default.fileExists(atPath: dispatchPath.path) else {
-    print("ERROR: ToolDispatch.swift not found at \(dispatchPath.path)")
+guard FileManager.default.fileExists(atPath: loopDir.path) else {
+    print("ERROR: Loop/ directory not found at \(loopDir.path)")
     exit(2)
 }
 
-let source = try String(contentsOf: dispatchPath, encoding: .utf8)
+let dispatchFiles = try FileManager.default.contentsOfDirectory(at: loopDir, includingPropertiesForKeys: nil)
+    .filter { $0.lastPathComponent.hasPrefix("ToolDispatch") && $0.pathExtension == "swift" }
+
 let handlerRegex = try! NSRegularExpression(
     pattern: #"handlers\["([^"]+)"\]\s*="# , options: []
 )
-let codeToolNames = Set(handlerRegex.matches(
-    in: source, range: NSRange(source.startIndex..., in: source)
-).compactMap { match -> String? in
-    guard let range = Range(match.range(at: 1), in: source) else { return nil }
-    let name = String(source[range])
-    return (name == "task_complete" || name == "ask_user") ? nil : name
-})
+
+var codeToolNames = Set<String>()
+for fileURL in dispatchFiles {
+    let source = try String(contentsOf: fileURL, encoding: .utf8)
+    let matches = handlerRegex.matches(
+        in: source, range: NSRange(source.startIndex..., in: source)
+    )
+    for match in matches {
+        guard let range = Range(match.range(at: 1), in: source) else { continue }
+        let name = String(source[range])
+        if name != "task_complete" && name != "ask_user" {
+            codeToolNames.insert(name)
+        }
+    }
+}
 
 print("Code tools: \(codeToolNames.count)")
 
@@ -76,10 +86,74 @@ if checkOnly {
     exit(1)
 }
 
-// MARK: - 4. Generate new registry.json
-let toolEntries = codeToolNames.sorted().map { name -> [String: Any] in
-    ["name": name, "source": "builtin", "version": "1.0.0"]
+// MARK: - 4. Read tool docs for workflow metadata
+let docsDir = repoRoot
+    .appendingPathComponent("Packages/YunPatCore/Sources/YunPatCore/Tools/Docs")
+
+func extractFrontmatter(from content: String) -> [String: String] {
+    let lines = content.components(separatedBy: .newlines)
+    guard lines.first?.trimmingCharacters(in: .whitespaces) == "---",
+          let endIdx = lines.dropFirst().firstIndex(where: { $0.trimmingCharacters(in: .whitespaces) == "---" })
+    else { return [:] }
+    var frontmatter: [String: String] = [:]
+    for line in lines[1..<endIdx] {
+        let parts = line.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
+        guard parts.count == 2 else { continue }
+        let key = parts[0].trimmingCharacters(in: .whitespaces)
+        let value = parts[1].trimmingCharacters(in: .whitespaces)
+        frontmatter[key] = value
+    }
+    return frontmatter
 }
+
+func extractBullets(after heading: String, from content: String) -> [String] {
+    let lines = content.components(separatedBy: .newlines)
+    guard let headingIdx = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces) == heading }) else {
+        return []
+    }
+    var bullets: [String] = []
+    for line in lines[(headingIdx + 1)...] {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty { continue }
+        guard trimmed.hasPrefix("- ") || trimmed.hasPrefix("1. ") else { break }
+        let bullet = trimmed.dropFirst(2).trimmingCharacters(in: .whitespaces)
+        if !bullet.isEmpty { bullets.append(bullet) }
+    }
+    return bullets
+}
+
+func extractWorkflow(from content: String) -> [String] {
+    extractBullets(after: "## Typical Workflow", from: content).map { step in
+        // Strip leading "1. ", "2. ", etc.
+        step.replacingOccurrences(of: #"^\d+\.\s*"#, with: "", options: .regularExpression)
+    }
+}
+
+func extractTriggers(from content: String) -> [String] {
+    extractBullets(after: "## When to Use", from: content)
+}
+
+let toolEntries = codeToolNames.sorted().map { name -> [String: Any] in
+    let docPath = docsDir.appendingPathComponent("\(name).md")
+    var entry: [String: Any] = [
+        "name": name,
+        "source": "builtin",
+        "version": "1.0.0",
+    ]
+    if FileManager.default.fileExists(atPath: docPath.path),
+       let docContent = try? String(contentsOf: docPath, encoding: .utf8) {
+        let frontmatter = extractFrontmatter(from: docContent)
+        if let desc = frontmatter["description"], !desc.isEmpty, !desc.hasPrefix("TODO") {
+            entry["description"] = desc
+        }
+        let triggers = extractTriggers(from: docContent)
+        if !triggers.isEmpty { entry["triggers"] = triggers }
+        let workflow = extractWorkflow(from: docContent)
+        if !workflow.isEmpty { entry["workflow"] = workflow }
+    }
+    return entry
+}
+
 let registry: [String: Any] = [
     "generated": ISO8601DateFormatter().string(from: Date()),
     "toolCount": toolEntries.count,

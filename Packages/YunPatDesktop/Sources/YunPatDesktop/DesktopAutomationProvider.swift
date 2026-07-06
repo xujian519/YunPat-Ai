@@ -18,7 +18,7 @@ public struct ElementLocator: Sendable {
     }
 }
 
-public protocol DesktopAutomationProvider: Sendable {
+public protocol DesktopAutomationService: Sendable {
     func click(app: AppIdentifier, element: ElementLocator) async throws
     func type(app: AppIdentifier, text: String, target: ElementLocator) async throws
     func read(app: AppIdentifier, element: ElementLocator) async throws -> String

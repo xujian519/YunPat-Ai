@@ -12,13 +12,8 @@ public final class OpenAIProvider: ModelBackend {
     private let baseURL: URL
     private let session: URLSession
 
-    public static let defaultBaseURL: URL = {
-        let urlString = "https://api.openai.com/v1"
-        guard let url = URL(string: urlString) else {
-            preconditionFailure("Invalid URL: \(urlString)")
-        }
-        return url
-    }()
+    // swiftlint:disable:next force_unwrapping
+    public static let defaultBaseURL: URL = URL(string: "https://api.openai.com/v1")!
 
     public init(
         apiKey: String,
