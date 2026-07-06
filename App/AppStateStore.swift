@@ -4,9 +4,7 @@ import SwiftUI
 // MARK: - Dock Panel Enums
 
 public enum LeftDockPanel: String, CaseIterable, Codable {
-    case caseList
-    case caseWorkspace
-    case knowledge  // 预留
+    case projectList
 }
 
 public enum RightDockPanel: String, CaseIterable, Codable {
@@ -14,6 +12,41 @@ public enum RightDockPanel: String, CaseIterable, Codable {
     case caseGraph
     case costDashboard
     case memoryAudit
+}
+
+/// 顶部主导航模块，与 PilotDeck 对齐
+public enum TopModule: String, CaseIterable, Codable, Identifiable {
+    case agent = "智能体"
+    case files = "文件"
+    case skills = "技能"
+    case routing = "路由"
+    case memory = "记忆"
+    case alwaysOn = "常驻"
+
+    public var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .agent: return "sparkles"
+        case .files: return "folder"
+        case .skills: return "wand.and.stars"
+        case .routing: return "chart.pie"
+        case .memory: return "brain.head.profile"
+        case .alwaysOn: return "waveform"
+        }
+    }
+}
+
+/// 中心区域内容模式。
+public enum CenterMode: String, CaseIterable, Codable {
+    case chat
+    case browser
+    case focusWriting
+    case files
+    case skills
+    case routing
+    case memory
+    case alwaysOn
 }
 
 /// Combine 响应式状态管理中心
@@ -27,7 +60,8 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
     @Published public var rightDockVisible: Bool = false
     @Published public var bottomDockVisible: Bool = false
     @Published public var centerMode: CenterMode = .chat
-    @Published public var leftDockActivePanel: LeftDockPanel = .caseList
+    @Published public var topModule: TopModule = .agent
+    @Published public var leftDockActivePanel: LeftDockPanel = .projectList
     @Published public var rightDockActivePanel: RightDockPanel = .collaboration
 
     /// 专注写作退出时恢复的状态快照

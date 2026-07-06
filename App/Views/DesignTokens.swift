@@ -86,8 +86,9 @@ enum PanelWidth {
     static let bottomDockMinHeight: CGFloat = 180
     static let bottomDockIdealHeight: CGFloat = 280
 
-    // StatusBar
+    // StatusBar / TopBar
     static let statusBarHeight: CGFloat = 34
+    static let topBarHeight: CGFloat = 48
 }
 
 // MARK: - Dock System
@@ -97,13 +98,6 @@ public enum DockPosition: String, CaseIterable, Codable {
     case left
     case right
     case bottom
-}
-
-/// 中心区域内容模式。
-public enum CenterMode: String, CaseIterable, Codable {
-    case chat
-    case browser
-    case focusWriting
 }
 
 // MARK: - AnimationDuration

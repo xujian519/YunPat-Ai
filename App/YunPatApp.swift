@@ -108,8 +108,8 @@ struct YunPatApp: App {
             }
         }
         Settings {
-            SettingsTabView(modelRouter: appState.modelRouter)
-                .frame(width: PanelWidth.settingsWidth, height: PanelWidth.settingsHeight)
+            ModernSettingsView(modelRouter: appState.modelRouter)
+                .frame(minWidth: 720, minHeight: 520)
         }
     }
 }

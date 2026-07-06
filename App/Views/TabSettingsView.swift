@@ -115,7 +115,11 @@ struct TabSettingsView: View {
                                 isOn: Binding(
                                     get: { enabledTools.contains(tool.id) },
                                     set: { enabled in
-                                        if enabled { enabledTools.insert(tool.id) } else { enabledTools.remove(tool.id) }
+                                        if enabled {
+                                            enabledTools.insert(tool.id)
+                                        } else {
+                                            enabledTools.remove(tool.id)
+                                        }
                                     }
                                 )
                             ) {

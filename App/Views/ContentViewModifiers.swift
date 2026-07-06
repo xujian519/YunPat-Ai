@@ -40,8 +40,7 @@ struct ContentViewModifiers: ViewModifier {
             }
             .onReceive(publisher(for: .menuToggleSplitScreen)) { _ in
                 withAnimation {
-                    appState.leftDockActivePanel = appState.leftDockActivePanel == .caseWorkspace
-                        ? .caseList : .caseWorkspace
+                    appState.leftDockVisible.toggle()
                 }
             }
             .onReceive(publisher(for: .menuFocusWriting)) { _ in

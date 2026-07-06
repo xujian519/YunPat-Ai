@@ -41,27 +41,15 @@ struct StatusBar: View {
         )
     }
 
-    // MARK: - Left Section: Left Dock panel switching
+    // MARK: - Left Section: Project list toggle
 
     private var leftSection: some View {
         HStack(spacing: Spacing.xxs) {
             StatusBarButton(
                 icon: "folder",
-                help: "案件列表",
-                isActive: appState.leftDockActivePanel == .caseList && appState.leftDockVisible,
-                action: { appState.leftDockActivePanel = .caseList; appState.leftDockVisible = true }
-            )
-            StatusBarButton(
-                icon: "briefcase",
-                help: "案件工作区",
-                isActive: appState.leftDockActivePanel == .caseWorkspace && appState.leftDockVisible,
-                action: { appState.leftDockActivePanel = .caseWorkspace; appState.leftDockVisible = true }
-            )
-            StatusBarButton(
-                icon: "books.vertical",
-                help: "知识库",
-                isActive: appState.leftDockActivePanel == .knowledge && appState.leftDockVisible,
-                action: { appState.leftDockActivePanel = .knowledge; appState.leftDockVisible = true }
+                help: "项目列表",
+                isActive: appState.leftDockActivePanel == .projectList && appState.leftDockVisible,
+                action: { appState.leftDockActivePanel = .projectList; appState.leftDockVisible.toggle() }
             )
         }
         .padding(.leading, Spacing.xxs)

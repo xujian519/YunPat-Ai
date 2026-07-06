@@ -15,6 +15,7 @@ final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_
     private let loopEngine: AgentLoopEngine
     private var patentLoopEngine: PatentLoopEngine?
     private let requestQueue: GlobalRequestQueue
+    private let defaultProvider: ModelProvider = .deepseek
 
     /// 待处理的 clarify 请求（由 sendMessage 后的结果触发）
     private var pendingClarify: ClarifyRequestDisplay?
@@ -184,7 +185,7 @@ final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_
         tabManager: TabManager
     ) async throws {
         let flow: AgentFlow = tab.resolvedFlow(for: sentText)
-        let model: String = tab.loopModel
+        let model: String = tab.loopModel ?? defaultProvider.defaultModel
         switch flow {
         case .copilot, .guided:
             let history: [Message] = tabManager.tabs[idx].sessionMemory.messages
@@ -245,7 +246,7 @@ final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_
 
         do {
             let flow: AgentFlow = tabManager.tabs[idx].loopPreference
-            let model: String = tabManager.tabs[idx].loopModel
+            let model: String = tabManager.tabs[idx].loopModel ?? defaultProvider.defaultModel
             let result: LoopResult = try await loopEngine.run(
                 request: UserRequest(content: answer),
                 flow: flow,

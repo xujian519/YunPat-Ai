@@ -58,7 +58,7 @@ public enum MemorySource: String, Sendable, Codable {
 }
 
 /// 记忆层级 — 对应五层记忆架构
-public enum MemoryLayer: String, Sendable, Codable {
+public enum MemoryLayer: String, Sendable, Codable, CaseIterable {
     case working
     case session
     case caseContext

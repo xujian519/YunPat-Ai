@@ -15,7 +15,7 @@ struct ChatTab: Identifiable, Equatable {
     var loopState: LoopState
     var loopPreference: AgentFlow
     var autoFlowEnabled: Bool
-    var loopModel: String
+    var loopModel: String?
     var sessionMemory: SessionMemory
     var caseId: String?  // 案件编号（patent 类型）
     var workspacePath: URL?  // 工作目录
@@ -34,7 +34,7 @@ struct ChatTab: Identifiable, Equatable {
         self.loopState = .idle
         self.loopPreference = flow
         self.autoFlowEnabled = (type == .general)
-        self.loopModel = "deepseek-v4-flash"
+        self.loopModel = nil
         self.sessionMemory = SessionMemory(tabId: tabId)
     }
 

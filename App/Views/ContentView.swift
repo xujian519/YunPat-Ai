@@ -19,6 +19,8 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            TopModuleBar()
+
             HSplitView {
                 leftDockSection
                 mainSection
@@ -29,7 +31,7 @@ struct ContentView: View {
                 Divider()
                 DocumentWorkspace()
                     .frame(minHeight: PanelWidth.bottomDockMinHeight, idealHeight: PanelWidth.bottomDockIdealHeight)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
             }
 
             if appState.centerMode != .focusWriting {
@@ -48,6 +50,7 @@ struct ContentView: View {
             value: appState.bottomDockVisible || appState.centerMode == .focusWriting
         )
         .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.centerMode)
+        .animation(.easeInOut(duration: AnimationDuration.fast), value: appState.topModule)
         .modifier(ContentViewModifiers(
             windowTitle: $windowTitle,
             tabManager: tabManager,
@@ -79,27 +82,12 @@ struct ContentView: View {
     @ViewBuilder
     private var leftDockSection: some View {
         if appState.leftDockVisible && appState.centerMode != .focusWriting {
-            switch appState.leftDockActivePanel {
-            case .caseList:
-                CaseListSidebar(tabManager: tabManager)
-                    .frame(
-                        minWidth: PanelWidth.sidebarMin,
-                        idealWidth: PanelWidth.sidebarIdeal,
-                        maxWidth: PanelWidth.sidebarMax
-                    )
-            case .caseWorkspace:
-                CaseWorkspaceView(manager: workspaceManager, tabManager: tabManager)
-                    .frame(minWidth: PanelWidth.caseWorkspaceMin, idealWidth: PanelWidth.caseWorkspaceIdeal)
-            case .knowledge:
-                EmptyStateView(
-                    icon: "books.vertical",
-                    title: "知识库",
-                    subtitle: "连接 Obsidian Vault 后自动加载法规与判例",
-                    action: nil
+            ProjectListSidebar(tabManager: tabManager)
+                .frame(
+                    minWidth: PanelWidth.sidebarMin,
+                    idealWidth: PanelWidth.sidebarIdeal,
+                    maxWidth: PanelWidth.sidebarMax
                 )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.thickMaterial)
-            }
         }
     }
 
@@ -107,7 +95,7 @@ struct ContentView: View {
 
     private var mainSection: some View {
         VStack(spacing: 0) {
-            if appState.centerMode != .focusWriting {
+            if appState.centerMode == .chat || appState.centerMode == .browser {
                 TabStripContent(
                     tabManager: tabManager,
                     chatManager: chatManager
@@ -127,6 +115,16 @@ struct ContentView: View {
             PatentBrowser()
         case .focusWriting:
             FocusWritingContent(onExit: { appState.exitFocusWriting() })
+        case .files:
+            FileBrowserView(workspaceManager: workspaceManager, tabManager: tabManager)
+        case .skills:
+            SkillGalleryView()
+        case .routing:
+            RoutingDashboardView()
+        case .memory:
+            MemoryDashboardView()
+        case .alwaysOn:
+            AlwaysOnDashboardView()
         }
     }
 
@@ -143,7 +141,7 @@ struct ContentView: View {
                         idealWidth: PanelWidth.collaborationIdeal,
                         maxWidth: PanelWidth.collaborationMax
                     )
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .caseGraph:
                 CaseGraphView(caseId: activeTab?.caseId)
                     .frame(
@@ -151,21 +149,21 @@ struct ContentView: View {
                         idealWidth: PanelWidth.collaborationIdeal,
                         maxWidth: PanelWidth.collaborationMax
                     )
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .costDashboard:
                 CostDashboardView(caseId: activeTab?.caseId)
                     .frame(
                         minWidth: PanelWidth.costDashboardMin,
                         idealWidth: PanelWidth.costDashboardIdeal
                     )
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .memoryAudit:
                 MemoryAuditView()
                     .frame(
                         minWidth: PanelWidth.memoryAuditMin,
                         idealWidth: PanelWidth.memoryAuditIdeal
                     )
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             }
         }
     }
@@ -197,26 +195,12 @@ struct ContentView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 if let tab = activeTab, !tab.messages.isEmpty {
-                    LazyVStack(alignment: .leading, spacing: Spacing.sm) {
-                        let messages: [ChatMessage] = tab.messages
-                        ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
-                            let isLast: Bool = index == messages.count - 1
-                            MessageBubble(
-                                message: message,
-                                isStreaming: isLast && chatManager.isStreaming && message.role == .assistant
-                            )
-                            .id(message.id)
-                        }
-                    }
-                    .padding()
+                    messageStack(tab: tab)
                 } else {
-                    EmptyStateView(
-                        icon: "bubble.left.and.bubble.right",
-                        title: "开始对话",
-                        subtitle: "发送消息，让 YunPat-Ai 协助你的专利代理工作",
-                        action: nil
-                    )
-                    .padding(.top, Spacing.xl)
+                    ChatWelcomeView { prompt in
+                        chatManager.inputText = prompt
+                        Task { await chatManager.sendMessage(in: tabManager) }
+                    }
                 }
             }
             .onChange(of: activeTab?.messages.count ?? 0) { _, _ in
@@ -227,6 +211,24 @@ struct ContentView: View {
             }
         }
         .task { await chatManager.wireTodoTo(tabManager) }
+    }
+
+    private func messageStack(tab: ChatTab) -> some View {
+        LazyVStack(alignment: .leading, spacing: Spacing.sm) {
+            let messages: [ChatMessage] = tab.messages
+            let lastIndex: Int = messages.count - 1
+            let isStreamingLast: Bool = chatManager.isStreaming
+            ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                let isLast: Bool = index == lastIndex
+                let shouldStream: Bool = isLast && isStreamingLast && message.role == .assistant
+                MessageBubble(
+                    message: message,
+                    isStreaming: shouldStream
+                )
+                .id(message.id)
+            }
+        }
+        .padding()
     }
 
     private func scrollToLast(_ proxy: ScrollViewProxy) {
@@ -356,6 +358,7 @@ struct InputBar: View {
     }
 
     private var sendDisabled: Bool {
-        chatManager.isStreaming || chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let trimmed: String = chatManager.inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return chatManager.isStreaming || trimmed.isEmpty
     }
 }
