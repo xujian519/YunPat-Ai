@@ -17,7 +17,7 @@ struct ChatWelcomeView: View {
             Spacer()
 
             Image(systemName: "sparkles")
-                .font(.system(size: 56, weight: .light))
+                .font(.system(size: IconSize.hero, weight: .light))
                 .foregroundStyle(Color.accentColor.opacity(0.8))
                 .padding(.bottom, Spacing.sm)
 
@@ -30,7 +30,7 @@ struct ChatWelcomeView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: Spacing.md) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: PanelWidth.suggestionCardMin))], spacing: Spacing.md) {
                 ForEach(suggestions) { suggestion in
                     PromptCard(suggestion: suggestion) {
                         onPromptTap(suggestion.prompt)
@@ -38,7 +38,7 @@ struct ChatWelcomeView: View {
                 }
             }
             .padding(.top, Spacing.lg)
-            .frame(maxWidth: 640)
+            .frame(maxWidth: PanelWidth.welcomeMax)
 
             Spacer()
         }
@@ -63,7 +63,7 @@ struct PromptCard: View {
                 Image(systemName: suggestion.icon)
                     .font(.system(size: IconSize.messageIcon))
                     .foregroundStyle(Color.accentColor)
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxxs) {
                     Text(suggestion.title)
                         .font(FontStyle.callout)
                         .foregroundStyle(.primary)
@@ -77,7 +77,7 @@ struct PromptCard: View {
                     .font(.system(size: IconSize.inlineSmall))
                     .foregroundStyle(.tertiary)
             }
-            .padding()
+            .padding(Spacing.sm)
             .background(Color.appSurfacePrimary)
             .cornerRadius(CornerRadius.lg)
         }

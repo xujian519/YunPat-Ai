@@ -11,14 +11,14 @@ struct ChecklistView: View {
             return AnyView(EmptyView())
         }
         return AnyView(
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Label("任务清单", systemImage: "checklist")
-                    .font(.headline)
+                    .font(FontStyle.headline)
                     .foregroundStyle(.secondary)
                     .accessibilityAddTraits(.isHeader)
 
                 ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                    HStack(alignment: .top, spacing: 8) {
+                    HStack(alignment: .top, spacing: Spacing.xs) {
                         Button(action: { toggleItem(index) }, label: {
                             Image(systemName: checkedItems.contains(index) ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(checkedItems.contains(index) ? Color.green : Color.secondary)
@@ -36,14 +36,14 @@ struct ChecklistView: View {
                     }
                 }
             }
-            .padding(12)
+            .padding(Spacing.sm)
             .background(Color.accentColor.opacity(0.05))
-            .cornerRadius(8)
+            .cornerRadius(CornerRadius.md)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.accentColor.opacity(0.1), lineWidth: 1)
+                RoundedRectangle(cornerRadius: CornerRadius.md)
+                    .stroke(Color.accentColor.opacity(0.1), lineWidth: BorderWidth.thin)
             )
-            .padding(.vertical, 4)
+            .padding(.vertical, Spacing.xxs)
         )
     }
 

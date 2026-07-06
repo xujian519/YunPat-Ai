@@ -4,6 +4,7 @@ import SwiftUI
 
 enum Spacing {
     static let unit: CGFloat = 8
+    static let xxxs: CGFloat = 2
     static let xxs: CGFloat = 4
     static let xs: CGFloat = unit * 1
     static let sm: CGFloat = unit * 2
@@ -51,7 +52,10 @@ enum IconSize {
     static let caption: CGFloat = 11
     static let emptyState: CGFloat = 40
     static let avatar: CGFloat = 28
+    static let avatarInline: CGFloat = 13
     static let messageIcon: CGFloat = 24
+    static let typingDot: CGFloat = 5
+    static let hero: CGFloat = 56
 }
 
 // MARK: - Hit Target (HIG 最小触控区域 44pt)
@@ -79,6 +83,8 @@ enum PanelWidth {
     static let memoryAuditMin: CGFloat = 260
     static let memoryAuditIdeal: CGFloat = 320
     static let flowPicker: CGFloat = 240
+    static let welcomeMax: CGFloat = 640
+    static let suggestionCardMin: CGFloat = 200
     static let settingsWidth: CGFloat = 520
     static let settingsHeight: CGFloat = 480
 
@@ -89,6 +95,13 @@ enum PanelWidth {
     // StatusBar / TopBar
     static let statusBarHeight: CGFloat = 34
     static let topBarHeight: CGFloat = 48
+}
+
+// MARK: - Border
+
+enum BorderWidth {
+    static let hairline: CGFloat = 0.5
+    static let thin: CGFloat = 1
 }
 
 // MARK: - Dock System
@@ -107,7 +120,7 @@ enum AnimationDuration {
     static let normal: CGFloat = 0.2
     static let slow: CGFloat = 0.25
     static let spring: CGFloat = 0.35
-    static let bouncy: CGFloat = 0.45
+    static let long: CGFloat = 0.45
 }
 
 // MARK: - Semantic Colors

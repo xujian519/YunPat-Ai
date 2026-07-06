@@ -14,6 +14,7 @@ public actor MemoryConsolidator {
     public static let shared: MemoryConsolidator = MemoryConsolidator()
     private let store: MemoryStore
     private var lastRun: Date?
+    private var isPaused: Bool = false
     public let intervalHours: Int
     public let salienceFloor: Double
     public let episodeRetentionDays: Int
@@ -28,7 +29,12 @@ public actor MemoryConsolidator {
         self.episodeRetentionDays = episodeRetentionDays
     }
 
+    public func pause() { isPaused = true }
+
+    public func resume() { isPaused = false }
+
     public var shouldRun: Bool {
+        guard !isPaused else { return false }
         guard let last = lastRun else { return true }
         return Date().timeIntervalSince(last) >= TimeInterval(intervalHours * 3600)
     }

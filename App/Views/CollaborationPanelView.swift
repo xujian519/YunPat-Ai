@@ -34,6 +34,7 @@ struct CollaborationPanel: View {
                     .font(.title2)
                 Text("协作")
                     .font(FontStyle.headline)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
             }
             .padding(.horizontal)

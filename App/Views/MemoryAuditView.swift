@@ -196,8 +196,9 @@ struct MemoryAuditView: View {
             Button("保存修改") {
                 Task { await manager.update(content: editingContent) }
             }
-            .keyboardShortcut("s", modifiers: .command)
             .disabled(editingContent == entry.content)
+            .keyboardShortcut("s", modifiers: [.command, .option])
+            .help("⌘⌥S 保存修改")
 
             Button {
                 Task { await manager.togglePin(entry) }

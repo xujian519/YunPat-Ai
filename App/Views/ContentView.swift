@@ -8,6 +8,7 @@ struct ContentView: View {
     @StateObject private var workspaceManager: CaseWorkspaceManager = CaseWorkspaceManager()
     @State private var filePickerOpen: Bool = false
     @State private var showWizard: Bool = false
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @Binding var windowTitle: String
 
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
@@ -19,38 +20,32 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TopModuleBar()
-
-            HSplitView {
-                leftDockSection
+            NavigationSplitView(columnVisibility: $columnVisibility) {
+                sidebarContent
+                    .navigationSplitViewColumnWidth(
+                        min: PanelWidth.sidebarMin,
+                        ideal: PanelWidth.sidebarIdeal,
+                        max: PanelWidth.sidebarMax
+                    )
+            } content: {
                 mainSection
-                rightDockSection
+            } detail: {
+                detailContent
             }
+            .toolbar { toolbarContent }
 
             if appState.bottomDockVisible && appState.centerMode != .focusWriting {
                 Divider()
                 DocumentWorkspace()
                     .frame(minHeight: PanelWidth.bottomDockMinHeight, idealHeight: PanelWidth.bottomDockIdealHeight)
-                .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
-            }
-
-            if appState.centerMode != .focusWriting {
-                Divider()
-                StatusBar(
-                    filePickerOpen: $filePickerOpen,
-                    onSave: { /* TODO: 接入文档保存逻辑 */ },
-                    onSync: { syncToAgent() }
-                )
+                    .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.leftDockVisible)
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.rightDockVisible)
         .animation(
             .easeInOut(duration: AnimationDuration.slow),
             value: appState.bottomDockVisible || appState.centerMode == .focusWriting
         )
         .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.centerMode)
-        .animation(.easeInOut(duration: AnimationDuration.fast), value: appState.topModule)
         .modifier(ContentViewModifiers(
             windowTitle: $windowTitle,
             tabManager: tabManager,
@@ -64,6 +59,12 @@ struct ContentView: View {
             allowsMultipleSelection: true,
             onCompletion: handleFileImport
         )
+        .onChange(of: appState.leftDockVisible) { _, _ in
+            syncColumnVisibility()
+        }
+        .onChange(of: appState.rightDockVisible) { _, _ in
+            syncColumnVisibility()
+        }
         .onChange(of: activeTab?.caseId) { _, newCaseId in
             workspaceManager.selectedCaseId = newCaseId
         }
@@ -77,17 +78,12 @@ struct ContentView: View {
         .withWindowRestoration()
     }
 
-    // MARK: - Left Dock
+    // MARK: - Sidebar
 
     @ViewBuilder
-    private var leftDockSection: some View {
+    private var sidebarContent: some View {
         if appState.leftDockVisible && appState.centerMode != .focusWriting {
             ProjectListSidebar(tabManager: tabManager)
-                .frame(
-                    minWidth: PanelWidth.sidebarMin,
-                    idealWidth: PanelWidth.sidebarIdeal,
-                    maxWidth: PanelWidth.sidebarMax
-                )
         }
     }
 
@@ -128,41 +124,23 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Right Dock
+    // MARK: - Detail
 
     @ViewBuilder
-    private var rightDockSection: some View {
+    private var detailContent: some View {
         if appState.rightDockVisible && appState.centerMode != .focusWriting {
             switch appState.rightDockActivePanel {
             case .collaboration:
                 CollaborationPanel(tabManager: tabManager, chatManager: chatManager)
-                    .frame(
-                        minWidth: PanelWidth.collaborationMin,
-                        idealWidth: PanelWidth.collaborationIdeal,
-                        maxWidth: PanelWidth.collaborationMax
-                    )
                     .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .caseGraph:
                 CaseGraphView(caseId: activeTab?.caseId)
-                    .frame(
-                        minWidth: PanelWidth.collaborationMin,
-                        idealWidth: PanelWidth.collaborationIdeal,
-                        maxWidth: PanelWidth.collaborationMax
-                    )
                     .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .costDashboard:
                 CostDashboardView(caseId: activeTab?.caseId)
-                    .frame(
-                        minWidth: PanelWidth.costDashboardMin,
-                        idealWidth: PanelWidth.costDashboardIdeal
-                    )
                     .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             case .memoryAudit:
                 MemoryAuditView()
-                    .frame(
-                        minWidth: PanelWidth.memoryAuditMin,
-                        idealWidth: PanelWidth.memoryAuditIdeal
-                    )
                     .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
             }
         }
@@ -247,6 +225,16 @@ struct ContentView: View {
     private var activeTabChecklist: String? { activeTab?.todoChecklist }
     private var activeTabClarify: ClarifyRequest? { activeTab?.clarifyRequest }
 
+    private func syncColumnVisibility() {
+        withAnimation(.easeInOut(duration: AnimationDuration.slow)) {
+            if appState.leftDockVisible {
+                columnVisibility = .all
+            } else {
+                columnVisibility = .doubleColumn
+            }
+        }
+    }
+
     private func syncToAgent() {
         Task { await chatManager.sendDocumentAnnotations(in: tabManager) }
     }
@@ -272,6 +260,107 @@ struct ContentView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Toolbar Extension
+
+extension ContentView {
+    @ToolbarContentBuilder
+    fileprivate var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigation) {
+            ForEach(TopModule.allCases) { module in
+                Button {
+                    switchToModule(module)
+                } label: {
+                    Image(systemName: module.icon)
+                }
+                .help(module.rawValue)
+                .foregroundStyle(appState.topModule == module ? Color.accentColor : Color.appTextSecondary)
+            }
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                NotificationCenter.default.post(name: .menuOpenFile, object: nil)
+            } label: {
+                Image(systemName: "paperclip")
+            }
+            .help("打开文件")
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                NotificationCenter.default.post(name: .openSettingsTab, object: 0)
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .help("设置")
+        }
+
+        ToolbarItemGroup {
+            Divider()
+
+            toolbarDockToggle(icon: "safari", help: "专利浏览器", isActive: appState.centerMode == .browser) {
+                appState.centerMode = appState.centerMode == .browser ? .chat : .browser
+            }
+            toolbarDockToggle(icon: "chart.pie", help: "成本仪表盘",
+                              isActive: appState.rightDockActivePanel == .costDashboard && appState.rightDockVisible) {
+                appState.rightDockActivePanel = .costDashboard; appState.rightDockVisible = true
+            }
+            toolbarDockToggle(icon: "brain.head.profile", help: "记忆审计",
+                              isActive: appState.rightDockActivePanel == .memoryAudit && appState.rightDockVisible) {
+                appState.rightDockActivePanel = .memoryAudit; appState.rightDockVisible = true
+            }
+            toolbarDockToggle(icon: "checklist", help: "协作面板",
+                              isActive: appState.rightDockActivePanel == .collaboration && appState.rightDockVisible) {
+                appState.rightDockActivePanel = .collaboration; appState.rightDockVisible = true
+            }
+            toolbarDockToggle(icon: "point.topleft.down.curvedto.point.bottomright.up", help: "案件图谱",
+                              isActive: appState.rightDockActivePanel == .caseGraph && appState.rightDockVisible) {
+                appState.rightDockActivePanel = .caseGraph; appState.rightDockVisible = true
+            }
+            toolbarDockToggle(icon: "doc.text", help: "文档工作区",
+                              isActive: appState.bottomDockVisible) {
+                appState.bottomDockVisible.toggle()
+            }
+
+            Divider()
+
+            HStack(spacing: 4) {
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 6))
+                    .foregroundStyle(Color.statusSuccess)
+                Text("已连接")
+                    .font(FontStyle.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityLabel("连接状态: 已连接")
+        }
+    }
+
+    private func switchToModule(_ module: TopModule) {
+        withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            appState.topModule = module
+            switch module {
+            case .agent:    appState.centerMode = .chat
+            case .files:    appState.centerMode = .files
+            case .skills:   appState.centerMode = .skills
+            case .routing:  appState.centerMode = .routing
+            case .memory:   appState.centerMode = .memory
+            case .alwaysOn: appState.centerMode = .alwaysOn
+            }
+        }
+    }
+
+    private func toolbarDockToggle(
+        icon: String, help: String, isActive: Bool, action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+        }
+        .help(help)
+        .foregroundStyle(isActive ? Color.accentColor : Color.appTextSecondary)
     }
 }
 

@@ -41,6 +41,7 @@ struct EmptyStateView: View {
                 .font(FontStyle.callout)
                 .fontWeight(.medium)
                 .foregroundStyle(.primary)
+                .accessibilityAddTraits(.isHeader)
 
             if let subtitle, !subtitle.isEmpty {
                 Text(subtitle)

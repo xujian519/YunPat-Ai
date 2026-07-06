@@ -8,6 +8,8 @@ struct YunPatApp: App {
     @StateObject private var appState: AppState = AppState()
     @State private var activeTabTitle: String = "YunPat-Ai"
 
+    @Environment(\.scenePhase) private var scenePhase: ScenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView(router: appState.modelRouter, windowTitle: $activeTabTitle)
@@ -20,9 +22,21 @@ struct YunPatApp: App {
                     }
                     return true
                 }
+                .onChange(of: scenePhase) { _, newPhase in
+                    Task {
+                        switch newPhase {
+                        case .active:
+                            await MemoryConsolidator.shared.resume()
+                        case .inactive, .background:
+                            await MemoryConsolidator.shared.pause()
+                        @unknown default: break
+                        }
+                    }
+                }
         }
         .windowResizability(.contentMinSize)
         .defaultSize(width: 1200, height: 800)
+        .windowToolbarStyle(.unifiedCompact)
         .commands {
             // ── App Info ──
             CommandGroup(replacing: .appInfo) {
@@ -53,17 +67,47 @@ struct YunPatApp: App {
                 .keyboardShortcut("s", modifiers: .command)
             }
 
-            // ── Edit Menu (保留系统默认 undo/redo，仅添加自定义项) ──
+            // ── Edit Menu ──
             CommandGroup(after: .undoRedo) {
                 Divider()
+                Button("剪切") {
+                    NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("x", modifiers: .command)
+                Button("复制") {
+                    NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("c", modifiers: .command)
+                Button("粘贴") {
+                    NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("v", modifiers: .command)
+                Button("删除") {
+                    NSApp.sendAction(#selector(NSText.delete(_:)), to: nil, from: nil)
+                }
+                Divider()
+                Button("全选") {
+                    NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("a", modifiers: .command)
+                Divider()
+                Button("查找…") {
+                    NSApp.sendAction(#selector(NSTextView.performTextFinderAction(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("f", modifiers: .command)
             }
 
             // ── View Menu ──
             CommandMenu("显示") {
+                Button("显示标签栏") {
+                    NotificationCenter.default.post(name: .menuShowTabBar, object: nil)
+                }
+                .keyboardShortcut("t", modifiers: [.command, .shift])
+                Divider()
                 Button("切换侧栏") {
                     NotificationCenter.default.post(name: .menuToggleSidebar, object: nil)
                 }
-                .keyboardShortcut("s", modifiers: [.command, .option])
+                .keyboardShortcut("l", modifiers: [.command, .option])
                 Button("切换协作面板") {
                     NotificationCenter.default.post(name: .menuToggleCollaboration, object: nil)
                 }
@@ -81,10 +125,6 @@ struct YunPatApp: App {
                     NotificationCenter.default.post(name: .menuFocusWriting, object: nil)
                 }
                 .keyboardShortcut("e", modifiers: [.command, .option, .shift])
-                Button("进入全屏") {
-                    NSApp.keyWindow?.toggleFullScreen(nil)
-                }
-                .keyboardShortcut("f", modifiers: [.command, .control])
             }
 
             // ── Window Menu ──
@@ -96,6 +136,11 @@ struct YunPatApp: App {
                 Button("缩放") {
                     NSApp.keyWindow?.zoom(nil)
                 }
+                Divider()
+                Button("进入全屏") {
+                    NSApp.keyWindow?.toggleFullScreen(nil)
+                }
+                .keyboardShortcut("f", modifiers: [.command, .control])
             }
 
             // ── Help Menu ──
@@ -226,6 +271,7 @@ extension Notification.Name {
     static let menuToggleBrowser: Notification.Name = Notification.Name("menuToggleBrowser")
     static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
     static let menuFocusWriting: Notification.Name = Notification.Name("menuFocusWriting")
+    static let menuShowTabBar: Notification.Name = Notification.Name("menuShowTabBar")
     static let dropFile: Notification.Name = Notification.Name("dropFile")
     /// 打开设置页到指定 Tab (object: Int — 0=接口, 1=技能, 2=插件, 3=MCP, 4=知识库, 5=路由)
     static let openSettingsTab: Notification.Name = Notification.Name("openSettingsTab")

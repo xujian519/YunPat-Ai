@@ -376,7 +376,7 @@ struct MessageBubble: View {
                                 message.role == .user
                                     ? Color.accentColor.opacity(0.18)
                                     : Color.appSeparator.opacity(0.4),
-                                lineWidth: 0.5
+                                lineWidth: BorderWidth.hairline
                             )
                     )
                     .foregroundStyle(message.role == .user ? Color.appBubbleUserText : Color.appTextPrimary)
@@ -404,7 +404,7 @@ struct MessageBubble: View {
                 if isStreaming && message.role == .assistant {
                     typingIndicator
                         .padding(.leading, Spacing.sm)
-                        .padding(.top, 2)
+                        .padding(.top, Spacing.xxxs)
                 }
             }
 
@@ -414,7 +414,7 @@ struct MessageBubble: View {
             }
         }
         .padding(.horizontal, Spacing.xs)
-        .padding(.vertical, 2)
+        .padding(.vertical, Spacing.xxxs)
     }
 
     private var avatarView: some View {
@@ -424,20 +424,20 @@ struct MessageBubble: View {
                 .frame(width: IconSize.avatar, height: IconSize.avatar)
 
             Image(systemName: message.role == .user ? "person.fill" : "sparkles")
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: IconSize.avatarInline, weight: .medium))
                 .foregroundStyle(message.role == .user ? Color.appBubbleUserText : .secondary)
         }
     }
 
     private var typingIndicator: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xxs) {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .fill(Color.accentColor.opacity(0.6 - Double(index) * 0.15))
-                    .frame(width: 5, height: 5)
+                    .frame(width: IconSize.typingDot, height: IconSize.typingDot)
                     .scaleEffect(typingDotScale)
                     .animation(
-                        .easeInOut(duration: 0.45)
+                        .easeInOut(duration: AnimationDuration.long)
                             .repeatForever(autoreverses: true)
                             .delay(Double(index) * 0.12),
                         value: typingDotScale

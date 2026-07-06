@@ -35,7 +35,7 @@ struct FolderTreeView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("刷新目录")
             }
-            .padding(.horizontal)
+            .padding(.horizontal, Spacing.xs)
             .padding(.top, Spacing.xs)
 
             if let path = rootPath {
@@ -52,8 +52,8 @@ struct FolderTreeView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, Spacing.xs)
+                .padding(.vertical, Spacing.xxs)
                 .background(Color.accentColor.opacity(0.05))
             }
 
@@ -78,11 +78,11 @@ struct FolderTreeView: View {
                             )
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, Spacing.xxs)
                 }
             }
         }
-        .frame(minWidth: 200, idealWidth: 260)
+        .frame(minWidth: PanelWidth.folderTreeMin, idealWidth: PanelWidth.folderTreeIdeal)
         .background(Color.windowBackgroundColor)
     }
 
@@ -132,12 +132,12 @@ struct FileEntryRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 4) {
+            HStack(spacing: Spacing.xxs) {
                 ForEach(0..<depth, id: \.self) { _ in
                     Rectangle()
                         .fill(Color.secondary.opacity(0.15))
                         .frame(width: 1)
-                        .padding(.leading, 8)
+                        .padding(.leading, Spacing.xs)
                 }
 
                 if entry.isDirectory {
@@ -149,11 +149,11 @@ struct FileEntryRow: View {
                     } label: {
                         Image(systemName: expanded.contains(entry.id) ? "chevron.down" : "chevron.right")
                             .font(.system(size: IconSize.caption, weight: .bold))
-                            .frame(width: 12)
+                            .frame(width: IconSize.sidebar)
                     }
                     .buttonStyle(.plain)
                 } else {
-                    Spacer().frame(width: 12)
+                    Spacer().frame(width: IconSize.sidebar)
                 }
 
                 Image(
@@ -169,9 +169,13 @@ struct FileEntryRow: View {
                     .lineLimit(1)
                 Spacer()
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, Spacing.xxxs)
             .contentShape(Rectangle())
+            .accessibilityLabel(entry.isDirectory ? "文件夹 \(entry.name)" : "文件 \(entry.name)")
+            .accessibilityValue(entry.isDirectory ? (expanded.contains(entry.id) ? "已展开" : "已折叠") : "")
+            .accessibilityHint(entry.isDirectory ? "点击切换展开或折叠" : "")
+            .accessibilityAddTraits(entry.isDirectory ? .isButton : .isStaticText)
             .onTapGesture {
                 if entry.isDirectory {
                     onToggle(entry.id)
