@@ -19,7 +19,7 @@ import YunPatNetworking
 /// - Level 3: FullCompact — LLM 摘要压缩整个对话（除首条）
 /// - Level 4: OverflowRecovery — 仅保留最近 2 个 turn-pair + 当前请求
 /// - Level 5: OverBudget — 窗口放不下
-public final class CompactionWatermark: @unchecked Sendable {
+public actor CompactionWatermark {
 
     /// 已摘要的 tool result key → 固定摘要文本
     private var summarizedResults: [String: String] = [:]

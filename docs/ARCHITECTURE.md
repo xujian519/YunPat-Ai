@@ -35,29 +35,37 @@ status: 生效 (2026-06-29)
 
 ```
 Packages/YunPatCore/Sources/YunPatCore/
-├── Capability/     — Services: CapabilityRegistry, CapabilityDefinition, ToolDefinition
-├── Context/        — Services: ContextEngine, CompactionWatermark, TokenEstimator
-├── Desktop/        — Services: FileOperationLog, FileSnapshotStore
-├── Hooks/          — Services: AgentHook, HooksService
-├── Knowledge/      — Services: WikiAdapter, RuleEngine, FactExtractor, EvaluationEngine 等
-│                   — Models: WikiTypes, StructuredFacts, ApplicableRules 等
-├── Loop/           — Services: AgentLoopEngine, PatentLoopEngine, PatentToolLoop 等
-│                   — Models: LoopState, LoopResult, ApprovalRequest 等
-├── Memory/         — Services: MemoryEngine, MemoryConsolidator, MemoryWritePath 等
-│                   — Storage: MemoryStore, MemoryDatabase
-├── Models/Chat/    — Models: SessionSource, ChatSessionData
-├── Patent/         — Services: FactBlackboard, LegalStateMachine, ChecklistEngine 等
-├── Privacy/        — Services: PrivacyFilter, PathSecurity 等
-├── Quality/        — Services: PatentRubric, FactMarker, TabooDetector 等
-├── Runtime/        — Services: RuntimeConfig, CoopScheduler, AgentMetrics
-├── Skill/          — Services: SkillManager, SkillParser
-├── SSR/            — Services: SSRGuard
-├── Storage/        — Storage: CaseDatabase, StorageConverger, DegradedStore
-├── SystemPrompt/   — Services: SystemPromptService
-├── Tools/          — Tools: ToolResponse, ToolErrorCode + Docs/
-├── Trace/          — Services: TraceCollector, TraceStore
-├── Utilities/      — Utils: Bits, RandGenerator, SyncWrapper
-└── Utils/          — Utils: DateParser
+├── Capability/      — Services: CapabilityRegistry, CapabilityDefinition, ToolDefinition
+├── Context/         — Services: ContextEngine, CompactionWatermark, TokenEstimator
+├── Cost/            — Services: CostTracker
+├── Desktop/         — Services: FileOperationLog, FileSnapshotStore
+├── DocumentAdapter/ — Services: DocumentAdapter, DocumentAdapterProvider, DocumentAdapterRegistry, PatentDocumentTool
+│   └── Adapters/    — Services: CSVDocumentAdapter, OfficeDocumentAdapter, PDFDocumentAdapter, PlainTextDocumentAdapter
+├── EventBus/        — Services: EventBus
+├── Hooks/           — Services: AgentHook, HooksService
+├── Knowledge/       — Services: WikiAdapter, RuleEngine, FactExtractor, EvaluationEngine 等
+│                    — Models: WikiTypes, StructuredFacts, ApplicableRules 等
+├── Loop/            — Services: AgentLoopEngine, PatentLoopEngine, PatentToolLoop 等
+│                    — Models: LoopState, LoopResult, ApprovalRequest 等
+├── Memory/          — Services: MemoryEngine, MemoryConsolidator, MemoryWritePath 等
+│                    — Storage: MemoryStore, MemoryDatabase
+├── Models/Chat/     — Models: SessionSource, ChatSessionData
+├── Patent/          — Services: FactBlackboard, LegalStateMachine, ChecklistEngine 等
+├── Privacy/         — Services: OnDeviceClassifier, PathSecurity 等
+├── Quality/         — Services: PatentRubric, FactMarker, TabooDetector 等
+├── Routing/         — Services: RoutingEngine, TokenBudgetService
+│                    — Storage: TokenUsageStore
+├── Runtime/         — Services: RuntimeConfig, CoopScheduler, AgentMetrics
+├── Skill/           — Services: SkillManager, SkillParser
+├── SSR/             — Services: SSRGuard
+├── Storage/         — Storage: CaseDatabase, StorageConverger, DegradedStore
+├── SystemPrompt/    — Services: SystemPromptService
+├── Tools/           — Tools: ToolResponse, ToolErrorCode + Docs/
+├── Trace/           — Services: TraceCollector, TraceStore
+├── Utilities/       — Utils: Bits, RandGenerator, SyncWrapper
+├── Utils/           — Utils: DateParser
+└── Workspace/       — Services: CaseWorkspace, CaseWorkspaceService
+                     — Storage: CaseWorkspaceStore
 
 App/Views/
 ├── ChatView, ContentView, Tab, TabBar, StatusBar 等

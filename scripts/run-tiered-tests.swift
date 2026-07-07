@@ -75,6 +75,9 @@ func runTests(for tiers: Set<Tier>) {
         ("YunPatCore", "Packages/YunPatCore"),
         ("YunPatPlugins", "Packages/YunPatPlugins"),
         ("PatentClient", "Packages/PatentClient"),
+        ("YunPatNetworking", "Packages/YunPatNetworking"),
+        ("YunPatDesktop", "Packages/YunPatDesktop"),
+        ("YunPatSandbox", "Packages/YunPatSandbox"),
     ]
 
     for (name, path) in packages {
@@ -82,7 +85,14 @@ func runTests(for tiers: Set<Tier>) {
         guard FileManager.default.fileExists(atPath: packageURL.path) else { continue }
 
         print("[TieredTest] 测试 \(name)...")
-        let status = runCommand(["swift", "test", "--package-path", path])
+        var testArgs = ["swift", "test", "--package-path", path]
+        // 非全量模式时，传入 --filter 以仅运行指定分档的测试
+        if tiers.count < 3 {
+            for filter in filters {
+                testArgs.append(contentsOf: ["--filter", filter])
+            }
+        }
+        let status = runCommand(testArgs)
         if status != 0 {
             print("[TieredTest] ❌ \(name) 测试失败")
             allPassed = false

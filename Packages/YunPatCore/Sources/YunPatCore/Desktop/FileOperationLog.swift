@@ -279,7 +279,7 @@ public actor ShellMutationLog {
 
 // MARK: - PlannedMutation
 
-public struct PlannedMutation: @unchecked Sendable {
+public struct PlannedMutation: Sendable {
     public let kind: FileOpKind
     public let sourcePath: String
     public let destPath: String?

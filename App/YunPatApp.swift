@@ -242,9 +242,13 @@ final class AppState: ObservableObject {
 
         Task {
             let consolidator: MemoryConsolidator = MemoryConsolidator.shared
-            while true {
+            while !Task.isCancelled {
                 if await consolidator.shouldRun { await consolidator.run() }
-                try? await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
+                do {
+                    try await Task.sleep(nanoseconds: 6 * 3600 * 1_000_000_000)
+                } catch {
+                    break  // 取消或超时 → 退出循环
+                }
             }
         }
 

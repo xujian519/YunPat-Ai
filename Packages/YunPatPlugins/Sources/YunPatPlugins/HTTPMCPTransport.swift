@@ -6,10 +6,10 @@ import Foundation
 ///
 /// 适用于 MCP "Streamable HTTP" transport 的非流式模式（单一请求-响应）。
 /// 服务端必须返回 `Content-Type: application/json` + JSON-RPC body。
-public final class HTTPMCPTransport: MCPTransport, @unchecked Sendable {
+public final class HTTPMCPTransport: MCPTransport, Sendable {
 
     private let url: URL
-    private var headers: [String: String]
+    private let headers: [String: String]
     private let session: URLSession
 
     public init(url: URL, headers: [String: String] = [:], session: URLSession = .shared) {
@@ -52,10 +52,10 @@ public final class HTTPMCPTransport: MCPTransport, @unchecked Sendable {
 ///
 /// 如果服务端对 SSE 请求返回 `Content-Type: application/json`（降级为非流式），
 /// 则直接收集完整 body 返回。
-public final class SSEMCPTransport: MCPTransport, @unchecked Sendable {
+public final class SSEMCPTransport: MCPTransport, Sendable {
 
     private let url: URL
-    private var headers: [String: String]
+    private let headers: [String: String]
     private let session: URLSession
 
     public init(url: URL, headers: [String: String] = [:], session: URLSession = .shared) {

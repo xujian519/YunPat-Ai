@@ -7,9 +7,20 @@
 ```bash
 git clone <repo>
 cd YunPat-Ai
-# 构建 SPM 包
-cd Packages/YunPatNetworking && swift build && swift test
-cd ../YunPatCore && swift build && swift test
+
+# 快速开发（Makefile）
+make build        # 构建所有包与 App
+make test         # 运行全量测试
+
+# 分步构建（SPM）
+swift build --package-path Packages/YunPatNetworking
+swift test  --package-path Packages/YunPatNetworking
+
+swift build --package-path Packages/YunPatCore
+swift test  --package-path Packages/YunPatCore
+
+# 构建 App bundle
+bash scripts/package-app.sh     # 产出 .build/YunPatAi.app
 ```
 
 ## 配置
@@ -25,8 +36,12 @@ cd ../YunPatCore && swift build && swift test
 App/                  SwiftUI macOS App
   Views/               Chat UI 组件
 Packages/
-  YunPatCore/          AgentLoop + CapabilityRegistry + ContextEngine
+  YunPatCore/          AgentLoop + 知识库 + 记忆 + 专利引擎 + 隐私过滤 + 桌面工具
   YunPatNetworking/    多后端模型路由 (OpenAI/Anthropic/DeepSeek/GLM)
+  PatentClient/        Google Patents + PSS 专利检索客户端
+  YunPatPlugins/       插件系统 + MCP 协议 (ClaimDrafting/Infringement 等)
+  YunPatDesktop/       桌面自动化 (AppleScript/AXorcist/Shell)
+  YunPatSandbox/       沙箱 Provider
 ```
 
 ## 技术栈

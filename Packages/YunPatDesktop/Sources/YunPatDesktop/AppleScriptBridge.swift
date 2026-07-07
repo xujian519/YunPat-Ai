@@ -5,7 +5,7 @@ import Foundation
 ///
 /// 设计 §1 macOS 独占特性：Spotlight、Shortcuts、AppleScript 集成。
 /// 提供脚本执行、Shortcuts 调用、Spotlight 搜索能力。
-public final class AppleScriptBridge: @unchecked Sendable {
+public final class AppleScriptBridge: Sendable {
 
     // MARK: - AppleScript Execution
 

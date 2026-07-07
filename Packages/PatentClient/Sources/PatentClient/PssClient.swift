@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SwiftSoup
 
 // MARK: - PSS 客户端
@@ -17,6 +18,7 @@ public actor PssClient {
     private let session: URLSession
     private let baseURL: String
     private var currentSession: PssSession?
+    private let logger = Logger(subsystem: "com.yunpat.patent-client", category: "PSS")
 
     private static let userAgent: String = [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
@@ -175,6 +177,16 @@ public actor PssClient {
 
     // MARK: - HTML 解析
 
+    /// 安全提取单元格文本，解析失败时记录日志并返空
+    private func safeCellText(_ cell: Element) -> String {
+        do {
+            return try cell.text().trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            logger.debug("HTML parse: cell text failed: \(error, privacy: .public)")
+            return ""
+        }
+    }
+
     /// 解析搜索结果表格
     private func parseSearchResults(_ html: String, keyword: String) throws -> PssSearchResult {
         let doc: Document = try SwiftSoup.parse(html)
@@ -187,20 +199,14 @@ public actor PssClient {
             let cells: Elements = try row.select("td")
             guard cells.count >= 5 else { continue }
             let brief: PssPatentBrief = PssPatentBrief(
-                pubNumber: (try? cells[0].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "",
-                title: (try? cells[1].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "",
-                applicant: (try? cells[2].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "",
-                appNumber: (try? cells[3].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "",
-                appDate: (try? cells[4].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "",
-                pubDate: cells.count > 5
-                    ? ((try? cells[5].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "")
-                    : "",
-                status: cells.count > 6
-                    ? ((try? cells[6].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "")
-                    : "",
-                ipc: cells.count > 7
-                    ? ((try? cells[7].text().trimmingCharacters(in: .whitespacesAndNewlines)) ?? "")
-                    : ""
+                pubNumber: safeCellText(cells[0]),
+                title: safeCellText(cells[1]),
+                applicant: safeCellText(cells[2]),
+                appNumber: safeCellText(cells[3]),
+                appDate: safeCellText(cells[4]),
+                pubDate: cells.count > 5 ? safeCellText(cells[5]) : "",
+                status: cells.count > 6 ? safeCellText(cells[6]) : "",
+                ipc: cells.count > 7 ? safeCellText(cells[7]) : ""
             )
             patents.append(brief)
         }

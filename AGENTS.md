@@ -47,7 +47,7 @@ bash scripts/package-app.sh                  # 产出 .build/YunPatAi.app
 - `Database` — SQLite
 - `View` — SwiftUI 视图
 
-**特例**：`ContextEngine.swift` / `CapabilityRegistry.swift` / `SystemPromptService.swift` 目前是 `@unchecked Sendable` class，计划迁为 `actor`。新代码必须合规。
+**特例**：`VaultObserver.swift` 因 FSEventStreamRef (OpaquePointer) 不可 Sendable，保持 `@unchecked Sendable`。新代码必须合规。
 
 ## CI 与影响面检测
 

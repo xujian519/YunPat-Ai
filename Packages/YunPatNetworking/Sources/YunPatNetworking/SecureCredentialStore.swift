@@ -5,7 +5,7 @@ import Security
 /// 凭证安全 — Keychain + 生物识别
 ///
 /// 设计 §9：不落盘明文，Secure Enclave 密钥派生
-public final class SecureCredentialStore: @unchecked Sendable {
+public final class SecureCredentialStore: Sendable {
     public static let shared = SecureCredentialStore()
 
     private init() {}

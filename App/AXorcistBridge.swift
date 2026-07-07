@@ -6,15 +6,19 @@ import YunPatDesktop
 /// AppKitAXorcistBridge — 桥接 YunPatDesktop 的 AXorcist 到 YunPatCore 的 DesktopAutomationProvider
 ///
 /// 在 App 启动时调用 AXorcistBridge.register() 注入
-final class AXorcistBridge: DesktopAutomationProvider, @unchecked Sendable {
+///
+/// **并发安全**: actor 隔离确保 _lastRoute 写入只在 actor 方法内发生；
+/// lastRouteDescription 使用 nonisolated(unsafe) 满足 DesktopAutomationProvider 协议要求
+/// （同步只读属性），写入仅在与 _lastRoute 相同线程安全的 actor 边界内完成。
+actor AXorcistBridge: DesktopAutomationProvider {
     private let axorcist: AppKitAXorcist = AppKitAXorcist()
-    private var _lastRoute: InputRoute = .accessibility
+    private nonisolated(unsafe) var _lastRoute: InputRoute = .accessibility
 
     static func register() {
         AXorcistToolRegistry.setProvider(AXorcistBridge())
     }
 
-    var lastRouteDescription: String { _lastRoute.rawValue }
+    nonisolated var lastRouteDescription: String { _lastRoute.rawValue }
 
     func click(app: String, element: String) async throws {
         try await axorcist.click(app: app, element: element)

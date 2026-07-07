@@ -1,6 +1,10 @@
 import SwiftUI
 import YunPatCore
 
+/// 人机协作审批面板 — 展示 Agent 的待确认检查点与消息中标记 "需要确认" / "⚠️" 的内容。
+///
+/// **注意**: 这不是多用户实时协作面板。它是一个单用户审批队列，用于展示 Agent 在工作流
+/// 中需要用户确认的决策点和检查点。真正的多用户协作（CRDT/OT/WebSocket）不在当前范围内。
 struct CollaborationPanel: View {
     @ObservedObject var tabManager: TabManager
     @ObservedObject var chatManager: ChatManager

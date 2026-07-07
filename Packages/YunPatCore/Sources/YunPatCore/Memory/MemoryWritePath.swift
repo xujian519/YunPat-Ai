@@ -100,7 +100,11 @@ public actor MemoryWritePath {
                     retryCount += 1
                     pendingSignals.append(contentsOf: signals)
                     persistPendingSignals()
-                    try? await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
+                    do {
+                        try await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
+                    } catch {
+                        return  // 取消 → 停止重试
+                    }
                     await flush(caseId: caseId)
                 } else {
                     logger.error("Distill fail after \(self.maxRetries) tries, dropping \(signals.count) signals")

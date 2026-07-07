@@ -1,6 +1,8 @@
 # YunPat-Ai 功能清单
 
-> 更新日期: 2026-07-03
+> 更新日期: 2026-07-07
+>
+> **说明**: 专利检索/知识检索/法律状态查询工具采用依赖注入 (DI) 模式，需调用 `configurePatentSearch()/configureKnowledgeSearch()/configureLegalStatus()` 注入后端实现。App 启动时自动通过 `SearchCommander` 配置默认后端。未配置时将返回清晰的"未配置"错误提示。
 
 | 功能 | 状态 | 文档 | 代码位置 |
 |------|------|------|---------|
@@ -27,6 +29,8 @@
 | 上下文压缩水位 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Context/CompactionWatermark.swift` |
 | 上下文摘要器 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Context/ContextSummarizer.swift` |
 | Token 估算器 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Context/TokenEstimator.swift` |
+| 上下文压缩策略 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Context/CompactionPolicy.swift` |
+| 全量压缩器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Context/FullCompactor.swift` |
 | **记忆系统** | | | |
 | 记忆引擎 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryEngine.swift` |
 | 记忆合并器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryConsolidator.swift` |
@@ -36,6 +40,9 @@
 | 记忆存储 (JSON) | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryStore.swift` |
 | LLM 记忆存储 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/LLMMemoryStore.swift` |
 | 记忆数据库 (SQLite) | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Storage/MemoryDatabase.swift` |
+| 记忆类型系统 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryTypes.swift` |
+| 梦境审查服务 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/DreamReviewService.swift` |
+| 记忆审计服务 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Memory/MemoryAuditService.swift` |
 | **知识检索** | | | |
 | Wiki 适配器 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Knowledge/WikiAdapter.swift` |
 | 规则引擎 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Knowledge/RuleEngine.swift` |
@@ -53,6 +60,15 @@
 | MLX 嵌入提供者 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Knowledge/MLXEmbeddingProvider.swift` |
 | 嵌入提供者协议 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Knowledge/EmbeddingProvider.swift` |
 | 保险库观察者 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Knowledge/VaultObserver.swift` |
+| **文档适配器** | | | |
+| 文档适配器协议 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/DocumentAdapter.swift` |
+| 文档适配器提供者 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/DocumentAdapterProvider.swift` |
+| 文档适配器注册表 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/DocumentAdapterRegistry.swift` |
+| CSV 文档适配器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/Adapters/CSVDocumentAdapter.swift` |
+| Office 文档适配器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/Adapters/OfficeDocumentAdapter.swift` |
+| PDF 文档适配器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/Adapters/PDFDocumentAdapter.swift` |
+| 纯文本适配器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/Adapters/PlainTextDocumentAdapter.swift` |
+| 专利文档工具 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/DocumentAdapter/PatentDocumentTool.swift` |
 | **专利法律知识** | | | |
 | 专利法知识图谱 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Patent/PatentLawKnowledgeGraph.swift` |
 | 案件关系存储 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Patent/CaseRelationStore.swift` |
@@ -83,10 +99,10 @@
 | 文件工具 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/ToolDispatch+FileTools.swift` |
 | 专利工具 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/ToolDispatch+PatentTools.swift` |
 | **隐私保护** | | | |
-| 隐私过滤器 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Privacy/PrivacyFilter.swift` |
+| 隐私过滤器 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Privacy/PrivacyFilter.swift` |
 | 路径安全 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Privacy/PathSecurity.swift` |
 | 设备端分类器 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Privacy/OnDeviceClassifier.swift` |
-| 敏感词注册表 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Privacy/SensitiveTermsRegistry.swift` |
+| 敏感词注册表 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Privacy/SensitiveTermsRegistry.swift` |
 | **桌面自动化** | | | |
 | 桌面自动化提供者 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Desktop/DesktopAutomationProvider.swift` |
 | 文件操作日志 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Desktop/FileOperationLog.swift` |
@@ -111,11 +127,18 @@
 | Usage 追踪 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Usage.swift` |
 | 网络策略 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/NetworkPolicy.swift` |
 | Fixture 录制 | Experimental | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/FixtureRecorder.swift` |
+| 路由引擎 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Routing/RoutingEngine.swift` |
+| Token 预算服务 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Routing/TokenBudgetService.swift` |
+| Token 使用存储 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Routing/TokenUsageStore.swift` |
 | **后端提供者** | | | |
 | Anthropic 提供者 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/AnthropicProvider.swift` |
 | OpenAI 提供者 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAIProvider.swift` |
 | OpenAI 兼容提供者 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OpenAICompatProvider.swift` |
 | OMLX 后端 | Experimental | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/Providers/OMLXBackend.swift` |
+| **流式输出** | | | |
+| 流式 Chat 分块 | Stable | — | `Packages/YunPatNetworking/Sources/YunPatNetworking/ChatChunk.swift` |
+| 模型流式回调 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift` (processStream) |
+| Tool Call 增量累积 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/AgentLoopEngine.swift` |
 | **插件系统** | | | |
 | 插件管理器 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/PluginManager.swift` |
 | 插件加载器 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/PluginLoader.swift` |
@@ -130,6 +153,8 @@
 | HTTP MCP 传输 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/HTTPMCPTransport.swift` |
 | 进程内 MCP 传输 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/InProcessMCPTransport.swift` |
 | MCP 类型 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/MCPTypes.swift` |
+| MCP 工具桥接 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/MCPToolBridge.swift` |
+| MCP 配置加载器 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/MCPConfigLoader.swift` |
 | **专利插件** | | | |
 | 专利搜索插件 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/PatentSearchPlugin.swift` |
 | 权利要求起草插件 | Experimental | — | `Packages/YunPatPlugins/Sources/YunPatPlugins/ClaimDraftingPlugin.swift` |
@@ -151,6 +176,10 @@
 | 模块边界 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Runtime/ModuleBoundary.swift` |
 | 工具调用状态 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Runtime/ToolCallState.swift` |
 | Agent 指标 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Runtime/AgentMetrics.swift` |
+| 始终在线调度器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Runtime/AlwaysOnScheduler.swift` |
+| Agent 角色 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/AgentRole.swift` |
+| 循环状态 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/LoopState.swift` |
+| 工具审计记录器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Loop/ToolAuditRecorder.swift` |
 | **事件 / 追踪** | | | |
 | 事件总线 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/EventBus/EventBus.swift` |
 | 追踪收集器 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Trace/TraceCollector.swift` |
@@ -169,12 +198,17 @@
 | **Hook 系统** | | | |
 | Agent Hook | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Hooks/AgentHook.swift` |
 | Hook 服务 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Hooks/HooksService.swift` |
+| **案件工作区** | | | |
+| 案件工作区模型 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Workspace/CaseWorkspace.swift` |
+| 案件工作区服务 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/Workspace/CaseWorkspaceService.swift` |
+| 案件工作区存储 | Experimental | — | `Packages/YunPatCore/Sources/YunPatCore/Workspace/CaseWorkspaceStore.swift` |
 | **系统提示** | | | |
 | 系统提示服务 | Stable | — | `Packages/YunPatCore/Sources/YunPatCore/SystemPrompt/SystemPromptService.swift` |
 | **macOS UI (SwiftUI)** | | | |
 | 主内容视图 | Stable | — | `App/Views/ContentView.swift` |
 | 对话视图 | Stable | — | `App/Views/ChatView.swift` |
-| 底部工具栏 | Stable | `docs/ARCHITECTURE.md` §2 | `App/Views/BottomToolbar.swift` |
+| 标签栏内容 (TabStrip) | Stable | — | `App/Views/TabStripContent.swift` |
+| 状态栏 | Stable | — | `App/Views/StatusBar.swift` |
 | Tab 系统 | Stable | — | `App/Views/Tab.swift`, `App/Views/TabBar.swift` |
 | 案件列表侧栏 | Stable | — | `App/Views/CaseListSidebar.swift` |
 | 文档工作区 | Stable | — | `App/Views/DocumentWorkspace.swift` |
@@ -189,6 +223,29 @@
 | 文档变更检测器 | Stable | — | `App/Views/DocumentChangeDetector.swift` |
 | 窗口状态恢复 | Stable | — | `App/Views/WindowStateRestoration.swift` |
 | 设计令牌 | Stable | — | `App/Views/DesignTokens.swift` |
+| 空状态视图 | Stable | — | `App/Views/EmptyStateView.swift` |
+| 表面修饰器 | Stable | — | `App/Views/SurfaceModifiers.swift` |
+| 颜色系统 | Stable | — | `App/Views/Color+App.swift` |
+| 内容视图修饰器 | Stable | — | `App/Views/ContentViewModifiers.swift` |
+| 聊天欢迎视图 | Stable | — | `App/Views/Agent/ChatWelcomeView.swift` |
+| 顶部模块栏 | Stable | — | `App/Views/Navigation/TopModuleBar.swift` |
+| 项目列表侧栏 | Stable | — | `App/Views/Project/ProjectListSidebar.swift` |
+| 路由仪表盘 | Experimental | — | `App/Views/Workspace/RoutingDashboardView.swift` |
+| 记忆仪表盘 | Experimental | — | `App/Views/Workspace/MemoryDashboardView.swift` |
+| 技能画廊 | Experimental | — | `App/Views/Workspace/SkillGalleryView.swift` |
+| 始终在线仪表盘 | Experimental | — | `App/Views/Workspace/AlwaysOnDashboardView.swift` |
+| 文件浏览器 | Experimental | — | `App/Views/Workspace/FileBrowserView.swift` |
+| 统计卡片 | Experimental | — | `App/Views/Workspace/StatCard.swift` |
+| 成本仪表盘 | Experimental | — | `App/Views/CostDashboardView.swift` |
+| 路由设置 | Experimental | — | `App/Views/RoutingSettingsView.swift` |
+| 现代化设置 | Experimental | — | `App/Views/Settings/ModernSettingsView.swift` |
+| 案件工作区视图 | Experimental | — | `App/Views/CaseWorkspaceView.swift` |
+| 记忆审计视图 | Experimental | — | `App/Views/MemoryAuditView.swift` |
+| 工具审计视图 | Experimental | — | `App/Views/ToolAuditView.swift` |
+| 案件工作区管理器 | Stable | — | `App/Managers/CaseWorkspaceManager.swift` |
+| 成本仪表盘管理器 | Experimental | — | `App/Managers/CostDashboardManager.swift` |
+| 记忆审计管理器 | Experimental | — | `App/Managers/MemoryAuditManager.swift` |
+| 工具审计管理器 | Experimental | — | `App/Managers/ToolAuditManager.swift` |
 | **设置页面** | | | |
 | 提供者设置 | Stable | — | `App/Views/Settings/ProviderSettingsView.swift` |
 | 技能设置 | Experimental | — | `App/Views/Settings/SkillSettingsView.swift` |
