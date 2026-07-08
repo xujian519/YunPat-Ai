@@ -1,14 +1,39 @@
 import SwiftUI
 import YunPatCore
 
-/// 记忆卡片式 Dashboard
+/// PilotDeck 风格记忆 Dashboard
 struct MemoryDashboardView: View {
     @State private var selectedLayer: MemoryLayer = .caseContext
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
-                header
+                PageHeader(
+                    title: "记忆",
+                    subtitle: "五层记忆架构的统一视图",
+                    actions: {
+                        Button(
+                            action: {},
+                            label: {
+                                HStack(spacing: Spacing.xxs) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: IconSize.inlineSmall))
+                                    Text("刷新")
+                                        .font(FontStyle.callout)
+                                }
+                            }
+                        )
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, Spacing.sm)
+                        .padding(.vertical, Spacing.xxs)
+                        .background(Color.appSurfacePrimary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: CornerRadius.md)
+                                .stroke(Color.appSeparator.opacity(0.5), lineWidth: BorderWidth.hairline)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
+                    }
+                )
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: Spacing.md) {
                     StatCard(
@@ -49,20 +74,9 @@ struct MemoryDashboardView: View {
         .background(Color.appBackground)
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("记忆")
-                .font(FontStyle.largeTitle)
-            Text("五层记忆架构的统一视图")
-                .font(FontStyle.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-
     private var layerSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("记忆层级")
-                .font(FontStyle.title2)
+            sectionTitle("记忆层级")
 
             Picker("层级", selection: $selectedLayer) {
                 ForEach(MemoryLayer.allCases, id: \.self) { layer in
@@ -75,8 +89,7 @@ struct MemoryDashboardView: View {
 
     private var recentEntriesSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("最近条目")
-                .font(FontStyle.title2)
+            sectionTitle("最近条目")
 
             VStack(spacing: Spacing.xs) {
                 MemoryEntryRow(content: "用户偏好：答复使用简体中文", source: "手动编辑", time: "10 分钟前")
@@ -94,6 +107,13 @@ struct MemoryDashboardView: View {
         case .longTerm: return "长期"
         case .global: return "全局"
         }
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(FontStyle.callout)
+            .fontWeight(.semibold)
+            .foregroundStyle(Color.appTextSecondary)
     }
 }
 

@@ -8,9 +8,9 @@ import SwiftUI
 /// 背景、圆角、发丝描边与投影，消除“扁平卡片”观感，并真正启用 `DesignTokens`
 /// 中已定义但此前未被引用的 `AppShadow` 高程系统。
 extension View {
-    /// 抬升卡片：表面背景 + 圆角 + 发丝描边 + 高程投影（浅/深色自适应）。
+    /// 抬升卡片：表面背景 + 圆角 + 发丝描边 + 柔和投影（浅/深色自适应）。
     /// - Parameters:
-    ///   - elevation: 投影层级（默认 `.sm`）。
+    ///   - elevation: 投影层级（默认 `.sm`，PilotDeck 风格更克制）。
     ///   - cornerRadius: 圆角半径（默认 `CornerRadius.lg`）。
     ///   - surface: 表面底色（默认 `appSurfacePrimary`）。
     func appCard(
@@ -54,8 +54,9 @@ private struct _AppCard: ViewModifier {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.appSeparator.opacity(colorScheme == .dark ? 0.9 : 0.5),
-                            lineWidth: BorderWidth.hairline)
+                    .stroke(
+                        Color.appSeparator.opacity(colorScheme == .dark ? 0.9 : 0.5),
+                        lineWidth: BorderWidth.hairline)
             )
             .shadow(color: shadow.color, radius: shadow.radius, x: shadow.horizontal, y: shadow.vertical)
     }

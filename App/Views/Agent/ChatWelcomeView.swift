@@ -1,7 +1,7 @@
 import SwiftUI
 import YunPatCore
 
-/// 聊天欢迎页：展示建议提示与快捷入口
+/// PilotDeck 风格聊天欢迎页
 struct ChatWelcomeView: View {
     let onPromptTap: (String) -> Void
 
@@ -13,34 +13,25 @@ struct ChatWelcomeView: View {
     ]
 
     var body: some View {
-        VStack(spacing: Spacing.xl) {
+        VStack(spacing: 0) {
             Spacer()
 
-            Image(systemName: "sparkles")
-                .font(.system(size: IconSize.hero, weight: .light))
-                .foregroundStyle(Color.accentColor.opacity(0.8))
-                .padding(.bottom, Spacing.sm)
-
-            Text("YunPat-Ai")
-                .font(FontStyle.largeTitle)
+            Text("今天想做点什么？")
+                .font(FontStyle.title)
                 .fontWeight(.semibold)
+                .foregroundStyle(Color.appTextPrimary)
 
-            Text("今天想处理什么专利代理工作？")
-                .font(FontStyle.title3)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            Spacer()
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: PanelWidth.suggestionCardMin))], spacing: Spacing.md) {
+            // 保留快捷入口，但以更克制的方式呈现
+            HStack(spacing: Spacing.md) {
                 ForEach(suggestions) { suggestion in
-                    PromptCard(suggestion: suggestion) {
+                    SuggestionPill(suggestion: suggestion) {
                         onPromptTap(suggestion.prompt)
                     }
                 }
             }
-            .padding(.top, Spacing.lg)
-            .frame(maxWidth: PanelWidth.welcomeMax)
-
-            Spacer()
+            .padding(.bottom, Spacing.xl)
         }
         .padding(.horizontal, Spacing.xl)
     }
@@ -53,7 +44,7 @@ struct PromptSuggestion: Identifiable {
     let prompt: String
 }
 
-struct PromptCard: View {
+struct SuggestionPill: View {
     let suggestion: PromptSuggestion
     let action: () -> Void
 
@@ -61,26 +52,24 @@ struct PromptCard: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Spacing.sm) {
+            HStack(spacing: Spacing.xs) {
                 Image(systemName: suggestion.icon)
-                    .font(.system(size: IconSize.messageIcon))
-                    .foregroundStyle(Color.accentColor)
-                VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                    Text(suggestion.title)
-                        .font(FontStyle.callout)
-                        .foregroundStyle(.primary)
-                    Text(suggestion.prompt)
-                        .font(FontStyle.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                Spacer()
-                Image(systemName: "arrow.right")
                     .font(.system(size: IconSize.inlineSmall))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.appTextSecondary)
+                Text(suggestion.title)
+                    .font(FontStyle.caption)
+                    .foregroundStyle(Color.appTextSecondary)
             }
-            .padding(Spacing.sm)
-            .background(isHovering ? Color.appSurfaceSecondary : Color.appSurfacePrimary)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs)
+            .background(
+                Capsule()
+                    .fill(isHovering ? Color.appSurfaceSecondary : Color.appSurfacePrimary)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.appSeparator.opacity(0.5), lineWidth: BorderWidth.hairline)
+            )
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -88,7 +77,6 @@ struct PromptCard: View {
                 isHovering = hovering
             }
         }
-        .appCard()
     }
 }
 

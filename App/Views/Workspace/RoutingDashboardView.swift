@@ -1,17 +1,58 @@
 import SwiftUI
 import YunPatCore
 
-/// 路由策略卡片式 Dashboard
+/// PilotDeck 风格路由策略 Dashboard
 struct RoutingDashboardView: View {
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
     @State private var selectedModel: String = "auto"
+    @State private var aggregation: AggregationScope = .project
+
+    private enum AggregationScope: String, CaseIterable {
+        case project = "项目"
+        case total = "总计"
+    }
 
     private let models: [String] = ["auto", "gpt-4o", "claude-sonnet", "deepseek-chat", "glm-4"]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
-                header
+                PageHeader(
+                    title: "路由",
+                    subtitle: "模型路由策略与实时成本监控",
+                    actions: {
+                        HStack(spacing: Spacing.xxs) {
+                            Picker("", selection: $aggregation) {
+                                ForEach(AggregationScope.allCases, id: \.self) { scope in
+                                    Text(scope.rawValue).tag(scope)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .frame(width: 120)
+
+                            Button(
+                                action: {},
+                                label: {
+                                    HStack(spacing: Spacing.xxs) {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: IconSize.inlineSmall))
+                                        Text("刷新")
+                                            .font(FontStyle.callout)
+                                    }
+                                }
+                            )
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, Spacing.sm)
+                            .padding(.vertical, Spacing.xxs)
+                            .background(Color.appSurfacePrimary)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: CornerRadius.md)
+                                    .stroke(Color.appSeparator.opacity(0.5), lineWidth: BorderWidth.hairline)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
+                        }
+                    }
+                )
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 260))], spacing: Spacing.md) {
                     StatCard(
@@ -52,20 +93,9 @@ struct RoutingDashboardView: View {
         .background(Color.appBackground)
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("路由")
-                .font(FontStyle.largeTitle)
-            Text("模型路由策略与实时成本监控")
-                .font(FontStyle.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-
     private var strategySection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("路由策略")
-                .font(FontStyle.title2)
+            sectionTitle("路由策略")
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Picker("默认模型", selection: $selectedModel) {
@@ -86,8 +116,7 @@ struct RoutingDashboardView: View {
 
     private var providerSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("提供商状态")
-                .font(FontStyle.title2)
+            sectionTitle("提供商状态")
 
             HStack(spacing: Spacing.md) {
                 ProviderStatusCard(name: "OpenAI", status: .healthy)
@@ -96,6 +125,13 @@ struct RoutingDashboardView: View {
                 ProviderStatusCard(name: "GLM", status: .healthy)
             }
         }
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(FontStyle.callout)
+            .fontWeight(.semibold)
+            .foregroundStyle(Color.appTextSecondary)
     }
 }
 

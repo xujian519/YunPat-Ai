@@ -4,7 +4,7 @@ import YunPatCore
 import YunPatNetworking
 
 @MainActor
-final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_length
+final class ChatManager: ObservableObject {  // swiftlint:disable:this type_body_length
     @Published var inputText: String = ""
     @Published var isStreaming: Bool = false
     @Published var clarifying: Bool = false
@@ -97,7 +97,8 @@ final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_
         var augmentedInput: String = inputText
 
         if !pendingDocumentQuestions.isEmpty {
-            let docContext: String = pendingDocumentQuestions
+            let docContext: String =
+                pendingDocumentQuestions
                 .map { "- 文档疑问: \($0)" }
                 .joined(separator: "\n")
             augmentedInput = "【文档标注问题】\n\(docContext)\n\n---\n\n\(inputText)"
@@ -321,13 +322,38 @@ final class ChatManager: ObservableObject { // swiftlint:disable:this type_body_
         tabManager.tabs[idx].loopModel = model
     }
 
+    /// 处理文件导入并将内容作为用户消息发送
+    func handleFileImport(_ result: Result<[URL], Error>, in tabManager: TabManager) {
+        if case .success(let urls) = result {
+            for url in urls {
+                guard url.startAccessingSecurityScopedResource() else { continue }
+                defer { url.stopAccessingSecurityScopedResource() }
+                Task { @MainActor in
+                    let safe: String
+                    do {
+                        safe = try String(contentsOf: url, encoding: .utf8)
+                    } catch {
+                        safe = "二进制文件（无法读取文本内容）"
+                    }
+                    let name: String = url.lastPathComponent
+                    let msg: String = "已打开: \(name)\n\n\(safe.prefix(2000))"
+                    if let id = tabManager.activeTabID {
+                        tabManager.appendMessage(to: id, ChatMessage(role: .user, content: msg))
+                        await sendMessage(in: tabManager)
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Patent Engine
 
     private func getPatentLoopEngine() async -> PatentLoopEngine {
         if let existing = patentLoopEngine {
             return existing
         }
-        let wiki: WikiAdapter = await KnowledgeBaseManager.shared.wikiAdapter
+        let wiki: WikiAdapter =
+            await KnowledgeBaseManager.shared.wikiAdapter
             ?? WikiAdapter(vaultPath: URL(filePath: ""))
         let engine: PatentLoopEngine = PatentLoopEngine(modelRouter: modelRouter, wikiAdapter: wiki)
         patentLoopEngine = engine

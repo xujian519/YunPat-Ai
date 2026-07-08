@@ -11,6 +11,9 @@ extension Color {
     static let appSurfaceTertiary = Color(nsColor: .tertiarySystemFill)
     static let appSurfaceQuaternary = Color(nsColor: .quaternarySystemFill)
 
+    /// PilotDeck 风格侧边栏背景：比主背景略暖的浅灰
+    static let appSidebarBackground = Color(nsColor: .windowBackgroundColor)
+
     // MARK: - Text
 
     static let appTextPrimary = Color(nsColor: .labelColor)

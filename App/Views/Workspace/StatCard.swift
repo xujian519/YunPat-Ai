@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 通用统计卡片组件
+/// PilotDeck 风格统计卡片
 struct StatCard: View {
     let title: String
     let value: String
@@ -10,21 +10,23 @@ struct StatCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
+            HStack(spacing: Spacing.xs) {
                 Image(systemName: icon)
-                    .font(.system(size: IconSize.messageIcon))
+                    .font(.system(size: IconSize.inlineSmall, weight: .medium))
                     .foregroundStyle(color)
-                Spacer()
-                Text(trend)
+                Text(title)
                     .font(FontStyle.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.appTextSecondary)
             }
+
             Text(value)
                 .font(FontStyle.title)
                 .fontWeight(.semibold)
-            Text(title)
-                .font(FontStyle.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appTextPrimary)
+
+            Text(trend)
+                .font(FontStyle.caption)
+                .foregroundStyle(Color.appTextSecondary)
         }
         .padding()
         .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)

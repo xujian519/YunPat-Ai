@@ -1,28 +1,66 @@
 import SwiftUI
 import YunPatCore
 
+/// PilotDeck 风格常驻 Dashboard
 struct AlwaysOnDashboardView: View {
     @StateObject private var manager = AlwaysOnManager()
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
-                header
+                PageHeader(
+                    title: "Always-On 仪表盘",
+                    subtitle: "所有工作区的活动动态。",
+                    actions: {
+                        Button(
+                            action: {},
+                            label: {
+                                HStack(spacing: Spacing.xxs) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: IconSize.inlineSmall))
+                                    Text("刷新")
+                                        .font(FontStyle.callout)
+                                }
+                            }
+                        )
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, Spacing.sm)
+                        .padding(.vertical, Spacing.xxs)
+                        .background(Color.appSurfacePrimary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: CornerRadius.md)
+                                .stroke(Color.appSeparator.opacity(0.5), lineWidth: BorderWidth.hairline)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
+                    }
+                )
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 220))], spacing: Spacing.md) {
-                    ForEach(AlwaysOnTaskKind.allCases, id: \.self) { kind in
-                        let status = manager.status(for: kind)
-                        AlwaysOnCard(
-                            title: title(for: kind),
-                            subtitle: subtitle(for: status),
-                            icon: icon(for: kind),
-                            isActive: status.state == .running
-                        ) {
-                            manager.toggle(kind)
-                        }
-                    }
+                    StatCard(
+                        title: "今日事件",
+                        value: "0",
+                        icon: "calendar",
+                        trend: "待处理",
+                        color: .blue
+                    )
+                    StatCard(
+                        title: "活跃项目",
+                        value: "0",
+                        icon: "folder.badge.person.crop",
+                        trend: "监控中",
+                        color: .green
+                    )
+                    StatCard(
+                        title: "正在运行",
+                        value: "0",
+                        icon: "arrow.triangle.2.circlepath",
+                        trend: "常驻任务",
+                        color: .orange
+                    )
                 }
 
+                recentEventsSection
+                taskSection
                 shortcutSection
             }
             .padding(Spacing.lg)
@@ -31,20 +69,46 @@ struct AlwaysOnDashboardView: View {
         .task { await manager.subscribe() }
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("常驻")
-                .font(FontStyle.largeTitle)
-            Text("后台常驻能力与快捷入口")
-                .font(FontStyle.subheadline)
-                .foregroundStyle(.secondary)
+    private var recentEventsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            sectionTitle("近期事件")
+
+            VStack(spacing: 0) {
+                EmptyStateView(
+                    icon: "waveform",
+                    title: "",
+                    subtitle: "暂无 Always-On 事件记录。",
+                    action: nil
+                )
+                .padding(.vertical, Spacing.xl)
+            }
+            .appCard()
+        }
+    }
+
+    private var taskSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            sectionTitle("常驻任务")
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220))], spacing: Spacing.md) {
+                ForEach(AlwaysOnTaskKind.allCases, id: \.self) { kind in
+                    let status = manager.status(for: kind)
+                    AlwaysOnCard(
+                        title: title(for: kind),
+                        subtitle: subtitle(for: status),
+                        icon: icon(for: kind),
+                        isActive: status.state == .running
+                    ) {
+                        manager.toggle(kind)
+                    }
+                }
+            }
         }
     }
 
     private var shortcutSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("快捷动作")
-                .font(FontStyle.title2)
+            sectionTitle("快捷动作")
 
             HStack(spacing: Spacing.md) {
                 ShortcutButton(title: "全局搜索", icon: "magnifyingglass", shortcut: "⌘⇧F")
@@ -85,6 +149,13 @@ struct AlwaysOnDashboardView: View {
         case .periodicSummary: return "timer"
         case .memoryConsolidation: return "brain.head.profile"
         }
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(FontStyle.callout)
+            .fontWeight(.semibold)
+            .foregroundStyle(Color.appTextSecondary)
     }
 }
 
@@ -167,4 +238,9 @@ final class AlwaysOnManager: ObservableObject {
     func toggle(_ kind: AlwaysOnTaskKind) {
         Task { await AlwaysOnScheduler.shared.toggle(kind) }
     }
+}
+
+#Preview {
+    AlwaysOnDashboardView()
+        .frame(width: 900, height: 600)
 }

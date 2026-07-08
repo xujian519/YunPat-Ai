@@ -41,21 +41,51 @@ struct SkillGalleryView: View {
     private var skillDetail: some View {
         if let skill = selectedSkill {
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    VStack(alignment: .leading, spacing: Spacing.xxs) {
-                        Text(skill.name)
-                            .font(FontStyle.title2)
-                        Text(skill.path)
-                            .font(FontStyle.caption)
-                            .foregroundStyle(.secondary)
+                PageHeader(
+                    title: skill.name,
+                    subtitle: skill.path,
+                    actions: {
+                        HStack(spacing: Spacing.xs) {
+                            Button(
+                                action: {},
+                                label: {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: IconSize.toolbar))
+                                }
+                            )
+                            .buttonStyle(.plain)
+
+                            Button(
+                                action: {},
+                                label: {
+                                    HStack(spacing: Spacing.xxs) {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: IconSize.inlineSmall, weight: .bold))
+                                        Text("新建")
+                                            .font(FontStyle.callout)
+                                    }
+                                }
+                            )
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, Spacing.sm)
+                            .padding(.vertical, Spacing.xxs)
+                            .background(Color.appTextPrimary)
+                            .foregroundStyle(Color.appSurfacePrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
+                        }
                     }
-                    Spacer()
-                    Toggle("编辑", isOn: $isEditing)
-                        .toggleStyle(.switch)
-                }
+                )
                 .padding()
 
                 Divider()
+
+                HStack {
+                    Spacer()
+                    Toggle("编辑", isOn: $isEditing)
+                        .toggleStyle(.switch)
+                        .padding(.trailing, Spacing.md)
+                }
+                .padding(.vertical, Spacing.xs)
 
                 ScrollView {
                     if isEditing {

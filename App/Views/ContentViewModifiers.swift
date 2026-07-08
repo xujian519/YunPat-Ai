@@ -13,7 +13,6 @@ struct ContentViewModifiers: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationTitle(windowTitle)
-            .toolbar { toolbarGroup }
             .sheet(isPresented: $showWizard) {
                 KnowledgeSetupWizard(isPresented: $showWizard)
             }
@@ -67,31 +66,6 @@ struct ContentViewModifiers: ViewModifier {
     private func checkWizardNeeded() {
         if UserDefaults.standard.string(forKey: "yunpat.vaultPath") == nil {
             showWizard = true
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var toolbarGroup: some ToolbarContent {
-        ToolbarItemGroup {
-            Button(
-                action: { withAnimation { appState.leftDockVisible.toggle() } },
-                label: { Label("侧栏", systemImage: "sidebar.left") }
-            ).help("显示/隐藏侧栏")
-
-            Button(
-                action: openSettings,
-                label: { Label("设置", systemImage: "gearshape") }
-            ).help("打开设置")
-
-            Spacer()
-        }
-    }
-
-    private func openSettings() {
-        if #available(macOS 14.0, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
         }
     }
 }
