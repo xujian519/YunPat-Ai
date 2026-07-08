@@ -21,7 +21,7 @@ public struct CapabilityManifest: Sendable {
 
         for cap in await registry.listCapabilities() {
             // 收集该 capability 下的工具
-            let tools = await cap.toolNames
+            let tools: [String] = cap.toolNames
             entries.append(
                 ManifestEntry(
                     name: cap.name,

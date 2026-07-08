@@ -211,7 +211,7 @@ public final class SQLiteVectorIndex: @unchecked Sendable {
                 sqlite3_reset(stmt)
                 sqlite3_bind_int64(stmt, 1, lastId)
                 if useDomainFilter, let domain: String = filter?.domain {
-                    domain.withCString { cStr in
+                    _ = domain.withCString { cStr in
                         sqlite3_bind_text(stmt, 2, cStr, -1, sqliteTransient)
                     }
                     sqlite3_bind_int64(stmt, 3, Int64(pageSize))

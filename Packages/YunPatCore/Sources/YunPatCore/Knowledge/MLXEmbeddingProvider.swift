@@ -248,7 +248,7 @@ public actor MLXEmbeddingProvider: EmbeddingProvider {
         for batchStart in stride(from: 0, to: texts.count, by: batchSize) {
             let batchEnd: Int = min(batchStart + batchSize, texts.count)
             let batch: [String] = Array(texts[batchStart..<batchEnd])
-            let embeddings: [[Float]] = try await embedBatch(batch, container: container)
+            let embeddings: [[Float]] = await embedBatch(batch, container: container)
             allEmbeddings.append(contentsOf: embeddings)
         }
         return allEmbeddings
@@ -296,8 +296,8 @@ public actor MLXEmbeddingProvider: EmbeddingProvider {
 
     private func embedBatch(
         _ texts: [String], container: EmbedderModelContainer
-    ) async throws -> [[Float]] {
-        try await container.perform { context in
+    ) async -> [[Float]] {
+        await container.perform { context in
             // Tokenize
             let inputs: [[Int]] = texts.map {
                 context.tokenizer.encode(text: $0, addSpecialTokens: true)

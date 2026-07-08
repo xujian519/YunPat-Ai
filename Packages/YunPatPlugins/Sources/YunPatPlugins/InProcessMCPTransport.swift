@@ -18,7 +18,7 @@ public final class InProcessMCPTransport: MCPTransport, @unchecked Sendable {
     }
 
     public func send(_ payload: Data) async throws -> Data {
-        try await server.handleRequest(payload)
+        await server.handleRequest(payload)
     }
 
     public func close() async throws {}
