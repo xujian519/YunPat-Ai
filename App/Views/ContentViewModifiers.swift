@@ -26,6 +26,9 @@ struct ContentViewModifiers: ViewModifier {
             .onReceive(publisher(for: .menuOpenFile)) { _ in
                 filePickerOpen = true
             }
+            .onReceive(publisher(for: .menuOpenFolder)) { _ in
+                openFolderAsProject()
+            }
             .onReceive(publisher(for: .menuToggleSidebar)) { _ in
                 withAnimation { appState.leftDockVisible.toggle() }
             }
@@ -61,6 +64,17 @@ struct ContentViewModifiers: ViewModifier {
 
     private func publisher(for name: Notification.Name) -> NotificationCenter.Publisher {
         NotificationCenter.default.publisher(for: name)
+    }
+
+    private func openFolderAsProject() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "选择项目文件夹"
+        panel.message = "选择一个文件夹作为新项目的工作目录"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        tabManager.openFolderAsProject(url: url)
     }
 
     private func checkWizardNeeded() {

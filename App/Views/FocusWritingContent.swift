@@ -3,10 +3,12 @@ import YunPatCore
 
 struct FocusWritingContent: View {
     var onExit: () -> Void
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            DocumentWorkspace().frame(maxWidth: .infinity, maxHeight: .infinity)
+            DocumentWorkspace(selectedFileURL: $appState.selectedDocumentURL)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack {
                 HStack {
                     Spacer()

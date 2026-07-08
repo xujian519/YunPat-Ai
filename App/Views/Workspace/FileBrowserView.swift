@@ -34,7 +34,10 @@ struct FileBrowserView: View {
                 .background(.thickMaterial)
             }
 
-            DocumentWorkspace()
+            DocumentWorkspace(selectedFileURL: Binding<URL?>(
+                get: { AppStateStore.shared.selectedDocumentURL },
+                set: { AppStateStore.shared.selectedDocumentURL = $0 }
+            ))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }

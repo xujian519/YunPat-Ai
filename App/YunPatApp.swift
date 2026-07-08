@@ -62,6 +62,10 @@ struct YunPatApp: App {
                     NotificationCenter.default.post(name: .menuOpenFile, object: nil)
                 }
                 .keyboardShortcut("o", modifiers: .command)
+                Button("打开文件夹…") {
+                    NotificationCenter.default.post(name: .menuOpenFolder, object: nil)
+                }
+                .keyboardShortcut("o", modifiers: [.command, .shift])
                 Divider()
                 Button("保存当前文档") {
                     NotificationCenter.default.post(name: .menuSave, object: nil)
@@ -270,6 +274,7 @@ extension Notification.Name {
     static let menuNewTab: Notification.Name = Notification.Name("menuNewTab")
     static let menuNewCase: Notification.Name = Notification.Name("menuNewCase")
     static let menuOpenFile: Notification.Name = Notification.Name("menuOpenFile")
+    static let menuOpenFolder: Notification.Name = Notification.Name("menuOpenFolder")
     static let menuSave: Notification.Name = Notification.Name("menuSave")
     static let menuUndo: Notification.Name = Notification.Name("menuUndo")
     static let menuRedo: Notification.Name = Notification.Name("menuRedo")

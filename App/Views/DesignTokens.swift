@@ -95,7 +95,10 @@ enum PanelWidth {
     static let bottomDockMinHeight: CGFloat = 180
     static let bottomDockIdealHeight: CGFloat = 280
 
-    // StatusBar / TopBar
+    // Right Panel
+    static let rightPanelMin: CGFloat = 260
+    static let rightPanelIdeal: CGFloat = 320
+    static let rightPanelMax: CGFloat = 420
     static let statusBarHeight: CGFloat = 34
     static let topBarHeight: CGFloat = 48
 }

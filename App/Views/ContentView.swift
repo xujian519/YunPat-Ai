@@ -12,6 +12,9 @@ struct ContentView: View {
 
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
+    @AppStorage("yunpat.sidebarWidth") private var sidebarWidth: Double = Double(PanelWidth.sidebarIdeal)
+    @AppStorage("yunpat.rightPanelWidth") private var rightPanelWidth: Double = Double(PanelWidth.rightPanelIdeal)
+
     init(router: ModelRouter, windowTitle: Binding<String>) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
         _windowTitle = windowTitle
@@ -21,7 +24,17 @@ struct ContentView: View {
         HStack(spacing: 0) {
             if appState.leftDockVisible && appState.centerMode != .focusWriting {
                 ProjectListSidebar(tabManager: tabManager)
-                    .frame(width: PanelWidth.sidebarIdeal)
+                    .frame(width: CGFloat(sidebarWidth))
+
+                ResizableDivider(
+                    minWidth: PanelWidth.sidebarMin,
+                    maxWidth: PanelWidth.sidebarMax,
+                    currentWidth: Binding<CGFloat>(
+                        get: { CGFloat(sidebarWidth) },
+                        set: { sidebarWidth = Double($0) }
+                    ),
+                    onWidthChange: { sidebarWidth += Double($0) }
+                )
             }
 
             VStack(spacing: 0) {
@@ -30,7 +43,7 @@ struct ContentView: View {
                     Divider()
                 }
 
-                if appState.centerMode == .chat || appState.centerMode == .browser {
+                if appState.centerMode != .focusWriting {
                     TabStripContent(
                         tabManager: tabManager,
                         chatManager: chatManager
@@ -38,12 +51,24 @@ struct ContentView: View {
                     Divider()
                 }
 
-                centerContent
+                ChatArea(tabManager: tabManager, chatManager: chatManager)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .background(Color.appBackground)
 
             if appState.rightDockVisible && appState.centerMode != .focusWriting {
+                ResizableDivider(
+                    minWidth: PanelWidth.rightPanelMin,
+                    maxWidth: PanelWidth.rightPanelMax,
+                    currentWidth: Binding<CGFloat>(
+                        get: { CGFloat(rightPanelWidth) },
+                        set: { rightPanelWidth = Double($0) }
+                    ),
+                    onWidthChange: { rightPanelWidth += Double($0) }
+                )
+
                 detailContent
+                    .frame(width: CGFloat(rightPanelWidth))
             }
         }
         .animation(
@@ -142,26 +167,8 @@ struct ContentView: View {
 
     // MARK: - Main Section
 
-    @ViewBuilder
     private var centerContent: some View {
-        switch appState.centerMode {
-        case .chat:
-            ChatArea(tabManager: tabManager, chatManager: chatManager)
-        case .browser:
-            PatentBrowser()
-        case .focusWriting:
-            FocusWritingContent(onExit: { appState.exitFocusWriting() })
-        case .files:
-            FileBrowserView(workspaceManager: workspaceManager, tabManager: tabManager)
-        case .skills:
-            SkillGalleryView()
-        case .routing:
-            RoutingDashboardView()
-        case .memory:
-            MemoryDashboardView()
-        case .alwaysOn:
-            AlwaysOnDashboardView()
-        }
+        ChatArea(tabManager: tabManager, chatManager: chatManager)
     }
 
     // MARK: - Detail
@@ -183,6 +190,27 @@ struct ContentView: View {
                 .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
         case .toolAudit:
             ToolAuditView()
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .fileExplorer:
+            RightFileExplorerView(workspaceManager: workspaceManager, tabManager: tabManager)
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .document:
+            RightDocumentView()
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .skills:
+            RightSkillGalleryView()
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .routing:
+            RightRoutingDashboardView(caseId: activeTab?.caseId)
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .memory:
+            RightMemoryDashboardView(caseId: activeTab?.caseId)
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .alwaysOn:
+            RightAlwaysOnDashboardView()
+                .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
+        case .browser:
+            PatentBrowser()
                 .transition(AnyTransition.move(edge: .trailing).combined(with: .opacity))
         }
     }

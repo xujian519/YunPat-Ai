@@ -7,12 +7,30 @@ public enum LeftDockPanel: String, CaseIterable, Codable {
     case projectList
 }
 
-public enum RightDockPanel: String, CaseIterable, Codable {
+public enum RightDockPanel: String, CaseIterable, Codable, Identifiable {
     case collaboration
     case caseGraph
     case costDashboard
     case memoryAudit
     case toolAudit
+    case fileExplorer
+    case document
+    case skills
+    case routing
+    case memory
+    case alwaysOn
+    case browser
+
+    public var id: String { rawValue }
+
+    public var isPersistentModule: Bool {
+        switch self {
+        case .fileExplorer, .document, .skills, .routing, .memory, .alwaysOn, .browser:
+            return true
+        case .collaboration, .caseGraph, .costDashboard, .memoryAudit, .toolAudit:
+            return false
+        }
+    }
 }
 
 /// 顶部主导航模块，与 PilotDeck 对齐
@@ -64,6 +82,7 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
     @Published public var topModule: TopModule = .agent
     @Published public var leftDockActivePanel: LeftDockPanel = .projectList
     @Published public var rightDockActivePanel: RightDockPanel = .collaboration
+    @Published public var selectedDocumentURL: URL?
 
     /// 专注写作退出时恢复的状态快照
     struct FocusWritingSnapshot {
@@ -71,10 +90,55 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
         var rightVisible: Bool
         var bottomVisible: Bool
         var mode: CenterMode
+        var module: TopModule
+        var rightPanel: RightDockPanel
     }
     var focusWritingRestoreState: FocusWritingSnapshot?
 
-    // MARK: - Focus Writing
+    // MARK: - Module / Dock 切换
+
+    /// 根据顶部模块切换右栏面板；中间区域始终为会话区。
+    public func switchToModule(_ module: TopModule) {
+        topModule = module
+        switch module {
+        case .agent:
+            rightDockVisible = false
+        case .files:
+            openRightPanel(.fileExplorer)
+        case .skills:
+            openRightPanel(.skills)
+        case .routing:
+            openRightPanel(.routing)
+        case .memory:
+            openRightPanel(.memory)
+        case .alwaysOn:
+            openRightPanel(.alwaysOn)
+        }
+    }
+
+    public func openRightPanel(_ panel: RightDockPanel) {
+        rightDockActivePanel = panel
+        rightDockVisible = true
+    }
+
+    public func showDocument(url: URL) {
+        selectedDocumentURL = url
+        openRightPanel(.document)
+    }
+
+    public func showFileExplorer() {
+        openRightPanel(.fileExplorer)
+    }
+
+    public func toggleRightPanel(_ panel: RightDockPanel) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if rightDockVisible && rightDockActivePanel == panel {
+                rightDockVisible = false
+            } else {
+                openRightPanel(panel)
+            }
+        }
+    }
 
     /// 进入专注写作：快照当前状态并隐藏所有 Dock
     func enterFocusWriting() {
@@ -82,7 +146,9 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
             leftVisible: leftDockVisible,
             rightVisible: rightDockVisible,
             bottomVisible: bottomDockVisible,
-            mode: centerMode
+            mode: centerMode,
+            module: topModule,
+            rightPanel: rightDockActivePanel
         )
         leftDockVisible = false
         rightDockVisible = false
@@ -96,9 +162,13 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
             rightDockVisible = restore.rightVisible
             bottomDockVisible = restore.bottomVisible
             centerMode = restore.mode
+            topModule = restore.module
+            rightDockActivePanel = restore.rightPanel
             focusWritingRestoreState = nil
         } else {
             centerMode = .chat
+            topModule = .agent
+            rightDockActivePanel = .collaboration
         }
     }
 

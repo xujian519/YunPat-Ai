@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct DocumentWorkspace: View {
+    @Binding var selectedFileURL: URL?
     @State private var documentText: String = ""
     @State private var annotations: [DocumentAnnotation] = []
     @State private var editCount: Int = 0
     @State private var lastSavedText: String = ""
     @State private var syncMode: DocumentSyncMode = .explicit
-    @State private var documentURL: URL?
     private let parser = AnnotationParser()
     private let changeDetector = DocumentChangeDetector()
 
@@ -15,19 +15,11 @@ struct DocumentWorkspace: View {
         case realtime = "实时同步"
     }
 
-    /// 加载外部文档文件
-    func loadFile(_ url: URL) {
-        documentURL = url
-        if let data = try? String(contentsOf: url, encoding: .utf8) {
-            documentText = data
-            lastSavedText = data
-        }
-    }
-
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("文档工作区").font(FontStyle.headline)
+                Text(selectedFileURL?.lastPathComponent ?? "文档工作区")
+                    .font(FontStyle.headline)
                 Spacer()
                 if !annotations.isEmpty {
                     Text("\(annotations.count) 处标注")
@@ -75,11 +67,11 @@ struct DocumentWorkspace: View {
 
             Divider()
 
-            if documentText.isEmpty && documentURL == nil {
+            if selectedFileURL == nil {
                 EmptyStateView(
                     icon: "doc.text",
                     title: "文档工作区",
-                    subtitle: "在状态栏点击 📎 打开文件，或拖拽文件到窗口",
+                    subtitle: "在资源管理器中选择一个文件打开",
                     action: nil
                 )
                 .background(Color.windowBackgroundColor)
@@ -97,6 +89,12 @@ struct DocumentWorkspace: View {
                         }
                     }
                     .accessibilityLabel("文档编辑器")
+                    .onChange(of: selectedFileURL) { _, newURL in
+                        loadFile(newURL)
+                    }
+                    .onAppear {
+                        loadFile(selectedFileURL)
+                    }
             }
 
             if !annotations.isEmpty {
@@ -134,10 +132,25 @@ struct DocumentWorkspace: View {
         }
     }
 
+    private func loadFile(_ url: URL?) {
+        guard let url else {
+            documentText = ""
+            lastSavedText = ""
+            annotations = []
+            editCount = 0
+            return
+        }
+        if let data = try? String(contentsOf: url, encoding: .utf8) {
+            documentText = data
+            lastSavedText = data
+            editCount = 0
+        }
+    }
+
     private func saveDocument() {
         lastSavedText = documentText
         editCount = 0
-        if let url = documentURL {
+        if let url = selectedFileURL {
             try? documentText.write(to: url, atomically: true, encoding: .utf8)
         }
     }
@@ -153,7 +166,7 @@ struct DocumentWorkspace: View {
             text: newText,
             annotations: annotations,
             timestamp: Date(),
-            documentURL: documentURL
+            documentURL: selectedFileURL
         )
         NotificationCenter.default.post(
             name: .documentChangedNotification,

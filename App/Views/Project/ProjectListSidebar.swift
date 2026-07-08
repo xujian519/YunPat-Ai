@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import YunPatCore
 
@@ -5,6 +6,7 @@ import YunPatCore
 struct ProjectListSidebar: View {
     @ObservedObject var tabManager: TabManager
     @State private var selectedScope: SidebarScope = .projects
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     enum SidebarScope: String, CaseIterable {
         case projects = "项目"
@@ -121,14 +123,15 @@ struct ProjectListSidebar: View {
                 .accessibilityLabel("新建")
 
                 Button {
-                    // 折叠/展开全部（保留扩展点）
+                    openFolderAsProject()
                 } label: {
-                    Image(systemName: "chevron.up.chevron.down")
+                    Image(systemName: "folder.badge.plus")
                         .font(.system(size: IconSize.caption, weight: .medium))
                         .foregroundStyle(Color.appTextSecondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("展开或折叠")
+                .accessibilityLabel("打开文件夹")
+                .accessibilityHint("选择文件夹作为新项目")
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -173,6 +176,19 @@ struct ProjectListSidebar: View {
             return tab.type == .patent ? "未分组项目" : "通用对话"
         }
         return grouped
+    }
+
+    private func openFolderAsProject() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "选择项目文件夹"
+        panel.message = "选择一个文件夹作为新项目的工作目录"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task { @MainActor in
+            tabManager.openFolderAsProject(url: url)
+        }
     }
 
     // MARK: - Settings Button
@@ -241,6 +257,7 @@ struct SidebarGroupRow: View {
 struct SidebarTabRow: View {
     let tab: ChatTab
     @ObservedObject var tabManager: TabManager
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     @State private var isHovered: Bool = false
 
@@ -276,6 +293,9 @@ struct SidebarTabRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             tabManager.activeTabID = tab.id
+            if tab.type == .patent {
+                appState.showFileExplorer()
+            }
         }
         .contextMenu { contextMenuItems }
         .onHover { hovering in

@@ -174,14 +174,16 @@ struct FileEntryRow: View {
             .contentShape(Rectangle())
             .accessibilityLabel(entry.isDirectory ? "文件夹 \(entry.name)" : "文件 \(entry.name)")
             .accessibilityValue(entry.isDirectory ? (expanded.contains(entry.id) ? "已展开" : "已折叠") : "")
-            .accessibilityHint(entry.isDirectory ? "点击切换展开或折叠" : "")
-            .accessibilityAddTraits(entry.isDirectory ? .isButton : .isStaticText)
+            .accessibilityHint(entry.isDirectory ? "点击切换展开或折叠" : "点击打开文档")
+            .accessibilityAddTraits(entry.isDirectory ? .isButton : .isButton)
             .onTapGesture {
                 if entry.isDirectory {
                     onToggle(entry.id)
                     if children.isEmpty {
                         children = scanDir(URL(fileURLWithPath: entry.id))
                     }
+                } else {
+                    AppStateStore.shared.showDocument(url: URL(fileURLWithPath: entry.id))
                 }
             }
 

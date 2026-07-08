@@ -37,6 +37,17 @@ final class TabManager: ObservableObject {
         activeTabID = tab.id
     }
 
+    func openFolderAsProject(url: URL) {
+        let title: String = url.lastPathComponent
+        let caseId: String = title
+        var tab = ChatTab(title: title, type: .patent, flow: .fullAgent)
+        tab.caseId = caseId
+        tab.workspacePath = url
+        tabs.append(tab)
+        activeTabID = tab.id
+        AppStateStore.shared.showFileExplorer()
+    }
+
     func closeTab(_ id: UUID) {
         guard tabs.count > 1 else { return }
         if let tab = tabs.first(where: { $0.id == id }) {
