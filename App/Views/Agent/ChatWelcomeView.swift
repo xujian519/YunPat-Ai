@@ -20,6 +20,7 @@ struct ChatWelcomeView: View {
                 .font(FontStyle.title)
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.appTextPrimary)
+                .accessibilityAddTraits(.isHeader)
 
             Spacer()
 
@@ -49,6 +50,7 @@ struct SuggestionPill: View {
     let action: () -> Void
 
     @State private var isHovering: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     var body: some View {
         Button(action: action) {
@@ -62,6 +64,7 @@ struct SuggestionPill: View {
             }
             .padding(.horizontal, Spacing.sm)
             .padding(.vertical, Spacing.xs)
+            .frame(minHeight: HitTarget.small)
             .background(
                 Capsule()
                     .fill(isHovering ? Color.appSurfaceSecondary : Color.appSurfacePrimary)
@@ -70,10 +73,14 @@ struct SuggestionPill: View {
                 Capsule()
                     .stroke(Color.appSeparator.opacity(0.5), lineWidth: BorderWidth.hairline)
             )
+            .contentShape(Capsule())
         }
         .buttonStyle(.plain)
+        .help(suggestion.title)
+        .accessibilityLabel(suggestion.title)
+        .accessibilityHint(suggestion.prompt)
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                 isHovering = hovering
             }
         }

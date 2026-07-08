@@ -121,7 +121,7 @@ private struct GaugeRowView: View {
             }
             ProgressView(value: percent, total: 100)
                 .tint(color)
-                .animation(.easeInOut, value: percent)
+                .accessibleAnimation(.easeInOut, value: percent)
         }
     }
 

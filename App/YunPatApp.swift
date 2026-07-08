@@ -9,12 +9,14 @@ struct YunPatApp: App {
     private let logger = Logger(subsystem: "com.yunpat", category: "App")
     @StateObject private var appState: AppState = AppState()
     @State private var activeTabTitle: String = "YunPat-Ai"
+    @AppStorage("yunpat.appearance") private var appearanceMode: AppearanceMode = .system
 
     @Environment(\.scenePhase) private var scenePhase: ScenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView(router: appState.modelRouter, windowTitle: $activeTabTitle)
+                .preferredColorScheme(appearanceMode.colorScheme)
                 .onDrop(of: [.fileURL], isTargeted: nil) { providers in
                     for provider in providers {
                         _ = provider.loadObject(ofClass: URL.self) { url, _ in
@@ -131,6 +133,13 @@ struct YunPatApp: App {
                     NotificationCenter.default.post(name: .menuFocusWriting, object: nil)
                 }
                 .keyboardShortcut("e", modifiers: [.command, .option, .shift])
+                Divider()
+                ForEach(Array(TopModule.allCases.enumerated()), id: \.element.id) { _, module in
+                    Button("切换到\(module.rawValue)") {
+                        NotificationCenter.default.post(name: .menuSwitchModule, object: module)
+                    }
+                    .keyboardShortcut(module.shortcutKey, modifiers: .command)
+                }
             }
 
             // ── Window Menu ──
@@ -284,6 +293,7 @@ extension Notification.Name {
     static let menuToggleSplitScreen: Notification.Name = Notification.Name("menuToggleSplitScreen")
     static let menuFocusWriting: Notification.Name = Notification.Name("menuFocusWriting")
     static let menuShowTabBar: Notification.Name = Notification.Name("menuShowTabBar")
+    static let menuSwitchModule: Notification.Name = Notification.Name("menuSwitchModule")
     static let dropFile: Notification.Name = Notification.Name("dropFile")
     /// 打开设置页到指定 Tab (object: Int — 0=接口, 1=技能, 2=插件, 3=MCP, 4=知识库, 5=路由)
     static let openSettingsTab: Notification.Name = Notification.Name("openSettingsTab")

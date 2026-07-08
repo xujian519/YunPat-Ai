@@ -42,8 +42,10 @@ struct RoutingIndicator: View {
             .background(Color.appStatusSuccessSoft)
             .cornerRadius(CornerRadius.sm)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
         .help("自动路由 — 点击查看成本仪表盘")
+        .accessibilityLabel("自动路由")
+        .accessibilityHint("查看成本仪表盘")
     }
 }
 
@@ -67,8 +69,10 @@ struct ModelPickerButton: View {
             .background(Color.appAccentSoft)
             .cornerRadius(CornerRadius.sm)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
         .help("切换模型")
+        .accessibilityLabel("模型选择")
+        .accessibilityValue(currentModel)
         .popover(isPresented: $showPicker) {
             ModelPickerPopover(
                 tabManager: tabManager,
@@ -96,6 +100,7 @@ struct ModelPickerPopover: View {
     @Binding var isPresented: Bool
     @State private var customModel: String = ""
     @State private var showCustomField: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     private struct ModelSection {
         let title: String
@@ -195,9 +200,9 @@ struct ModelPickerPopover: View {
                 }
                 .padding(.vertical, Spacing.xxs)
             }
-            .frame(maxHeight: 420)
+            .frame(minHeight: 200, maxHeight: 420)
         }
-        .frame(width: 280)
+        .frame(minWidth: 260, maxWidth: 320)
     }
 
     private var headerView: some View {
@@ -211,7 +216,9 @@ struct ModelPickerPopover: View {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.tertiary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
+            .help("关闭")
+            .accessibilityLabel("关闭模型选择器")
         }
         .padding(.horizontal, Spacing.sm)
         .padding(.top, Spacing.sm)
@@ -257,6 +264,7 @@ struct ModelPickerPopover: View {
                     .cornerRadius(CornerRadius.sm)
                 }
                 .buttonStyle(.plain)
+                .help(model.desc)
             }
         }
     }
@@ -266,7 +274,9 @@ struct ModelPickerPopover: View {
             Divider().padding(.vertical, 2)
 
             Button {
-                withAnimation { showCustomField.toggle() }
+                withAccessibleAnimation(reduceMotion: reduceMotion) {
+                    showCustomField.toggle()
+                }
             } label: {
                 HStack {
                     Image(systemName: showCustomField ? "chevron.down" : "chevron.right")
@@ -336,6 +346,7 @@ struct FlowModePicker: View {
         .pickerStyle(.segmented)
         .frame(width: PanelWidth.flowPicker)
         .help("自由问答: 直接对话无需确认 | 分步撰写: 逐步确认适合专利稿 | 自动代理: 全自主完成复杂任务")
+        .accessibilityLabel("Agent 流程模式")
     }
 
     private var flowBinding: Binding<AgentFlow> {
@@ -363,8 +374,10 @@ struct ToolManagerButton: View {
             Image(systemName: "wrench.adjustable")
                 .font(.system(size: IconSize.toolbar))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
         .help("工具管理")
+        .accessibilityLabel("工具管理")
+        .minimumHitTarget()
         .popover(isPresented: $showPopover) {
             ToolManagerPopover(isPresented: $showPopover)
         }
@@ -399,7 +412,7 @@ struct ToolManagerPopover: View {
                 NotificationCenter.default.post(name: .openSettingsTab, object: 0)
             }
         }
-        .frame(width: 220)
+        .frame(minWidth: 200, maxWidth: 240)
         .padding(.vertical, Spacing.xxs)
     }
 }
@@ -416,16 +429,19 @@ private struct SettingsLinkRow: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, Spacing.sm)
+        .help(label)
     }
 }
 
 struct CollaborationToggle: View {
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     var body: some View {
         Button(
             action: {
-                withAnimation(.easeInOut(duration: AnimationDuration.normal)) {
+                AppHaptic.alignment()
+                withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.normal) {
                     appState.rightDockVisible.toggle()
                 }
             },
@@ -435,8 +451,9 @@ struct CollaborationToggle: View {
                     .foregroundStyle(appState.rightDockVisible ? Color.accentColor : Color.appTextSecondary)
             }
         )
-        .buttonStyle(.plain)
-        .help("协作面板")
+        .buttonStyle(.borderless)
+        .help("协作面板 (⌘⌥C)")
+        .minimumHitTarget()
         .accessibilityLabel("协作面板")
         .accessibilityValue(appState.rightDockVisible ? "已显示" : "已隐藏")
     }

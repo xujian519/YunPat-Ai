@@ -10,6 +10,8 @@ struct ModernSettingsView: View {
     @AppStorage("yunpat.confirmToolCalls") private var confirmToolCalls: Bool = false
     @AppStorage("yunpat.defaultTopModule") private var defaultTopModule: String = "agent"
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
+
     var body: some View {
         HStack(spacing: 0) {
             sidebar
@@ -44,7 +46,7 @@ struct ModernSettingsView: View {
 
     private func categoryRow(_ category: SettingsCategory) -> some View {
         Button {
-            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                 selectedCategory = category
             }
         } label: {
@@ -56,13 +58,19 @@ struct ModernSettingsView: View {
                     .font(FontStyle.callout)
                 Spacer()
             }
-            .foregroundStyle(selectedCategory == category ? Color.white : .primary)
+            .foregroundStyle(selectedCategory == category ? Color.accentColor : .primary)
             .padding(.horizontal, Spacing.sm)
             .padding(.vertical, Spacing.xs + 2)
-            .background(selectedCategory == category ? Color.accentColor : Color.clear)
+            .background(
+                selectedCategory == category
+                    ? Color.accentColor.opacity(0.12)
+                    : Color.clear
+            )
             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(category.title)
+        .accessibilityAddTraits(selectedCategory == category ? .isSelected : [])
     }
 
     private var contentPane: some View {
@@ -106,7 +114,8 @@ struct ModernSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 240)
+                .frame(maxWidth: 300)
+                .help("选择应用的显示主题")
             }
         }
     }
@@ -115,7 +124,9 @@ struct ModernSettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             settingsCard(icon: "arrow.2.squarepath", title: "会话工作流") {
                 Toggle("自动蒸馏长期记忆", isOn: $autoDistill)
+                    .help("启用后，长期记忆将定期自动蒸馏以减少冗余")
                 Toggle("执行工具前请求确认", isOn: $confirmToolCalls)
+                    .help("启用后，每次工具调用前都会弹出确认对话框")
 
                 Picker("默认顶部模块", selection: $defaultTopModule) {
                     Text("智能体").tag("agent")
@@ -123,7 +134,8 @@ struct ModernSettingsView: View {
                     Text("技能").tag("skills")
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 260)
+                .frame(maxWidth: 300)
+                .help("选择应用启动时默认显示的模块")
             }
         }
     }
@@ -203,6 +215,15 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
         case .system: "跟随系统"
         case .light: "浅色"
         case .dark: "深色"
+        }
+    }
+
+    /// 转换为 SwiftUI ColorScheme；跟随系统时返回 nil 让系统接管。
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
         }
     }
 }

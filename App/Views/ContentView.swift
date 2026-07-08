@@ -8,12 +8,14 @@ struct ContentView: View {
     @StateObject private var workspaceManager: CaseWorkspaceManager = CaseWorkspaceManager()
     @State private var filePickerOpen: Bool = false
     @State private var showWizard: Bool = false
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @Binding var windowTitle: String
 
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
-    @AppStorage("yunpat.sidebarWidth") private var sidebarWidth: Double = Double(PanelWidth.sidebarIdeal)
     @AppStorage("yunpat.rightPanelWidth") private var rightPanelWidth: Double = Double(PanelWidth.rightPanelIdeal)
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     init(router: ModelRouter, windowTitle: Binding<String>) {
         _chatManager = StateObject(wrappedValue: ChatManager(modelRouter: router))
@@ -21,61 +23,21 @@ struct ContentView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            if appState.leftDockVisible && appState.centerMode != .focusWriting {
-                ProjectListSidebar(tabManager: tabManager)
-                    .frame(width: CGFloat(sidebarWidth))
-
-                ResizableDivider(
-                    minWidth: PanelWidth.sidebarMin,
-                    maxWidth: PanelWidth.sidebarMax,
-                    currentWidth: Binding<CGFloat>(
-                        get: { CGFloat(sidebarWidth) },
-                        set: { sidebarWidth = Double($0) }
-                    ),
-                    onWidthChange: { sidebarWidth += Double($0) }
-                )
-            }
-
-            VStack(spacing: 0) {
-                if appState.centerMode != .focusWriting {
-                    topBar
-                    Divider()
-                }
-
-                if appState.centerMode == .chat {
-                    TabStripContent(
-                        tabManager: tabManager,
-                        chatManager: chatManager
-                    )
-                    Divider()
-                }
-
-                centerContent
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .background(Color.appBackground)
-
-            if appState.rightDockVisible && appState.centerMode != .focusWriting {
-                ResizableDivider(
-                    minWidth: PanelWidth.rightPanelMin,
-                    maxWidth: PanelWidth.rightPanelMax,
-                    currentWidth: Binding<CGFloat>(
-                        get: { CGFloat(rightPanelWidth) },
-                        set: { rightPanelWidth = Double($0) }
-                    ),
-                    onWidthChange: { rightPanelWidth += Double($0) }
-                )
-
-                detailContent
-                    .frame(width: CGFloat(rightPanelWidth))
+        Group {
+            if appState.centerMode == .focusWriting {
+                FocusWritingContent { appState.exitFocusWriting() }
+            } else {
+                navigationSplitView
             }
         }
-        .animation(
+        .accessibleAnimation(
             .easeInOut(duration: AnimationDuration.slow),
-            value: appState.bottomDockVisible || appState.centerMode == .focusWriting
+            value: appState.bottomDockVisible
         )
-        .animation(.easeInOut(duration: AnimationDuration.slow), value: appState.centerMode)
+        .accessibleAnimation(
+            .easeInOut(duration: AnimationDuration.slow),
+            value: appState.centerMode
+        )
         .modifier(
             ContentViewModifiers(
                 windowTitle: $windowTitle,
@@ -99,25 +61,79 @@ struct ContentView: View {
         .onChange(of: activeTab?.title) { _, newTitle in
             windowTitle = newTitle ?? "YunPat-Ai"
         }
+        .onChange(of: appState.leftDockVisible) { _, visible in
+            withAccessibleAnimation(reduceMotion: reduceMotion) {
+                columnVisibility = visible ? .all : .detailOnly
+            }
+        }
         .task {
             workspaceManager.selectedCaseId = activeTab?.caseId
             windowTitle = activeTab?.title ?? "YunPat-Ai"
+            columnVisibility = appState.leftDockVisible ? .all : .detailOnly
         }
         .withWindowRestoration()
     }
 
-    // MARK: - Top Bar
+    // MARK: - NavigationSplitView
 
-    private var topBar: some View {
-        HStack(spacing: Spacing.sm) {
-            breadcrumb
-            Spacer()
-            moduleNavigation
+    private var navigationSplitView: some View {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            ProjectListSidebar(tabManager: tabManager)
+                .navigationSplitViewColumnWidth(
+                    min: PanelWidth.sidebarMin,
+                    ideal: PanelWidth.sidebarIdeal,
+                    max: PanelWidth.sidebarMax
+                )
+        } detail: {
+            mainContentArea
         }
-        .padding(.horizontal, Spacing.md)
-        .frame(height: PanelWidth.topBarHeight)
-        .background(Color.appSurfacePrimary)
+        .navigationSplitViewStyle(.balanced)
     }
+
+    // MARK: - Main Content Area (center + right panel)
+
+    private var mainContentArea: some View {
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                if appState.centerMode == .chat {
+                    TabStripContent(
+                        tabManager: tabManager,
+                        chatManager: chatManager
+                    )
+                    Divider()
+                }
+
+                centerContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .background(Color.appBackground)
+
+            if appState.rightDockVisible {
+                ResizableDivider(
+                    minWidth: PanelWidth.rightPanelMin,
+                    maxWidth: PanelWidth.rightPanelMax,
+                    currentWidth: Binding<CGFloat>(
+                        get: { CGFloat(rightPanelWidth) },
+                        set: { rightPanelWidth = Double($0) }
+                    ),
+                    onWidthChange: { rightPanelWidth += Double($0) }
+                )
+
+                detailContent
+                    .frame(width: CGFloat(rightPanelWidth))
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .navigation) {
+                breadcrumb
+            }
+            ToolbarItemGroup(placement: .primaryAction) {
+                moduleNavigation
+            }
+        }
+    }
+
+    // MARK: - Toolbar: Breadcrumb
 
     private var breadcrumb: some View {
         HStack(spacing: Spacing.xxs) {
@@ -137,15 +153,24 @@ struct ContentView: View {
         .font(FontStyle.callout)
     }
 
+    // MARK: - Toolbar: Module Navigation
+
     private var moduleNavigation: some View {
         HStack(spacing: Spacing.xxs) {
             ForEach(TopModule.allCases) { module in
-                TopModuleButton(
-                    module: module,
-                    isActive: appState.topModule == module
-                ) {
+                Button {
                     switchToModule(module)
+                } label: {
+                    Label(module.rawValue, systemImage: module.icon)
+                        .labelStyle(.titleAndIcon)
+                        .font(FontStyle.callout)
+                        .foregroundStyle(
+                            appState.topModule == module
+                                ? Color.accentColor
+                                : Color.appTextSecondary
+                        )
                 }
+                .help("\(module.rawValue) (⌘\(module.shortcutDigit))")
             }
         }
     }
@@ -245,7 +270,7 @@ struct ContentView: View {
     }
 
     private func switchToModule(_ module: TopModule) {
-        withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+        withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
             appState.switchToModule(module)
         }
     }

@@ -8,10 +8,14 @@ struct TopModuleButton: View {
     let action: () -> Void
 
     @State private var isHovered: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     var body: some View {
         Button(
-            action: action,
+            action: {
+                AppHaptic.alignment()
+                action()
+            },
             label: {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: module.icon)
@@ -22,14 +26,18 @@ struct TopModuleButton: View {
                 .foregroundStyle(foregroundStyle)
                 .padding(.horizontal, Spacing.sm)
                 .padding(.vertical, Spacing.xxs)
+                .frame(minHeight: HitTarget.small + Spacing.xxs)
                 .background(backgroundStyle)
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md))
+                .contentShape(RoundedRectangle(cornerRadius: CornerRadius.md))
             }
         )
         .buttonStyle(.plain)
-        .help(module.rawValue)
+        .help("\(module.rawValue) (⌘\(module.shortcutDigit))")
+        .accessibilityLabel(module.rawValue)
+        .accessibilityAddTraits(isActive ? .isSelected : [])
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                 isHovered = hovering
             }
         }
@@ -37,7 +45,7 @@ struct TopModuleButton: View {
 
     private var foregroundStyle: some ShapeStyle {
         if isActive {
-            return AnyShapeStyle(Color.appTextPrimary)
+            return AnyShapeStyle(Color.accentColor)
         } else if isHovered {
             return AnyShapeStyle(Color.appTextPrimary)
         }

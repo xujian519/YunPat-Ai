@@ -368,6 +368,7 @@ struct MessageBubble: View {
     var isStreaming: Bool = false
 
     @State private var typingDotScale: CGFloat = 1.0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     /// 将消息内容解析为 Markdown AttributedString，支持粗体/斜体/代码/链接/列表等
     private var markdownContent: AttributedString {
@@ -407,17 +408,19 @@ struct MessageBubble: View {
                     )
                     .foregroundStyle(message.role == .user ? Color.appBubbleUserText : Color.appTextPrimary)
                     .textSelection(.enabled)
-                    .animation(.interactiveSpring(duration: AnimationDuration.fast), value: message.content)
+                    .accessibleAnimation(.interactiveSpring(duration: AnimationDuration.fast), value: message.content)
                     .accessibilityLabel(buildAccessibilityLabel())
                     .accessibilityAddTraits(.isStaticText)
                     .contextMenu {
                         Button {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(message.content, forType: .string)
+                            AppHaptic.generic()
                         } label: {
                             Label("复制", systemImage: "doc.on.doc")
                         }
                         .keyboardShortcut("c", modifiers: .command)
+                        .help("复制消息内容")
                     }
 
                 if !message.content.isEmpty && !isStreaming {
@@ -461,8 +464,8 @@ struct MessageBubble: View {
                 Circle()
                     .fill(Color.accentColor.opacity(0.6 - Double(index) * 0.15))
                     .frame(width: IconSize.typingDot, height: IconSize.typingDot)
-                    .scaleEffect(typingDotScale)
-                    .animation(
+                    .scaleEffect(reduceMotion ? 1.0 : typingDotScale)
+                    .accessibleAnimation(
                         .easeInOut(duration: AnimationDuration.long)
                             .repeatForever(autoreverses: true)
                             .delay(Double(index) * 0.12),
@@ -470,7 +473,7 @@ struct MessageBubble: View {
                     )
             }
         }
-        .onAppear { startTypingAnimation() }
+        .onAppear { if !reduceMotion { startTypingAnimation() } }
         .accessibilityLabel("助手正在输入")
     }
 

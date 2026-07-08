@@ -95,14 +95,19 @@ struct TabBar: View {
                 TabButton(
                     tab: tab,
                     isActive: tabManager.activeTabID == tab.id,
-                    onSelect: { tabManager.activeTabID = tab.id },
+                    onSelect: {
+                        AppHaptic.alignment()
+                        tabManager.activeTabID = tab.id
+                    },
                     onClose: { Task { @MainActor in tabManager.closeTab(tab.id) } }
                 )
             }
             Button(action: { Task { @MainActor in tabManager.addTab() } }, label: {
                 Image(systemName: "plus").font(.caption)
             })
-            .buttonStyle(.plain).padding(.horizontal, Spacing.xs)
+            .buttonStyle(.borderless)
+            .padding(.horizontal, Spacing.xs)
+            .help("新建标签 (⌘T)")
             .accessibilityLabel("新建标签")
             .accessibilityHint("创建新对话标签页")
         }
@@ -115,26 +120,34 @@ struct TabButton: View {
     let onSelect: () -> Void
     let onClose: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
+
     var body: some View {
-        HStack(spacing: Spacing.xxs) {
-            tabIconView
-            Text(tab.title)
-                .font(FontStyle.callout)
-                .fontWeight(isActive ? .semibold : .regular)
-                .lineLimit(1)
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(FontStyle.caption2)
-                    .fontWeight(.bold)
+        Button(action: onSelect) {
+            HStack(spacing: Spacing.xxs) {
+                tabIconView
+                Text(tab.title)
+                    .font(FontStyle.callout)
+                    .fontWeight(isActive ? .semibold : .regular)
+                    .lineLimit(1)
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(FontStyle.caption2)
+                        .fontWeight(.bold)
+                }
+                .buttonStyle(.borderless)
+                .help("关闭标签")
+                .accessibilityLabel("关闭标签 \(tab.title)")
+                .accessibilityHint("关闭当前标签页")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("关闭标签 \(tab.title)")
-            .accessibilityHint("关闭当前标签页")
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xxs)
+            .frame(minHeight: HitTarget.minimum)
+            .background(isActive ? Color.accentColor.opacity(0.15) : Color.clear)
+            .cornerRadius(CornerRadius.md)
+            .contentShape(Rectangle())
         }
-        .padding(.horizontal, Spacing.sm).padding(.vertical, Spacing.xxs)
-        .background(isActive ? Color.accentColor.opacity(0.15) : Color.clear)
-        .cornerRadius(CornerRadius.md)
-        .onTapGesture { onSelect() }
+        .buttonStyle(.plain)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(tab.title)
         .accessibilityAddTraits(isActive ? [.isSelected, .isButton] : .isButton)
@@ -147,7 +160,7 @@ struct TabButton: View {
             Image(systemName: "circle.circle")
                 .font(.system(size: IconSize.caption))
                 .foregroundStyle(Color.statusRunning)
-                .symbolEffect(.pulse, options: .repeating)
+                .symbolEffect(.pulse, options: reduceMotion ? .nonRepeating : .repeating)
         } else {
             Image(systemName: tab.typeIcon)
                 .font(.system(size: IconSize.caption))

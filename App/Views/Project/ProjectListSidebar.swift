@@ -9,6 +9,8 @@ struct ProjectListSidebar: View {
     @State private var showAppLauncher: Bool = false
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
+
     enum SidebarScope: String, CaseIterable {
         case projects = "项目"
         case general = "通用"
@@ -56,8 +58,9 @@ struct ProjectListSidebar: View {
                         .foregroundStyle(Color.appTextSecondary)
                 }
             )
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
             .help("应用启动器")
+            .minimumHitTarget()
             .popover(isPresented: $showAppLauncher) {
                 AppLauncherPopover(
                     onNewTab: {
@@ -81,7 +84,7 @@ struct ProjectListSidebar: View {
                         NotificationCenter.default.post(name: .openSettingsTab, object: 0)
                     }
                 )
-                .frame(width: 200)
+                .frame(minWidth: 200, maxWidth: 240)
                 .padding(Spacing.sm)
             }
         }
@@ -95,7 +98,8 @@ struct ProjectListSidebar: View {
         HStack(spacing: Spacing.xxs) {
             ForEach(SidebarScope.allCases, id: \.self) { scope in
                 Button {
-                    withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+                    AppHaptic.levelChange()
+                    withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                         selectedScope = scope
                     }
                 } label: {
@@ -117,6 +121,8 @@ struct ProjectListSidebar: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(scope.rawValue)范围")
+                .accessibilityAddTraits(selectedScope == scope ? .isSelected : [])
             }
         }
         .padding(.horizontal, Spacing.sm)
@@ -146,7 +152,9 @@ struct ProjectListSidebar: View {
                         .font(.system(size: IconSize.caption, weight: .bold))
                         .foregroundStyle(Color.appTextSecondary)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
+                .help("新建")
+                .minimumHitTarget()
                 .accessibilityLabel("新建")
 
                 Button {
@@ -156,7 +164,9 @@ struct ProjectListSidebar: View {
                         .font(.system(size: IconSize.caption, weight: .medium))
                         .foregroundStyle(Color.appTextSecondary)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
+                .help("打开文件夹作为项目")
+                .minimumHitTarget()
                 .accessibilityLabel("打开文件夹")
                 .accessibilityHint("选择文件夹作为新项目")
             }
@@ -240,6 +250,7 @@ struct ProjectListSidebar: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .help("打开设置 (⌘,)")
             .accessibilityLabel("设置")
         }
     }
@@ -288,6 +299,7 @@ private struct LauncherButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .help(title)
     }
 }
 
@@ -332,6 +344,7 @@ struct SidebarTabRow: View {
     @ObservedObject var tabManager: TabManager
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
     @State private var isHovered: Bool = false
 
     private var isActive: Bool {
@@ -339,40 +352,46 @@ struct SidebarTabRow: View {
     }
 
     var body: some View {
-        HStack(spacing: Spacing.xxs) {
-            Circle()
-                .fill(dotColor)
-                .frame(width: 6, height: 6)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(tab.title)
-                    .lineLimit(1)
-                    .font(FontStyle.callout)
-                if let time = relativeTime {
-                    Text(time)
-                        .font(FontStyle.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-            Spacer()
-        }
-        .padding(.vertical, 2)
-        .padding(.leading, Spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: CornerRadius.sm)
-                .fill(
-                    isActive
-                        ? Color.appSurfaceSecondary : (isHovered ? Color.appSurfaceTertiary.opacity(0.5) : Color.clear))
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
+        Button {
+            AppHaptic.alignment()
             tabManager.activeTabID = tab.id
             if tab.type == .patent {
                 appState.showFileExplorer()
             }
+        } label: {
+            HStack(spacing: Spacing.xxs) {
+                Circle()
+                    .fill(dotColor)
+                    .frame(width: 6, height: 6)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tab.title)
+                        .lineLimit(1)
+                        .font(FontStyle.callout)
+                    if let time = relativeTime {
+                        Text(time)
+                            .font(FontStyle.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                Spacer()
+            }
+            .padding(.vertical, Spacing.xs)
+            .padding(.leading, Spacing.sm)
+            .frame(minHeight: HitTarget.small + Spacing.xs)
+            .background(
+                RoundedRectangle(cornerRadius: CornerRadius.sm)
+                    .fill(
+                        isActive
+                            ? Color.appSurfaceSecondary
+                            : (isHovered ? Color.appSurfaceTertiary.opacity(0.5) : Color.clear)
+                    )
+            )
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .contextMenu { contextMenuItems }
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                 isHovered = hovering
             }
         }

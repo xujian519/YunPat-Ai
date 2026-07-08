@@ -6,6 +6,8 @@ struct ChatArea: View {
     @ObservedObject var chatManager: ChatManager
     var onAttachFiles: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
+
     var body: some View {
         VStack(spacing: 0) {
             messageList
@@ -73,7 +75,11 @@ struct ChatArea: View {
 
     private func scrollToLast(_ proxy: ScrollViewProxy) {
         if let lastID = activeTab?.messages.last?.id {
-            withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
+            if reduceMotion {
+                proxy.scrollTo(lastID, anchor: .bottom)
+            } else {
+                withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
+            }
         }
     }
 

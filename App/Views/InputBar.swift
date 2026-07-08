@@ -20,6 +20,7 @@ struct InputBar: View {
                 .lineLimit(1...6)
                 .focused($isInputFocused)
                 .accessibilityLabel("消息输入框")
+                .accessibilityHint("输入消息后按 ⌘+Enter 发送")
                 .onSubmit {
                     if !sendDisabled {
                         Task { await chatManager.sendMessage(in: tabManager) }
@@ -53,6 +54,7 @@ struct InputBar: View {
                 isInputFocused = true
                 showSkillPicker.toggle()
             }
+            .help("选择技能")
             .popover(isPresented: $showSkillPicker) {
                 SkillPickerPopover(
                     skills: availableSkills,
@@ -62,13 +64,14 @@ struct InputBar: View {
                         isInputFocused = true
                     }
                 )
-                .frame(width: 240, height: 320)
+                .frame(minWidth: 240, maxWidth: 300, minHeight: 200, maxHeight: 360)
                 .task { await loadSkills() }
             }
 
             ToolButton(icon: "paperclip", label: nil) {
                 onAttachFiles()
             }
+            .help("附件文件")
 
             ToolButton(icon: "at", label: nil) {
                 isInputFocused = true
@@ -76,13 +79,15 @@ struct InputBar: View {
                     chatManager.inputText = "@" + chatManager.inputText
                 }
             }
+            .help("@提及")
 
             ToolButton(icon: "shield.fill", label: "完全访问权限", accent: true) {
                 showAccessPopover.toggle()
             }
+            .help("完全访问权限设置")
             .popover(isPresented: $showAccessPopover) {
                 FullAccessPopover()
-                    .frame(width: 260, height: 160)
+                    .frame(minWidth: 240, maxWidth: 280, minHeight: 140, maxHeight: 180)
             }
         }
     }
@@ -94,6 +99,7 @@ struct InputBar: View {
 
     private var sendButton: some View {
         Button {
+            AppHaptic.generic()
             Task { await chatManager.sendMessage(in: tabManager) }
         } label: {
             Image(systemName: "arrow.up")
@@ -109,6 +115,7 @@ struct InputBar: View {
         .disabled(sendDisabled)
         .keyboardShortcut(.return, modifiers: [.command])
         .accessibilityLabel("发送消息")
+        .accessibilityHint("发送当前输入的消息")
         .help("⌘ + Enter 发送")
     }
 
@@ -125,6 +132,7 @@ struct ToolButton: View {
     let action: () -> Void
 
     @State private var isHovered: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     var body: some View {
         Button(
@@ -141,13 +149,15 @@ struct ToolButton: View {
                 .foregroundStyle(accent ? Color.orange : (isHovered ? Color.appTextPrimary : Color.appTextSecondary))
                 .padding(.horizontal, Spacing.xs)
                 .padding(.vertical, Spacing.xxs)
+                .frame(minHeight: HitTarget.small + Spacing.xxs)
                 .background(isHovered ? Color.appSurfaceTertiary : Color.clear)
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.sm))
+                .contentShape(RoundedRectangle(cornerRadius: CornerRadius.sm))
             }
         )
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
+            withAccessibleAnimation(reduceMotion: reduceMotion, duration: AnimationDuration.fast) {
                 isHovered = hovering
             }
         }
@@ -207,6 +217,7 @@ private struct SkillPickerPopover: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .help(skill.description)
                         }
                     }
                     .padding(.vertical, Spacing.xxs)

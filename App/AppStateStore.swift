@@ -54,6 +54,23 @@ public enum TopModule: String, CaseIterable, Codable, Identifiable {
         case .alwaysOn: return "waveform"
         }
     }
+
+    /// 用于 ⌘1~6 快捷键的数字字符
+    var shortcutDigit: String {
+        switch self {
+        case .agent: return "1"
+        case .files: return "2"
+        case .skills: return "3"
+        case .routing: return "4"
+        case .memory: return "5"
+        case .alwaysOn: return "6"
+        }
+    }
+
+    /// 用于键盘快捷键的 KeyEquivalent
+    var shortcutKey: KeyEquivalent {
+        KeyEquivalent(Character(shortcutDigit))
+    }
 }
 
 /// 中心区域内容模式。
