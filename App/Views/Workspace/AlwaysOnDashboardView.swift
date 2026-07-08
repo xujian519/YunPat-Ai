@@ -13,7 +13,7 @@ struct AlwaysOnDashboardView: View {
                     subtitle: "所有工作区的活动动态。",
                     actions: {
                         Button(
-                            action: {},
+                            action: { Task { await manager.refreshStats() } },
                             label: {
                                 HStack(spacing: Spacing.xxs) {
                                     Image(systemName: "arrow.clockwise")
@@ -37,24 +37,24 @@ struct AlwaysOnDashboardView: View {
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 220))], spacing: Spacing.md) {
                     StatCard(
-                        title: "今日事件",
-                        value: "0",
-                        icon: "calendar",
-                        trend: "待处理",
+                        title: "剪贴板事件",
+                        value: "\(manager.clipboardCount)",
+                        icon: "doc.on.clipboard",
+                        trend: "已记录",
                         color: .blue
                     )
                     StatCard(
-                        title: "活跃项目",
-                        value: "0",
-                        icon: "folder.badge.person.crop",
-                        trend: "监控中",
+                        title: "活跃任务",
+                        value: "\(manager.runningCount)",
+                        icon: "arrow.triangle.2.circlepath",
+                        trend: "运行中",
                         color: .green
                     )
                     StatCard(
-                        title: "正在运行",
-                        value: "0",
-                        icon: "arrow.triangle.2.circlepath",
-                        trend: "常驻任务",
+                        title: "总任务数",
+                        value: "\(AlwaysOnTaskKind.allCases.count)",
+                        icon: "list.bullet",
+                        trend: "已配置",
                         color: .orange
                     )
                 }
@@ -73,16 +73,39 @@ struct AlwaysOnDashboardView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             sectionTitle("近期事件")
 
-            VStack(spacing: 0) {
-                EmptyStateView(
-                    icon: "waveform",
-                    title: "",
-                    subtitle: "暂无 Always-On 事件记录。",
-                    action: nil
-                )
-                .padding(.vertical, Spacing.xl)
+            if manager.clipboardItems.isEmpty {
+                VStack(spacing: 0) {
+                    EmptyStateView(
+                        icon: "waveform",
+                        title: "",
+                        subtitle: "暂无 Always-On 事件记录。",
+                        action: nil
+                    )
+                    .padding(.vertical, Spacing.xl)
+                }
+                .appCard()
+            } else {
+                VStack(spacing: Spacing.xs) {
+                    ForEach(Array(manager.clipboardItems.prefix(8).enumerated()), id: \.offset) { _, item in
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: "doc.on.clipboard")
+                                .font(.system(size: IconSize.caption))
+                                .foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(String(item.prefix(80)))
+                                    .font(FontStyle.callout)
+                                    .lineLimit(2)
+                                Text("剪贴板")
+                                    .font(FontStyle.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding()
+                        .appCard(cornerRadius: CornerRadius.md)
+                    }
+                }
             }
-            .appCard()
         }
     }
 
@@ -220,15 +243,22 @@ struct ShortcutButton: View {
 @MainActor
 final class AlwaysOnManager: ObservableObject {
     @Published var statuses: [AlwaysOnTaskKind: AlwaysOnTaskStatus] = [:]
+    @Published var clipboardItems: [String] = []
 
     func subscribe() async {
         let scheduler: AlwaysOnScheduler = AlwaysOnScheduler.shared
         for kind in AlwaysOnTaskKind.allCases {
             statuses[kind] = await scheduler.status(for: kind)
         }
+        await refreshStats()
         for await status in scheduler.statusStream() {
             statuses[status.kind] = status
+            await refreshStats()
         }
+    }
+
+    func refreshStats() async {
+        clipboardItems = await AlwaysOnScheduler.shared.recentClipboardContent()
     }
 
     func status(for kind: AlwaysOnTaskKind) -> AlwaysOnTaskStatus {
@@ -236,7 +266,21 @@ final class AlwaysOnManager: ObservableObject {
     }
 
     func toggle(_ kind: AlwaysOnTaskKind) {
-        Task { await AlwaysOnScheduler.shared.toggle(kind) }
+        Task {
+            await AlwaysOnScheduler.shared.toggle(kind)
+            await refreshStats()
+        }
+    }
+
+    var runningCount: Int {
+        statuses.values.filter {
+            if case .running = $0.state { return true }
+            return false
+        }.count
+    }
+
+    var clipboardCount: Int {
+        clipboardItems.count
     }
 }
 

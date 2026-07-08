@@ -3,7 +3,8 @@ import YunPatCore
 
 /// 技能库中心视图：浏览与编辑 SKILL.md
 struct SkillGalleryView: View {
-    @State private var selectedSkill: SkillPreview? = sampleSkills.first
+    @StateObject private var manager = SkillGalleryManager()
+    @State private var selectedSkill: SkillPreview?
     @State private var isEditing: Bool = false
 
     var body: some View {
@@ -13,6 +14,16 @@ struct SkillGalleryView: View {
             skillDetail
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .task {
+            await manager.load()
+            if selectedSkill == nil {
+                selectedSkill = skillPreviews.first
+            }
+        }
+    }
+
+    private var skillPreviews: [SkillPreview] {
+        manager.skills.map { SkillPreview(from: $0) }
     }
 
     private var skillList: some View {
@@ -23,11 +34,15 @@ struct SkillGalleryView: View {
                 Text("技能")
                     .font(FontStyle.headline)
                 Spacer()
+                if manager.isLoading {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                }
             }
             .padding()
 
             List(selection: $selectedSkill) {
-                ForEach(sampleSkills) { skill in
+                ForEach(skillPreviews) { skill in
                     SkillRow(skill: skill)
                         .tag(skill)
                 }
@@ -42,12 +57,12 @@ struct SkillGalleryView: View {
         if let skill = selectedSkill {
             VStack(alignment: .leading, spacing: 0) {
                 PageHeader(
-                    title: skill.name,
+                    title: skill.displayName,
                     subtitle: skill.path,
                     actions: {
                         HStack(spacing: Spacing.xs) {
                             Button(
-                                action: {},
+                                action: { Task { await manager.refresh() } },
                                 label: {
                                     Image(systemName: "arrow.clockwise")
                                         .font(.system(size: IconSize.toolbar))
@@ -79,6 +94,24 @@ struct SkillGalleryView: View {
 
                 Divider()
 
+                if !skill.tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: Spacing.xxs) {
+                            ForEach(skill.tags, id: \.self) { tag in
+                                Text(tag)
+                                    .font(FontStyle.caption2)
+                                    .padding(.horizontal, Spacing.xs)
+                                    .padding(.vertical, 2)
+                                    .background(Color.accentColor.opacity(0.15))
+                                    .foregroundStyle(Color.accentColor)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .padding(.horizontal, Spacing.md)
+                    }
+                    .padding(.vertical, Spacing.xs)
+                }
+
                 HStack {
                     Spacer()
                     Toggle("编辑", isOn: $isEditing)
@@ -88,15 +121,11 @@ struct SkillGalleryView: View {
                 .padding(.vertical, Spacing.xs)
 
                 ScrollView {
-                    if isEditing {
-                        TextEditor(text: .constant(skill.markdown))
-                            .font(FontStyle.bodyMonospaced)
-                            .padding()
-                    } else {
-                        Text(skill.markdown)
-                            .font(FontStyle.body)
-                            .padding()
-                    }
+                    Text(skill.markdown)
+                        .font(FontStyle.body)
+                        .textSelection(.enabled)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .background(Color.appBackground)
@@ -104,7 +133,7 @@ struct SkillGalleryView: View {
             EmptyStateView(
                 icon: "wand.and.stars",
                 title: "选择技能",
-                subtitle: "从左侧选择要查看或编辑的 SKILL.md",
+                subtitle: manager.skills.isEmpty ? "尚未加载任何技能" : "从左侧选择要查看的 SKILL.md",
                 action: nil
             )
         }
@@ -112,10 +141,23 @@ struct SkillGalleryView: View {
 }
 
 struct SkillPreview: Identifiable, Hashable {
-    let id = UUID()
+    var id: String { name }
     let name: String
+    let displayName: String
     let path: String
     let markdown: String
+    let tags: [String]
+    let triggers: [String]
+
+    init(from match: SkillMatch) {
+        let manifest: SkillManifest = match.manifest
+        self.name = manifest.name
+        self.displayName = manifest.displayName.isEmpty ? manifest.name : manifest.displayName
+        self.path = "~/.agents/skills/\(manifest.name)/SKILL.md"
+        self.markdown = match.skill.body
+        self.tags = manifest.tags
+        self.triggers = manifest.triggers
+    }
 }
 
 struct SkillRow: View {
@@ -127,7 +169,7 @@ struct SkillRow: View {
                 .font(.system(size: IconSize.caption))
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(skill.name)
+                Text(skill.displayName)
                     .font(FontStyle.callout)
                 Text(skill.path)
                     .font(FontStyle.caption2)
@@ -139,19 +181,6 @@ struct SkillRow: View {
         .padding(.vertical, 2)
     }
 }
-
-private let sampleSkills: [SkillPreview] = [
-    SkillPreview(
-        name: "专利检索",
-        path: "~/.agents/skills/google-patents-search/SKILL.md",
-        markdown: "# Google Patents 检索\n\n用于检索专利并下载 PDF。\n"
-    ),
-    SkillPreview(
-        name: "审查意见答复",
-        path: "~/.agents/skills/oa-response/SKILL.md",
-        markdown: "# 审查意见答复\n\n辅助撰写 OA 答复。\n"
-    )
-]
 
 #Preview {
     SkillGalleryView()

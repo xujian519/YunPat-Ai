@@ -4,13 +4,19 @@ import YunPatCore
 /// PilotDeck 风格路由策略 Dashboard
 struct RoutingDashboardView: View {
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
-    @State private var selectedModel: String = "auto"
-    @State private var aggregation: AggregationScope = .project
+    @StateObject private var manager = RoutingDashboardManager()
+
+    @AppStorage("yunpat.routing.selectedModel") private var selectedModel: String = "auto"
+    @AppStorage("yunpat.routing.autoFallback") private var autoFallback: Bool = true
+    @AppStorage("yunpat.routing.preferClaudeLongText") private var preferClaudeLongText: Bool = true
+    @AppStorage("yunpat.routing.preferDeepSeekCode") private var preferDeepSeekCode: Bool = false
 
     private enum AggregationScope: String, CaseIterable {
         case project = "项目"
         case total = "总计"
     }
+
+    @State private var aggregation: AggregationScope = .project
 
     private let models: [String] = ["auto", "gpt-4o", "claude-sonnet", "deepseek-chat", "glm-4"]
 
@@ -31,7 +37,7 @@ struct RoutingDashboardView: View {
                             .frame(width: 120)
 
                             Button(
-                                action: {},
+                                action: { Task { await manager.load() } },
                                 label: {
                                     HStack(spacing: Spacing.xxs) {
                                         Image(systemName: "arrow.clockwise")
@@ -57,31 +63,31 @@ struct RoutingDashboardView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 260))], spacing: Spacing.md) {
                     StatCard(
                         title: "当前模型",
-                        value: selectedModel.uppercased(),
+                        value: manager.activeProvider,
                         icon: "cpu",
-                        trend: "自动路由",
+                        trend: selectedModel == "auto" ? "自动路由" : "手动指定",
                         color: .blue
                     )
                     StatCard(
-                        title: "平均延迟",
-                        value: "1.2s",
-                        icon: "clock",
-                        trend: "较昨日 -12%",
-                        color: .green
-                    )
-                    StatCard(
                         title: "今日 Token",
-                        value: "42K",
+                        value: manager.todayTokensFormatted,
                         icon: "text.alignleft",
-                        trend: "较昨日 +8%",
+                        trend: aggregation == .total ? "累计" : "今日",
                         color: .orange
                     )
                     StatCard(
-                        title: "失败率",
-                        value: "0.3%",
-                        icon: "exclamationmark.triangle",
-                        trend: "稳定",
-                        color: .red
+                        title: "累计成本",
+                        value: manager.totalCostFormatted,
+                        icon: "dollarsign.circle",
+                        trend: manager.snapshot.map { "\(Int($0.percentTokens))% 预算" } ?? "—",
+                        color: .green
+                    )
+                    StatCard(
+                        title: "提供商数",
+                        value: "\(manager.providerStats.filter { $0.tokenCount > 0 }.count)",
+                        icon: "server.rack",
+                        trend: "活跃",
+                        color: .purple
                     )
                 }
 
@@ -91,6 +97,7 @@ struct RoutingDashboardView: View {
             .padding(Spacing.lg)
         }
         .background(Color.appBackground)
+        .task { await manager.load() }
     }
 
     private var strategySection: some View {
@@ -105,9 +112,9 @@ struct RoutingDashboardView: View {
                 }
                 .pickerStyle(.segmented)
 
-                Toggle("自动降级", isOn: .constant(true))
-                Toggle("长文本优先 Claude", isOn: .constant(true))
-                Toggle("代码任务优先 DeepSeek", isOn: .constant(false))
+                Toggle("自动降级", isOn: $autoFallback)
+                Toggle("长文本优先 Claude", isOn: $preferClaudeLongText)
+                Toggle("代码任务优先 DeepSeek", isOn: $preferDeepSeekCode)
             }
             .padding()
             .appCard()
@@ -118,11 +125,23 @@ struct RoutingDashboardView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             sectionTitle("提供商状态")
 
-            HStack(spacing: Spacing.md) {
-                ProviderStatusCard(name: "OpenAI", status: .healthy)
-                ProviderStatusCard(name: "Anthropic", status: .healthy)
-                ProviderStatusCard(name: "DeepSeek", status: .degraded)
-                ProviderStatusCard(name: "GLM", status: .healthy)
+            if manager.providerStats.isEmpty {
+                Text("暂无使用记录")
+                    .font(FontStyle.caption)
+                    .foregroundStyle(.secondary)
+                    .padding()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.md) {
+                        ForEach(manager.providerStats) { stat in
+                            ProviderStatusCard(
+                                name: stat.name,
+                                status: stat.isHealthy ? .healthy : .offline,
+                                tokenCount: stat.tokenCount
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -142,15 +161,26 @@ enum ProviderHealth {
 struct ProviderStatusCard: View {
     let name: String
     let status: ProviderHealth
+    var tokenCount: Int = 0
 
     var body: some View {
-        HStack(spacing: Spacing.xs) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
-            Text(name)
-                .font(FontStyle.callout)
-            Spacer()
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
+            HStack(spacing: Spacing.xs) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+                Text(name)
+                    .font(FontStyle.callout)
+                Spacer()
+            }
+            if tokenCount > 0 {
+                let formatted: String = tokenCount >= 1000
+                    ? String(format: "%.1fK", Double(tokenCount) / 1000)
+                    : "\(tokenCount)"
+                Text("\(formatted) tokens")
+                    .font(FontStyle.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding()
         .frame(minWidth: 120)
