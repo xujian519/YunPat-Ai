@@ -97,22 +97,24 @@ public final class AppStateStore: ObservableObject, @unchecked Sendable {
 
     // MARK: - Module / Dock 切换
 
-    /// 根据顶部模块切换右栏面板；中间区域始终为会话区。
+    /// 根据顶部模块切换中心内容区和右栏面板。
+    /// 文件/技能/路由/记忆/常驻作为主工作区展示；右栏留给协作面板、审计、图表等辅助视图。
     public func switchToModule(_ module: TopModule) {
         topModule = module
+        rightDockVisible = false
         switch module {
         case .agent:
-            rightDockVisible = false
+            centerMode = .chat
         case .files:
-            openRightPanel(.fileExplorer)
+            centerMode = .files
         case .skills:
-            openRightPanel(.skills)
+            centerMode = .skills
         case .routing:
-            openRightPanel(.routing)
+            centerMode = .routing
         case .memory:
-            openRightPanel(.memory)
+            centerMode = .memory
         case .alwaysOn:
-            openRightPanel(.alwaysOn)
+            centerMode = .alwaysOn
         }
     }
 

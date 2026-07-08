@@ -6,6 +6,7 @@ struct SkillGalleryView: View {
     @StateObject private var manager = SkillGalleryManager()
     @State private var selectedSkill: SkillPreview?
     @State private var isEditing: Bool = false
+    @State private var showCreateSheet: Bool = false
 
     var body: some View {
         HSplitView {
@@ -19,6 +20,9 @@ struct SkillGalleryView: View {
             if selectedSkill == nil {
                 selectedSkill = skillPreviews.first
             }
+        }
+        .sheet(isPresented: $showCreateSheet) {
+            CreateSkillSheet(manager: manager, isPresented: $showCreateSheet)
         }
     }
 
@@ -71,7 +75,7 @@ struct SkillGalleryView: View {
                             .buttonStyle(.plain)
 
                             Button(
-                                action: {},
+                                action: { showCreateSheet = true },
                                 label: {
                                     HStack(spacing: Spacing.xxs) {
                                         Image(systemName: "plus")
@@ -179,6 +183,144 @@ struct SkillRow: View {
             Spacer()
         }
         .padding(.vertical, 2)
+    }
+}
+
+// MARK: - Create Skill Sheet
+
+private struct CreateSkillSheet: View {
+    @ObservedObject var manager: SkillGalleryManager
+    @Binding var isPresented: Bool
+
+    @State private var name: String = ""
+    @State private var displayName: String = ""
+    @State private var description: String = ""
+    @State private var tags: String = ""
+    @State private var triggers: String = ""
+    @State private var bodyText: String = ""
+    @State private var isSaving: Bool = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("新建技能")
+                    .font(FontStyle.headline)
+                Spacer()
+                Button {
+                    isPresented = false
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding()
+
+            Divider()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    FormRow(label: "名称") {
+                        TextField("唯一标识，如 claim_drafting", text: $name)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    FormRow(label: "显示名") {
+                        TextField("用户可见名称", text: $displayName)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    FormRow(label: "描述") {
+                        TextField("简短描述", text: $description)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    FormRow(label: "标签") {
+                        TextField("用逗号分隔", text: $tags)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    FormRow(label: "触发词") {
+                        TextField("用逗号分隔", text: $triggers)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    FormRow(label: "正文") {
+                        TextEditor(text: $bodyText)
+                            .font(FontStyle.body)
+                            .frame(minHeight: 160)
+                            .padding(Spacing.xxs)
+                            .background(Color.appSurfaceSecondary)
+                            .cornerRadius(CornerRadius.md)
+                    }
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(FontStyle.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+                .padding()
+            }
+
+            Divider()
+
+            HStack {
+                Spacer()
+                Button("取消") { isPresented = false }
+                    .keyboardShortcut(.cancelAction)
+                Button("创建") { createSkill() }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(!canSave || isSaving)
+            }
+            .padding()
+        }
+        .frame(minWidth: 480, minHeight: 520)
+    }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func createSkill() {
+        isSaving = true
+        errorMessage = nil
+        Task {
+            do {
+                let request = SkillCreateRequest(
+                    name: name,
+                    displayName: displayName,
+                    description: description,
+                    tags: parseList(tags),
+                    triggers: parseList(triggers),
+                    body: bodyText
+                )
+                try await manager.createSkill(request)
+                isSaving = false
+                isPresented = false
+            } catch {
+                isSaving = false
+                errorMessage = "创建失败: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func parseList(_ text: String) -> [String] {
+        text
+            .components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+}
+
+private struct FormRow<Content: View>: View {
+    let label: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text(label)
+                .font(FontStyle.caption)
+                .foregroundStyle(.secondary)
+            content
+        }
     }
 }
 

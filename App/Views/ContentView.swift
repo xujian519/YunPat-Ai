@@ -43,7 +43,7 @@ struct ContentView: View {
                     Divider()
                 }
 
-                if appState.centerMode != .focusWriting {
+                if appState.centerMode == .chat {
                     TabStripContent(
                         tabManager: tabManager,
                         chatManager: chatManager
@@ -51,7 +51,7 @@ struct ContentView: View {
                     Divider()
                 }
 
-                ChatArea(tabManager: tabManager, chatManager: chatManager)
+                centerContent
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(Color.appBackground)
@@ -167,8 +167,30 @@ struct ContentView: View {
 
     // MARK: - Main Section
 
+    @ViewBuilder
     private var centerContent: some View {
-        ChatArea(tabManager: tabManager, chatManager: chatManager)
+        switch appState.centerMode {
+        case .chat:
+            ChatArea(
+                tabManager: tabManager,
+                chatManager: chatManager,
+                onAttachFiles: { filePickerOpen = true }
+            )
+        case .files:
+            FileBrowserView(workspaceManager: workspaceManager, tabManager: tabManager)
+        case .skills:
+            SkillGalleryView()
+        case .routing:
+            RoutingDashboardView()
+        case .memory:
+            MemoryDashboardView()
+        case .alwaysOn:
+            AlwaysOnDashboardView(tabManager: tabManager, chatManager: chatManager)
+        case .browser:
+            PatentBrowser()
+        case .focusWriting:
+            FocusWritingContent { appState.exitFocusWriting() }
+        }
     }
 
     // MARK: - Detail
@@ -224,15 +246,7 @@ struct ContentView: View {
 
     private func switchToModule(_ module: TopModule) {
         withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
-            appState.topModule = module
-            switch module {
-            case .agent: appState.centerMode = .chat
-            case .files: appState.centerMode = .files
-            case .skills: appState.centerMode = .skills
-            case .routing: appState.centerMode = .routing
-            case .memory: appState.centerMode = .memory
-            case .alwaysOn: appState.centerMode = .alwaysOn
-            }
+            appState.switchToModule(module)
         }
     }
 

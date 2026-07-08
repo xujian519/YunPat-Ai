@@ -1,9 +1,20 @@
+import AppKit
 import SwiftUI
 import YunPatCore
 
 /// PilotDeck 风格常驻 Dashboard
 struct AlwaysOnDashboardView: View {
-    @StateObject private var manager = AlwaysOnManager()
+    @StateObject private var manager: AlwaysOnManager
+    var tabManager: TabManager?
+    var chatManager: ChatManager?
+    @ObservedObject private var appState: AppStateStore = AppStateStore.shared
+    @State private var screenshotError: String?
+
+    init(tabManager: TabManager? = nil, chatManager: ChatManager? = nil) {
+        _manager = StateObject(wrappedValue: AlwaysOnManager())
+        self.tabManager = tabManager
+        self.chatManager = chatManager
+    }
 
     var body: some View {
         ScrollView {
@@ -134,9 +145,59 @@ struct AlwaysOnDashboardView: View {
             sectionTitle("快捷动作")
 
             HStack(spacing: Spacing.md) {
-                ShortcutButton(title: "全局搜索", icon: "magnifyingglass", shortcut: "⌘⇧F")
-                ShortcutButton(title: "新建速记", icon: "square.and.pencil", shortcut: "⌘⇧N")
-                ShortcutButton(title: "截图提问", icon: "camera", shortcut: "⌘⇧5")
+                ShortcutButton(title: "全局搜索", icon: "magnifyingglass", shortcut: "⌘⇧F") {
+                    appState.switchToModule(.files)
+                    appState.openRightPanel(.fileExplorer)
+                }
+                ShortcutButton(title: "新建速记", icon: "square.and.pencil", shortcut: "⌘⇧N") {
+                    if let tabManager {
+                        tabManager.addTab(title: "速记", type: .general, flow: .copilot)
+                        appState.switchToModule(.agent)
+                    } else {
+                        NotificationCenter.default.post(name: .menuNewTab, object: nil)
+                    }
+                }
+                ShortcutButton(title: "截图提问", icon: "camera", shortcut: "⌘⇧5") {
+                    Task { await takeScreenshotAndAsk() }
+                }
+            }
+        }
+        .alert("截图失败", isPresented: .init(
+            get: { screenshotError != nil },
+            set: { if !$0 { screenshotError = nil } }
+        )) {
+            Button("确定") { screenshotError = nil }
+        } message: {
+            Text(screenshotError ?? "")
+        }
+    }
+
+    private func takeScreenshotAndAsk() async {
+        guard AXIsProcessTrusted() else {
+            await MainActor.run {
+                screenshotError = "需要辅助功能/屏幕录制权限才能截图。请前往系统设置 > 隐私与安全性 > 辅助功能授予权限。"
+            }
+            return
+        }
+        do {
+            let bridge = AXorcistBridge()
+            let data: Data = try await bridge.screenshot(app: nil, region: nil)
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("yunpat_screenshot_\(UUID().uuidString).png")
+            try data.write(to: tempURL)
+
+            await MainActor.run {
+                appState.switchToModule(.agent)
+                if let chatManager, let tabManager, tabManager.activeTabID != nil {
+                    chatManager.inputText = "请描述这张截图并据此回答我的问题。图片路径: \(tempURL.path)"
+                    Task { await chatManager.sendMessage(in: tabManager) }
+                } else {
+                    screenshotError = "截图已保存到 \(tempURL.path)，但当前没有活跃对话。"
+                }
+            }
+        } catch {
+            await MainActor.run {
+                screenshotError = error.localizedDescription
             }
         }
     }
@@ -219,24 +280,28 @@ struct ShortcutButton: View {
     let title: String
     let icon: String
     let shortcut: String
+    let action: () -> Void
 
     var body: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-            Text(title)
-                .font(FontStyle.callout)
-            Spacer()
-            Text(shortcut)
-                .font(FontStyle.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, Spacing.xs)
-                .padding(.vertical, 2)
-                .appSurface(cornerRadius: CornerRadius.sm, surface: Color.appSurfaceSecondary)
+        Button(action: action) {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: icon)
+                    .foregroundStyle(.secondary)
+                Text(title)
+                    .font(FontStyle.callout)
+                Spacer()
+                Text(shortcut)
+                    .font(FontStyle.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, Spacing.xs)
+                    .padding(.vertical, 2)
+                    .appSurface(cornerRadius: CornerRadius.sm, surface: Color.appSurfaceSecondary)
+            }
+            .padding()
+            .frame(minWidth: 160)
+            .appCard()
         }
-        .padding()
-        .frame(minWidth: 160)
-        .appCard()
+        .buttonStyle(.plain)
     }
 }
 

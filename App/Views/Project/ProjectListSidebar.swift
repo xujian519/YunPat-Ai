@@ -6,6 +6,7 @@ import YunPatCore
 struct ProjectListSidebar: View {
     @ObservedObject var tabManager: TabManager
     @State private var selectedScope: SidebarScope = .projects
+    @State private var showAppLauncher: Bool = false
     @ObservedObject private var appState: AppStateStore = AppStateStore.shared
 
     enum SidebarScope: String, CaseIterable {
@@ -48,7 +49,7 @@ struct ProjectListSidebar: View {
                 .foregroundStyle(Color.appTextPrimary)
             Spacer()
             Button(
-                action: {},
+                action: { showAppLauncher.toggle() },
                 label: {
                     Image(systemName: "square.grid.2x2")
                         .font(.system(size: IconSize.sidebar, weight: .medium))
@@ -57,6 +58,32 @@ struct ProjectListSidebar: View {
             )
             .buttonStyle(.plain)
             .help("应用启动器")
+            .popover(isPresented: $showAppLauncher) {
+                AppLauncherPopover(
+                    onNewTab: {
+                        showAppLauncher = false
+                        tabManager.addTab()
+                    },
+                    onNewCase: {
+                        showAppLauncher = false
+                        tabManager.addTab(type: .patent)
+                    },
+                    onOpenFolder: {
+                        showAppLauncher = false
+                        openFolderAsProject()
+                    },
+                    onOpenSkills: {
+                        showAppLauncher = false
+                        appState.switchToModule(.skills)
+                    },
+                    onOpenSettings: {
+                        showAppLauncher = false
+                        NotificationCenter.default.post(name: .openSettingsTab, object: 0)
+                    }
+                )
+                .frame(width: 200)
+                .padding(Spacing.sm)
+            }
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
@@ -215,6 +242,52 @@ struct ProjectListSidebar: View {
             .buttonStyle(.plain)
             .accessibilityLabel("设置")
         }
+    }
+}
+
+// MARK: - App Launcher Popover
+
+private struct AppLauncherPopover: View {
+    let onNewTab: () -> Void
+    let onNewCase: () -> Void
+    let onOpenFolder: () -> Void
+    let onOpenSkills: () -> Void
+    let onOpenSettings: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
+            LauncherButton(title: "新建标签", icon: "plus.bubble") { onNewTab() }
+            LauncherButton(title: "新建案件", icon: "briefcase") { onNewCase() }
+            LauncherButton(title: "打开文件夹", icon: "folder.badge.plus") { onOpenFolder() }
+            Divider().padding(.vertical, Spacing.xxs)
+            LauncherButton(title: "技能库", icon: "wand.and.stars") { onOpenSkills() }
+            LauncherButton(title: "设置", icon: "gearshape") { onOpenSettings() }
+        }
+    }
+}
+
+private struct LauncherButton: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: IconSize.caption))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 20)
+                Text(title)
+                    .font(FontStyle.callout)
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, Spacing.xxs)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 

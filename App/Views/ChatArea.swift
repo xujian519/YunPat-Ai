@@ -4,6 +4,7 @@ import YunPatCore
 struct ChatArea: View {
     @ObservedObject var tabManager: TabManager
     @ObservedObject var chatManager: ChatManager
+    var onAttachFiles: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +23,11 @@ struct ChatArea: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             Divider()
-            InputBar(chatManager: chatManager, tabManager: tabManager)
+            InputBar(
+                chatManager: chatManager,
+                tabManager: tabManager,
+                onAttachFiles: onAttachFiles
+            )
         }
     }
 
